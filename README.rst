@@ -1,12 +1,21 @@
-Sample Module Repository
-========================
+Name
+search_tech_articles
+====
 
-This simple project is an example repo for Python projects.
+Overview
+Hatenaからテック系記事の情報をスクレイピングしデータベースに登録する。
+登録後はHatenaへ直接接続せずに気になる記事をデータベーっすから検索できるデスクトップアプリ。
 
-`Learn more <http://www.kennethreitz.org/essays/repository-structure-and-python>`_.
+## Requirement
 
----------------
+## Usage
 
-If you want to learn more about ``setup.py`` files, check out `this repository <https://github.com/kennethreitz/setup.py>`_.
+## Install
 
-✨🍰✨
+## Licence
+
+[myConsciousness](https://github.com/myConsciousness/search_tech_articles/blob/master/LICENSE)
+
+## Author
+
+[myConsciousness](https://github.com/myConsciousness)

@@ -52,14 +52,14 @@ class SearchArticlesOfTech(tkinter.Tk):
         # TOP画面の作成
         self.create_top_gui(frameUpdateArticles)
         # ログ出力画面の作成
-        #self.create_log_gui(frameShowLog)
+        self.create_log_gui(frameShowLog)
 
         self.notebook.grid(row=0, column=0, sticky=N+S+W+E)
 
         # ウィンドウの設定
         self.root.resizable(0, 0)
         self.root.iconbitmap('../common/icon/python_icon.ico')
-        self.root.title('Information about Tech Articles')
+        self.root.title('Search Tech Articles')
         self.root.geometry('1000x500+400+250')
 
         self.root.mainloop()
@@ -72,6 +72,100 @@ class SearchArticlesOfTech(tkinter.Tk):
         # エラー・メッセージ用ラベルの表示
         self.lblForError = tkinter.Label(parent, font=('Consolas', 10), foreground='#ff0000')
         self.lblForError.pack()
+
+
+    def create_log_gui(self, parent):
+        '''
+        Log検索画面のGUIを作成する関数
+        '''
+
+        # 入力フォームの設定
+        lblDate = tkinter.Label(parent, font=('Consolas', 10), text='Enter the date.')
+        lblDate.pack()
+        self.inputDate = ttk.Entry(parent, font=('Consolas', 10), justify='center', width=20)
+        self.inputDate.insert(tkinter.END, datetime.today().strftime('%Y/%m/%d'))
+        self.inputDate.bind('<Leave>', self.call_read_func)
+        self.inputDate.pack()
+
+        # 出力用フォームの設定
+        frameTextLog = tkinter.Frame(parent, pady=10, bd=0)
+        frameTextLog.pack()
+        self.OutputTextLog = tkst.ScrolledText(frameTextLog, font=('Consolas', 10), height=24, width=130)
+        self.OutputTextLog.pack()
+
+        # readボタン
+        read_button = ttk.Button(parent, text='Read', width=10, command=self.read_log_button)
+        read_button.place(relx=0.25, rely=0.86)
+        # 一覧ボタン
+        list_button = ttk.Button(parent, text='List', width=10, command=self.list_log_button)
+        list_button.place(relx=0.45, rely=0.86)
+        # 終了ボタン
+        quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit_button)
+        quit_button.place(relx=0.65, rely=0.86)
+
+    def read_log_button(self):
+        '''
+        readボタン押下時の処理を定義
+        '''
+
+        # 出力用テキストフォームが空ではない場合
+        if self.MyUtil.required(self.OutputTextLog.get('1.0',tkinter.END)):
+            # テキストフォームの初期化
+            self.OutputTextLog.delete('1.0', tkinter.END)
+
+        input_date = self.inputDate.get()
+        if '.log' in input_date:
+            # ファイル名と拡張子を分割
+            root, ext = os.path.splitext(input_date)
+            # 入力された日付を処理用に加工
+            date = ''.join(self.MyUtil.split_string(root, '-/., '))
+            # 参照するログのパス
+            path_name = '../log/' + date + '.log'
+        else:
+            # 入力された日付を処理用に加工
+            date = ''.join(self.MyUtil.split_string(input_date, '-/., '))
+            # 参照するログのパス
+            path_name = '../log/' + date + '.log'
+
+        # 指定したパスが存在する場合
+        if os.path.exists(path_name):
+            text_lines = ''
+            with open(path_name, 'r') as f:
+                text_lines = f.readlines()
+
+            # 取得した行数分だけ処理
+            for line in text_lines:
+                self.OutputTextLog.insert(tkinter.END, line)
+            self.OutputTextLog.pack()
+        else:
+            # ログファイルが存在しなかった場合
+            self.OutputTextLog.insert(tkinter.END, 'Failed to open log file\r\nno such file or directory')
+
+    def call_read_func(self, event):
+        '''
+        log出力画面におけるマウスアウト時処理
+        '''
+        # readボタン押下時の処理を呼び出す
+        self.read_log_button()
+
+    def list_log_button(self):
+        '''
+        listボタン押下時の処理を定義
+        '''
+
+        # 出力用テキストフォームが空ではない場合
+        if self.MyUtil.required(self.OutputTextLog.get('1.0',tkinter.END)):
+            # テキストフォームの初期化
+            self.OutputTextLog.delete('1.0', tkinter.END)
+
+        # logディレクトリ内のファイルを取得
+        log_files = os.listdir('../log')
+        for log in log_files:
+            # ファイル名と拡張子を分割
+            _, ext = os.path.splitext(log)
+            if ext == '.log':
+                self.OutputTextLog.insert(tkinter.END, log + '\r\n')
+        self.OutputTextLog.pack()
 
 
 class CrawlingAndScrapingArticlesOfTech:

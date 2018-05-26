@@ -18,7 +18,7 @@ setup(
     long_description=readme,
     author='Kato Shinya',
     author_email='yourdream28@gmail.com',
-    url='https://github.com/kennethreitz/samplemod',
+    url='https://github.com/myConsciousness/search-tech-articles',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )
