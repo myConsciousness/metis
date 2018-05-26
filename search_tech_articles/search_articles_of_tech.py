@@ -3,6 +3,8 @@
 from urllib.request import Request, urlopen, URLError, HTTPError
 from urllib.parse import urlencode
 import html.parser as htmlparser
+import webbrowser
+import pyperclip
 from datetime import date, datetime, timedelta
 import json
 import os.path
@@ -28,9 +30,6 @@ fh = FileHandler(PATH_TO_LOG_FILE)
 logger.addHandler(fh)
 fh.setFormatter(Formatter('%(asctime)s:%(levelname)s:[%(lineno)d]%(name)s:%(message)s'))
 
-# UserAgent定義
-DEF_USER_AGENT = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0'}
-
 class SearchArticlesOfTech(tkinter.Tk):
 
     def __init__(self):
@@ -38,12 +37,14 @@ class SearchArticlesOfTech(tkinter.Tk):
         check_status_of_log_file(PATH_TO_LOG_FILE)
 
         self.root = tkinter.Tk()
-        self.notebook = ttk.Notebook(self.root, height=500, width=999)
+        self.root.protocol('WM_DELETE_WINDOW', self.disable_close_button)
+        self.notebook = ttk.Notebook(self.root, height=700, width=999)
 
         # top画面用のフレーム
         frameUpdateArticles = tkinter.Frame(self.notebook, bd=2, relief='groove')
         # log検索画面用のフレーム
         frameShowLog = tkinter.Frame(self.notebook, bd=2, relief='groove')
+
         # top画面用のタブ
         self.notebook.add(frameUpdateArticles, text='Top')
         # log検索画面用のタブ
@@ -60,7 +61,7 @@ class SearchArticlesOfTech(tkinter.Tk):
         self.root.resizable(0, 0)
         self.root.iconbitmap('../common/icon/python_icon.ico')
         self.root.title('Search Tech Articles')
-        self.root.geometry('1000x500+400+250')
+        self.root.geometry('1000x725+400+150')
 
         self.root.mainloop()
 
@@ -73,6 +74,95 @@ class SearchArticlesOfTech(tkinter.Tk):
         self.lblForError = tkinter.Label(parent, font=('Consolas', 10), foreground='#ff0000')
         self.lblForError.pack()
 
+        # 最大表示件数入力フォームの設定
+        lblSearchTerms = tkinter.Label(parent, font=('Consolas', 10),text='Enter search terms')
+        lblSearchTerms.pack()
+        self.btnSearchTerms = ttk.Entry(parent, justify='center', width=40)
+        self.btnSearchTerms.pack()
+
+        # 検索ボタン
+        search_button = ttk.Button(parent, text='Search', width=10, command=self.refresh_tree_view)
+        search_button.place(relx=0.63, rely=0.058)
+
+        # ツリービューの作成
+        self.tree = ttk.Treeview(parent, height=15)
+        self.scroll = tkinter.Scrollbar(parent, orient=tkinter.VERTICAL, command=self.tree.yview)
+        self.scroll.grid(row=0, column=1, sticky='ns')
+        #self.scroll.place(relx=0.962, y=95, height=474.45)
+        self.tree['columns'] = (1, 2, 3, 4)
+        self.tree['show'] = 'headings'
+        self.tree.column(1, width=70)
+        self.tree.column(2, width=700)
+        self.tree.column(3, width=100)
+        self.tree.column(4)
+        self.tree.heading(1, text='No.')
+        self.tree.heading(2, text='Title')
+        self.tree.heading(3, text='Bookmarks')
+        self.tree.heading(4)
+        self.tree.configure(style='my.Treeview', displaycolumns=(1,2,3), yscroll=self.scroll.set)
+        #self.tree.pack(fill='x', padx=20, pady=30)
+
+        # ツリービューのレイアウト設定
+        style = ttk.Style(parent)
+        style.configure('my.Treeview', rowheight=30)
+        style.configure('Treeview', font=('Consolas', 10))
+        style.configure('Treeview.Heading', font=('Consolas', 10, 'bold'))
+
+        # 初期化ボタン
+        reset_button = ttk.Button(parent, text='Reset', width=10)
+        reset_button.place(relx=0.36, rely=0.87)
+        # ブラウザで開くボタン
+        open_button = ttk.Button(parent, text='Open', width=10)
+        open_button.place(relx=0.54, rely=0.87)
+        # 終了ボタン
+        quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit)
+        quit_button.place(relx=0.72, rely=0.87)
+
+    def refresh_tree_view(self):
+        '''
+        取得した記事情報からツリービューを作成する関数
+        '''
+
+        # 検索ワードの取得
+        search_word = self.btnSearchTerms.get()
+        if search_word:
+            # ツリービューの初期化
+            self.tree.delete(*self.tree.get_children())
+            # DB接続を行う
+            conn, cursor = connect_to_database()
+
+            try:
+                article_infos = self.__select_infos_by_search_word(cursor, search_word)
+                if article_infos:
+                    # TreeViewの作成
+                    for i, infos in enumerate(article_infos):
+                        value = (str(i+1), infos[1], infos[3], infos[0])
+                        self.tree.insert('', 'end', tags=i, values=value)
+
+                        if i & 1:
+                            # 偶数行の背景色を変更
+                            self.tree.tag_configure(i, background='#CCFFFF')
+
+                    # ダブルクリックでページを開くように設定
+                    self.tree.bind('<Double-1>', self.open_by_double_click)
+                    # 右クリックでURLをコピーするように設定
+                    self.tree.bind('<ButtonRelease-3>', self.copy_by_right_click)
+                    self.tree.pack(fill='x', padx=20, pady=30)
+                else:
+                    messagebox.showinfo('NO_RESULTS_FOUND',
+                                            'Your search - ' \
+                                            + search_word \
+                                            + ' - did not match any documents.')
+            except sqlite3.Error as e:
+                logger.error(e)
+                logger.exception(e)
+            finally:
+                # 開放処理
+                conn.close()
+                logger.log(20, 'データベースの開放処理を完了しました。')
+        else:
+            messagebox.showerror('ERR_EMPTY_REQUESTED', \
+                                    'This field must not be empty.')
 
     def create_log_gui(self, parent):
         '''
@@ -80,36 +170,78 @@ class SearchArticlesOfTech(tkinter.Tk):
         '''
 
         # 入力フォームの設定
-        lblDate = tkinter.Label(parent, font=('Consolas', 10), text='Enter the date.')
+        lblDate = tkinter.Label(parent, font=('Consolas', 10), text='Enter the date')
         lblDate.pack()
         self.inputDate = ttk.Entry(parent, font=('Consolas', 10), justify='center', width=20)
         self.inputDate.insert(tkinter.END, datetime.today().strftime('%Y/%m/%d'))
-        self.inputDate.bind('<Leave>', self.call_read_func)
+        self.inputDate.bind('<Leave>', lambda x: self.read_log())
         self.inputDate.pack()
 
         # 出力用フォームの設定
         frameTextLog = tkinter.Frame(parent, pady=10, bd=0)
         frameTextLog.pack()
-        self.OutputTextLog = tkst.ScrolledText(frameTextLog, font=('Consolas', 10), height=24, width=130)
+        self.OutputTextLog = tkst.ScrolledText(frameTextLog, font=('Consolas', 10), height=37, width=130)
         self.OutputTextLog.pack()
 
         # readボタン
-        read_button = ttk.Button(parent, text='Read', width=10, command=self.read_log_button)
-        read_button.place(relx=0.25, rely=0.86)
+        read_button = ttk.Button(parent, text='Read', width=10, command=self.read_log)
+        read_button.place(relx=0.25, rely=0.9)
         # 一覧ボタン
-        list_button = ttk.Button(parent, text='List', width=10, command=self.list_log_button)
-        list_button.place(relx=0.45, rely=0.86)
+        list_button = ttk.Button(parent, text='List', width=10, command=self.read_log_list)
+        list_button.place(relx=0.45, rely=0.9)
         # 終了ボタン
-        quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit_button)
-        quit_button.place(relx=0.65, rely=0.86)
+        quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit)
+        quit_button.place(relx=0.65, rely=0.9)
 
-    def read_log_button(self):
+    def open_button(self):
+        '''
+        openボタン押下時の処理を定義
+        '''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+        # valuesキーが要素を持っている場合
+        if item_dict['values']:
+            # URLの取得
+            url = item_dict['values'][3]
+            # ブラウザで開く
+            webbrowser.open_new_tab(url)
+
+    def open_by_double_click(self, event):
+        '''
+        左のダブルクリック時に発生するイベントを定義
+        '''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+        # valuesキーが要素を持っている場合
+        if item_dict['values']:
+            # URLの取得
+            url = item_dict['values'][3]
+            # ブラウザで開く
+            webbrowser.open_new_tab(url)
+
+    def copy_by_right_click(self, event):
+        '''
+        右クリック時に発生するイベントを定義
+        '''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+        # valuesキーが要素を持っている場合
+        if item_dict['values']:
+            # URLの取得
+            url = item_dict['values'][2]
+            # クリップボードへ追加
+            pyperclip.copy(url)
+
+    def read_log(self):
         '''
         readボタン押下時の処理を定義
         '''
 
         # 出力用テキストフォームが空ではない場合
-        if self.MyUtil.required(self.OutputTextLog.get('1.0',tkinter.END)):
+        if self.OutputTextLog.get('1.0',tkinter.END):
             # テキストフォームの初期化
             self.OutputTextLog.delete('1.0', tkinter.END)
 
@@ -118,12 +250,12 @@ class SearchArticlesOfTech(tkinter.Tk):
             # ファイル名と拡張子を分割
             root, ext = os.path.splitext(input_date)
             # 入力された日付を処理用に加工
-            date = ''.join(self.MyUtil.split_string(root, '-/., '))
+            date = ''.join(split_string(root, '-/., '))
             # 参照するログのパス
             path_name = '../log/' + date + '.log'
         else:
             # 入力された日付を処理用に加工
-            date = ''.join(self.MyUtil.split_string(input_date, '-/., '))
+            date = ''.join(split_string(input_date, '-/., '))
             # 参照するログのパス
             path_name = '../log/' + date + '.log'
 
@@ -141,20 +273,13 @@ class SearchArticlesOfTech(tkinter.Tk):
             # ログファイルが存在しなかった場合
             self.OutputTextLog.insert(tkinter.END, 'Failed to open log file\r\nno such file or directory')
 
-    def call_read_func(self, event):
-        '''
-        log出力画面におけるマウスアウト時処理
-        '''
-        # readボタン押下時の処理を呼び出す
-        self.read_log_button()
-
-    def list_log_button(self):
+    def read_log_list(self):
         '''
         listボタン押下時の処理を定義
         '''
 
         # 出力用テキストフォームが空ではない場合
-        if self.MyUtil.required(self.OutputTextLog.get('1.0',tkinter.END)):
+        if self.OutputTextLog.get('1.0',tkinter.END):
             # テキストフォームの初期化
             self.OutputTextLog.delete('1.0', tkinter.END)
 
@@ -167,11 +292,45 @@ class SearchArticlesOfTech(tkinter.Tk):
                 self.OutputTextLog.insert(tkinter.END, log + '\r\n')
         self.OutputTextLog.pack()
 
+    def quit(self):
+        '''
+        quitボタン押下時の処理を定義
+        '''
+
+        # 処理を終了
+        self.root.destroy()
+
+    def disable_close_button(self):
+        messagebox.showinfo('ERR_BUTTON_RESTRICTED', 'Use Quit button to close the window.')
+
+    def __select_infos_by_search_word(self, cursor: object, search_word: str) -> object:
+
+        cursor.execute('''
+                        SELECT
+                            URL,
+                            TITLE,
+                            PUBLISHED_DATE,
+                            BOOKMARKS,
+                            TAG,
+                            REGISTER_DATE,
+                            UPDATED_DATE,
+                            RESERVED_DEL_DATE
+                        FROM
+                            INFO_TECH
+                        WHERE
+                            TAG
+                        LIKE
+                            ?
+                        ''',(search_word,))
+        return cursor.fetchall()
 
 class CrawlingAndScrapingArticlesOfTech:
     '''クローリングとスクレイピングの処理を定義したクラス'''
 
-    def __init__(self, conn: object, cursor: object, proc_mode: str):
+    # UserAgent定義
+    DEF_USER_AGENT = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0'}
+
+    def __init__(self):
         '''コンストラクタ
 
         Note:
@@ -187,7 +346,7 @@ class CrawlingAndScrapingArticlesOfTech:
         check_status_of_log_file(PATH_TO_LOG_FILE)
 
         try:
-            # インターネットへの疎通確認
+            # 疎通確認
             with urlopen('http://info.cern.ch/'):
                 # 疎通成功の場合は何もしない
                 pass
@@ -206,24 +365,17 @@ class CrawlingAndScrapingArticlesOfTech:
             self.__handling_url_exception(e)
             return
 
-        # コネクションオブジェクト
-        self.conn = conn
-        # カーソルオブジェクト
-        self.cursor = cursor
-        # 処理モード
-        self.proc_mode = proc_mode
-
         # 処理実行
         self.__main()
 
     def __main(self):
 
-        # トレースバックの設定
-        sqlite3.enable_callback_tracebacks(True)
+        # DB接続を行う
+        conn, cursor = connect_to_database()
 
         try:
             # hatenaへのクローリング処理を開始
-            self.__crawl_hatena(self.conn, self.cursor)
+            self.__crawl_hatena(conn, cursor)
         except sqlite3.Error as e:
             # ロールバック
             conn.rollback()
@@ -568,6 +720,17 @@ def check_status_of_log_file(path_to_log: str):
         # logファイルの作成
         with open(PATH_TO_LOG_FILE):
             pass
+
+def connect_to_database() -> object:
+
+    # トレースバックの設定
+    sqlite3.enable_callback_tracebacks(True)
+    # データベースへの接続
+    conn = sqlite3.connect('../common/db/USER01.db')
+    # カーソル
+    cursor = conn.cursor()
+
+    return conn, cursor
 
 def split_string(target: str, split_words: str) -> list:
     '''組み込みsplit関数の拡張関数
