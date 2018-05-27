@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from urllib.request import Request, urlopen, URLError, HTTPError
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
 from urllib.parse import urlencode
 import html.parser as htmlparser
 import webbrowser
@@ -11,7 +12,7 @@ import os.path
 import sqlite3
 from logging import getLogger, FileHandler, StreamHandler, Formatter
 import tkinter
-from tkinter import messagebox
+from tkinter import messagebox, Menu
 import tkinter.ttk as ttk
 from tkinter import N, S, W, E
 import webbrowser
@@ -31,64 +32,74 @@ logger.addHandler(fh)
 fh.setFormatter(Formatter('%(asctime)s:%(levelname)s:[%(lineno)d]%(name)s:%(message)s'))
 
 class SearchArticlesOfTech(tkinter.Tk):
+    '''GUIの出力処理を定義するクラス'''
 
     def __init__(self):
+        '''コンストラクタ'''
+
         # ログファイルの有効性チェック
         check_status_of_log_file(PATH_TO_LOG_FILE)
 
         self.root = tkinter.Tk()
-        self.root.protocol('WM_DELETE_WINDOW', self.disable_close_button)
-        self.notebook = ttk.Notebook(self.root, height=700, width=999)
+        # closeボタンの無効化
+        self.root.protocol('WM_DELETE_WINDOW', self.__disable_close_button)
+        # エスケープキーで処理終了するように設定
+        self.root.bind('<Escape>', lambda x: self.__quit())
 
+        # ファイルメニューの生成
+        self.__create_file_menu()
+
+        notebook = ttk.Notebook(self.root, height=700, width=999)
         # top画面用のフレーム
-        frameUpdateArticles = tkinter.Frame(self.notebook, bd=2, relief='groove')
+        frameUpdateArticles = tkinter.Frame(notebook, bd=2, relief='groove')
         # log検索画面用のフレーム
-        frameShowLog = tkinter.Frame(self.notebook, bd=2, relief='groove')
+        frameShowLog = tkinter.Frame(notebook, bd=2, relief='groove')
 
         # top画面用のタブ
-        self.notebook.add(frameUpdateArticles, text='Top')
+        notebook.add(frameUpdateArticles, text='Top')
         # log検索画面用のタブ
-        self.notebook.add(frameShowLog, text='Log')
+        notebook.add(frameShowLog, text='Log')
 
         # TOP画面の作成
-        self.create_top_gui(frameUpdateArticles)
+        self.__create_top_gui(frameUpdateArticles)
         # ログ出力画面の作成
-        self.create_log_gui(frameShowLog)
+        self.__create_log_gui(frameShowLog)
 
-        self.notebook.grid(row=0, column=0, sticky=N+S+W+E)
+        notebook.grid(row=0, column=0, sticky=N+S+W+E)
 
         # ウィンドウの設定
         self.root.resizable(0, 0)
         self.root.iconbitmap('../common/icon/python_icon.ico')
         self.root.title('Search Tech Articles')
-        self.root.geometry('1000x725+400+150')
+        self.root.geometry('1000x680+400+150')
 
         self.root.mainloop()
 
-    def create_top_gui(self, parent):
-        '''
-        TOP画面のGUIを作成する関数
+    def __create_top_gui(self, parent: tkinter.Frame):
+        '''TOP画面の出力を定義するメソッド
+
+        Args:
+            parent (tkinter.Frame): 画面の親フレーム。
+
         '''
 
-        # エラー・メッセージ用ラベルの表示
-        self.lblForError = tkinter.Label(parent, font=('Consolas', 10), foreground='#ff0000')
-        self.lblForError.pack()
-
+        tkinter.Label(parent).pack()
         # 最大表示件数入力フォームの設定
         lblSearchTerms = tkinter.Label(parent, font=('Consolas', 10),text='Enter search terms')
         lblSearchTerms.pack()
         self.btnSearchTerms = ttk.Entry(parent, justify='center', width=40)
+        # リターンキー押下で検索を開始するように設定
+        self.btnSearchTerms.bind('<Return>', lambda x: self.__refresh_tree_view())
         self.btnSearchTerms.pack()
 
         # 検索ボタン
-        search_button = ttk.Button(parent, text='Search', width=10, command=self.refresh_tree_view)
+        search_button = ttk.Button(parent, text='Search', width=10, command=self.__refresh_tree_view)
         search_button.place(relx=0.63, rely=0.058)
 
         # ツリービューの作成
         self.tree = ttk.Treeview(parent, height=15)
         self.scroll = tkinter.Scrollbar(parent, orient=tkinter.VERTICAL, command=self.tree.yview)
-        self.scroll.grid(row=0, column=1, sticky='ns')
-        #self.scroll.place(relx=0.962, y=95, height=474.45)
+        self.scroll.place(relx=0.962, y=95, height=474.45)
         self.tree['columns'] = (1, 2, 3, 4)
         self.tree['show'] = 'headings'
         self.tree.column(1, width=70)
@@ -100,7 +111,11 @@ class SearchArticlesOfTech(tkinter.Tk):
         self.tree.heading(3, text='Bookmarks')
         self.tree.heading(4)
         self.tree.configure(style='my.Treeview', displaycolumns=(1,2,3), yscroll=self.scroll.set)
-        #self.tree.pack(fill='x', padx=20, pady=30)
+        # ダブルクリックでページを開くように設定
+        self.tree.bind('<Double-1>', self.__open_by_double_click)
+        # 右クリックでURLをコピーするように設定
+        self.tree.bind('<ButtonRelease-3>', self.__copy_by_right_click)
+        self.tree.pack(fill='x', padx=20, pady=30)
 
         # ツリービューのレイアウト設定
         style = ttk.Style(parent)
@@ -108,20 +123,18 @@ class SearchArticlesOfTech(tkinter.Tk):
         style.configure('Treeview', font=('Consolas', 10))
         style.configure('Treeview.Heading', font=('Consolas', 10, 'bold'))
 
-        # 初期化ボタン
-        reset_button = ttk.Button(parent, text='Reset', width=10)
-        reset_button.place(relx=0.36, rely=0.87)
         # ブラウザで開くボタン
-        open_button = ttk.Button(parent, text='Open', width=10)
-        open_button.place(relx=0.54, rely=0.87)
+        open_button = ttk.Button(parent, text='Open', width=10, command=self.__open)
+        open_button.place(width=150, relx=0.12, rely=0.86)
+        # 初期化ボタン
+        flush_button = ttk.Button(parent, text='Flush', width=10, command=self.__flush)
+        flush_button.place(width=150, relx=0.42, rely=0.86)
         # 終了ボタン
-        quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit)
-        quit_button.place(relx=0.72, rely=0.87)
+        quit_button = ttk.Button(parent, text='Quit', width=10, command=self.__quit)
+        quit_button.place(width=150, relx=0.72, rely=0.86)
 
-    def refresh_tree_view(self):
-        '''
-        取得した記事情報からツリービューを作成する関数
-        '''
+    def __refresh_tree_view(self):
+        '''取得した記事情報からツリービューを生成するメソッド'''
 
         # 検索ワードの取得
         search_word = self.btnSearchTerms.get()
@@ -132,9 +145,9 @@ class SearchArticlesOfTech(tkinter.Tk):
             conn, cursor = connect_to_database()
 
             try:
-                article_infos = self.__select_infos_by_search_word(cursor, search_word)
+                article_infos = self.__select_infos_by_search_word(cursor, '%' + search_word + '%')
                 if article_infos:
-                    # TreeViewの作成
+                    # TreeViewの生成
                     for i, infos in enumerate(article_infos):
                         value = (str(i+1), infos[1], infos[3], infos[0])
                         self.tree.insert('', 'end', tags=i, values=value)
@@ -142,11 +155,6 @@ class SearchArticlesOfTech(tkinter.Tk):
                         if i & 1:
                             # 偶数行の背景色を変更
                             self.tree.tag_configure(i, background='#CCFFFF')
-
-                    # ダブルクリックでページを開くように設定
-                    self.tree.bind('<Double-1>', self.open_by_double_click)
-                    # 右クリックでURLをコピーするように設定
-                    self.tree.bind('<ButtonRelease-3>', self.copy_by_right_click)
                     self.tree.pack(fill='x', padx=20, pady=30)
                 else:
                     messagebox.showinfo('NO_RESULTS_FOUND',
@@ -164,9 +172,12 @@ class SearchArticlesOfTech(tkinter.Tk):
             messagebox.showerror('ERR_EMPTY_REQUESTED', \
                                     'This field must not be empty.')
 
-    def create_log_gui(self, parent):
-        '''
-        Log検索画面のGUIを作成する関数
+    def __create_log_gui(self, parent: tkinter.Frame):
+        '''Log検索画面の出力を定義するメソッド
+
+        Args:
+            parent (tkinter.Frame): 画面の親フレーム
+
         '''
 
         # 入力フォームの設定
@@ -174,29 +185,68 @@ class SearchArticlesOfTech(tkinter.Tk):
         lblDate.pack()
         self.inputDate = ttk.Entry(parent, font=('Consolas', 10), justify='center', width=20)
         self.inputDate.insert(tkinter.END, datetime.today().strftime('%Y/%m/%d'))
-        self.inputDate.bind('<Leave>', lambda x: self.read_log())
+        self.inputDate.bind('<Leave>', lambda x: self.__read_log())
         self.inputDate.pack()
 
         # 出力用フォームの設定
         frameTextLog = tkinter.Frame(parent, pady=10, bd=0)
         frameTextLog.pack()
-        self.OutputTextLog = tkst.ScrolledText(frameTextLog, font=('Consolas', 10), height=37, width=130)
+        self.OutputTextLog = tkst.ScrolledText(frameTextLog, font=('Consolas', 10), height=35, width=130)
         self.OutputTextLog.pack()
 
         # readボタン
-        read_button = ttk.Button(parent, text='Read', width=10, command=self.read_log)
-        read_button.place(relx=0.25, rely=0.9)
+        read_button = ttk.Button(parent, text='Read', width=10, command=self.__read_log)
+        read_button.place(relx=0.25, rely=0.88)
         # 一覧ボタン
-        list_button = ttk.Button(parent, text='List', width=10, command=self.read_log_list)
-        list_button.place(relx=0.45, rely=0.9)
+        list_button = ttk.Button(parent, text='List', width=10, command=self.__read_log_list)
+        list_button.place(relx=0.45, rely=0.88)
         # 終了ボタン
-        quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit)
-        quit_button.place(relx=0.65, rely=0.9)
+        quit_button = ttk.Button(parent, text='Quit', width=10, command=self.__quit)
+        quit_button.place(relx=0.65, rely=0.88)
 
-    def open_button(self):
-        '''
-        openボタン押下時の処理を定義
-        '''
+    def __create_file_menu(self):
+        '''メニューバーの出力を定義するメソッド'''
+
+        menubar = Menu(self.root)
+
+        file_menu = Menu(menubar, tearoff=0)
+        # パラメータ設定画面
+        file_menu.add_command(label='Parameters')
+        file_menu.add_separator()
+        # 終了コマンド
+        file_menu.add_command(label='Exit', command=quit)
+        menubar.add_cascade(label='File', menu=file_menu)
+
+        # 編集メニュー
+        edit_menu = Menu(menubar, tearoff=0)
+        edit_menu.add_command(label='Copy Path', command=self.__copy_url)
+        edit_menu.add_command(label='Copy Title', command=self.__copy_title)
+        edit_menu.add_command(label='Copy Informations', command=self.__copy_informations)
+        menubar.add_cascade(label='Edit', menu=edit_menu)
+
+        # 更新メニュー
+        update_menu = Menu(menubar, tearoff=0)
+        start_crawling = Menu(menubar, tearoff=0)
+        update_bookmarks = Menu(menubar, tearoff=0)
+        update_menu.add_cascade(label='Start Crawling', menu=start_crawling)
+        start_crawling.add_command(label='Hatena', command=self.__execute_crawling_hatena)
+        update_menu.add_cascade(label='Update Bookmarks', menu=update_bookmarks)
+        update_bookmarks.add_command(label='Hatena')
+        menubar.add_cascade(label='Update', menu=update_menu)
+
+        # helpメニュー
+        help_menu = Menu(menubar, tearoff=0)
+        help_menu.add_command(label='Document')
+        help_menu.add_command(label='About Software', command=self.__open_readme)
+        help_menu.add_separator()
+        help_menu.add_command(label='Licence', command=self.__open_licence)
+
+        menubar.add_cascade(label='Help', menu=help_menu)
+
+        self.root.config(menu=menubar)
+
+    def __open(self):
+        '''openボタン押下時の処理を定義'''
 
         # フォーカス部分の要素を辞書として取得
         item_dict = self.tree.item(self.tree.focus())
@@ -207,10 +257,14 @@ class SearchArticlesOfTech(tkinter.Tk):
             # ブラウザで開く
             webbrowser.open_new_tab(url)
 
-    def open_by_double_click(self, event):
-        '''
-        左のダブルクリック時に発生するイベントを定義
-        '''
+    def __flush(self):
+        '''flushボタン押下時の処理を定義'''
+
+        # ツリービューの初期化
+        self.tree.delete(*self.tree.get_children())
+
+    def __copy_url(self):
+        '''URLをクリップボードに追加する処理を定義'''
 
         # フォーカス部分の要素を辞書として取得
         item_dict = self.tree.item(self.tree.focus())
@@ -218,27 +272,78 @@ class SearchArticlesOfTech(tkinter.Tk):
         if item_dict['values']:
             # URLの取得
             url = item_dict['values'][3]
-            # ブラウザで開く
-            webbrowser.open_new_tab(url)
-
-    def copy_by_right_click(self, event):
-        '''
-        右クリック時に発生するイベントを定義
-        '''
-
-        # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
-        # valuesキーが要素を持っている場合
-        if item_dict['values']:
-            # URLの取得
-            url = item_dict['values'][2]
             # クリップボードへ追加
             pyperclip.copy(url)
 
-    def read_log(self):
-        '''
-        readボタン押下時の処理を定義
-        '''
+    def __copy_title(self):
+        '''タイトルをクリップボードに追加する処理を定義'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+        # valuesキーが要素を持っている場合
+        if item_dict['values']:
+            # タイトルの取得
+            title = item_dict['values'][1]
+            # クリップボードへ追加
+            pyperclip.copy(title)
+
+    def __copy_informations(self):
+        '''タイトル、URL、ブックマーク数をコピーする処理を定義'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+        # valuesキーが要素を持っている場合
+        if item_dict['values']:
+            url = item_dict['values'][3]
+            # タイトルの取得
+            title = item_dict['values'][1]
+            # ブックマーク数の取得
+            bookmarks = str(item_dict['values'][2])
+
+            # クリップボードへ追加
+            pyperclip.copy(' '.join([url, title, bookmarks]))
+
+    def __open_by_double_click(self, event):
+        '''左ダブルクリック時に発生する処理を定義'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+        # valuesキーが要素を持っている場合
+        if item_dict['values']:
+            # URLの取得
+            url = item_dict['values'][3]
+            # ブラウザで開く
+            webbrowser.open_new_tab(url)
+
+    def __copy_by_right_click(self, event):
+        '''右クリック時に発生する処理を定義'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+        # valuesキーが要素を持っている場合
+        if item_dict['values']:
+            # URLの取得
+            url = item_dict['values'][3]
+            # クリップボードへ追加
+            pyperclip.copy(url)
+
+    def __open_licence(self):
+        '''ライセンスを記述したページを開く'''
+
+        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/LICENSE')
+
+    def __open_readme(self):
+        '''readmeを記述したページを開く'''
+
+        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/README.rst')
+
+    def __execute_crawling_hatena(self):
+        '''hatenaへのクローリング処理を実行する'''
+
+        CrawlingAndScrapingArticlesOfTech()
+
+    def __read_log(self):
+        '''readボタン押下時の処理を定義'''
 
         # 出力用テキストフォームが空ではない場合
         if self.OutputTextLog.get('1.0',tkinter.END):
@@ -271,12 +376,10 @@ class SearchArticlesOfTech(tkinter.Tk):
             self.OutputTextLog.pack()
         else:
             # ログファイルが存在しなかった場合
-            self.OutputTextLog.insert(tkinter.END, 'Failed to open log file\r\nno such file or directory')
+            self.OutputTextLog.insert(tkinter.END, 'Failed to open log file\r\nNo such file or directory')
 
-    def read_log_list(self):
-        '''
-        listボタン押下時の処理を定義
-        '''
+    def __read_log_list(self):
+        '''listボタン押下時の処理を定義'''
 
         # 出力用テキストフォームが空ではない場合
         if self.OutputTextLog.get('1.0',tkinter.END):
@@ -292,18 +395,32 @@ class SearchArticlesOfTech(tkinter.Tk):
                 self.OutputTextLog.insert(tkinter.END, log + '\r\n')
         self.OutputTextLog.pack()
 
-    def quit(self):
-        '''
-        quitボタン押下時の処理を定義
-        '''
+    def __quit(self):
+        '''quitボタン押下時の処理を定義'''
 
         # 処理を終了
         self.root.destroy()
 
-    def disable_close_button(self):
-        messagebox.showinfo('ERR_BUTTON_RESTRICTED', 'Use Quit button to close the window.')
+    def __disable_close_button(self):
+        '''windowのcloseボタンを無効化する'''
 
-    def __select_infos_by_search_word(self, cursor: object, search_word: str) -> object:
+        messagebox.showerror('ERR_BUTTON_RESTRICTED', \
+                                'Use Quit button or Esc key to close the window.')
+
+    def __select_infos_by_search_word(self, cursor: sqlite3.Cursor, search_word: str) -> tuple:
+        '''検索ワードから記事情報を取得するクエリ
+
+        Note:
+            返り値はtuple型。
+
+        Args:
+            cursor (sqlite3.Cursor): カーソル。
+            search_word (str): 検索ワード。
+
+        Returns:
+            検索結果。
+
+        '''
 
         cursor.execute('''
                         SELECT
@@ -325,7 +442,7 @@ class SearchArticlesOfTech(tkinter.Tk):
         return cursor.fetchall()
 
 class CrawlingAndScrapingArticlesOfTech:
-    '''クローリングとスクレイピングの処理を定義したクラス'''
+    '''クローリングとスクレイピングの処理を定義するクラス'''
 
     # UserAgent定義
     DEF_USER_AGENT = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0'}
@@ -387,12 +504,12 @@ class CrawlingAndScrapingArticlesOfTech:
             conn.close()
             logger.log(20, 'データベースの開放処理を完了しました。')
 
-    def __crawl_hatena(self, conn: object, cursor: object):
+    def __crawl_hatena(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
         '''Hatenaに対してクローリング処理を行うメソッド
 
         Args:
-            conn (object): DBとのコネクション
-            cursor (object): カーソル。
+            conn (sqlite3.Connection): DBとのコネクション。
+            cursor (sqlite3.Cursor): カーソル。
 
         '''
 
@@ -599,11 +716,11 @@ class CrawlingAndScrapingArticlesOfTech:
 
         return html[start_idx+1:end_idx]
 
-    def __handling_url_exception(self, e: URLError):
+    def __handling_url_exception(self, e):
         '''通信処理における例外を処理するメソッド
 
         Args:
-            e (URLError): 通信処理において発生した例外情報
+            e (urllib.error.URLError): 通信処理において発生した例外情報
 
         '''
 
@@ -616,14 +733,14 @@ class CrawlingAndScrapingArticlesOfTech:
             logger.error(e.code)
             logger.exception(e)
 
-    def __select_params_by_primary_key(self, cursor: object, primary_key: str) -> tuple:
+    def __select_params_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
         '''主キーを用いてパラメータTBLから値を取得するクエリ
 
         Note:
             返り値はtuple型。
 
         Args:
-            cursor (object): カーソル。
+            cursor (sqlite3.Cursor): カーソル。
             primary_key (str): 主キー。
 
         Returns:
@@ -644,14 +761,14 @@ class CrawlingAndScrapingArticlesOfTech:
 
         return cursor.fetchone()
 
-    def __select_by_primary_key(self, cursor: object, primary_key: str) -> tuple:
+    def __select_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
         '''主キーを使用してDBから記事情報を取得するクエリ
 
         Note:
             返り値はtuple型。
 
         Args:
-            cursor (object): カーソル。
+            cursor (sqlite3.Cursor): カーソル。
             primary_key (str): 主キー。
 
         Returns:
@@ -679,11 +796,11 @@ class CrawlingAndScrapingArticlesOfTech:
 
         return cursor.fetchone()
 
-    def __insert_new_article_infos(self, cursor: object, article_infos: dict):
+    def __insert_new_article_infos(self, cursor: sqlite3.Cursor, article_infos: dict):
         '''取得した記事情報をDBへ挿入するクエリ
 
         Args:
-            cursor (object): カーソル。
+            cursor (sqlite3.Cursor): カーソル。
             article_infos (dict): カラムと挿入する記事情報の対応辞書。
 
         '''
@@ -721,7 +838,16 @@ def check_status_of_log_file(path_to_log: str):
         with open(PATH_TO_LOG_FILE):
             pass
 
-def connect_to_database() -> object:
+def connect_to_database():
+    '''データベースへ接続する関数
+
+    Note:
+        コネクションの開放処理は別途行うこと。
+
+    Returns:
+        コネクション、カーソルオブジェクトを格納したリスト。
+
+    '''
 
     # トレースバックの設定
     sqlite3.enable_callback_tracebacks(True)
