@@ -1,20 +1,5 @@
-Name
-search_tech_articles
-====
+Metis is the client application for crawling, scraping, and searching tech articles.
+Now it is designated for Hatena.
 
-Overview
-※Writing
-
-## Requirement
-
-## Usage
-
-## Install
-
-## Licence
-
-[myConsciousness](https://github.com/myConsciousness/search_tech_articles/blob/master/LICENSE)
-
-## Author
-
-[myConsciousness](https://github.com/myConsciousness)
+Source: https://github.com/myConsciousness/metis
+Bug reports: https://github.com/myConsciousness/metis/issues
