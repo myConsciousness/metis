@@ -76,7 +76,7 @@ class SearchArticlesOfTech(tkinter.Tk):
         # ウィンドウの設定
         self.root.resizable(0, 0)
         self.root.iconbitmap('../common/icon/python_icon.ico')
-        self.root.title('Search Tech Articles')
+        self.root.title('Metis')
         self.root.geometry('1000x680+400+150')
 
         self.root.mainloop()
