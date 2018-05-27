@@ -34,8 +34,14 @@ fh.setFormatter(Formatter('%(asctime)s:%(levelname)s:[%(lineno)d]%(name)s:%(mess
 class SearchArticlesOfTech(tkinter.Tk):
     '''GUIの出力処理を定義するクラス'''
 
-    def __init__(self):
-        '''コンストラクタ'''
+    def __init__(self, *args, **kwargs):
+        '''コンストラクタ
+
+        Args:
+            *args (tuple): タプルの可変長引数。
+            **kwargs (dict): 辞書の可変長引数。
+
+        '''
 
         # ログファイルの有効性チェック
         check_status_of_log_file(PATH_TO_LOG_FILE)
@@ -340,6 +346,7 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __execute_crawling_hatena(self):
         '''hatenaへのクローリング処理を実行する'''
 
+        # クローリング処理を実行
         CrawlingAndScrapingArticlesOfTech()
 
     def __read_log(self):
@@ -447,15 +454,15 @@ class CrawlingAndScrapingArticlesOfTech:
     # UserAgent定義
     DEF_USER_AGENT = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0'}
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         '''コンストラクタ
 
         Note:
             コンストラクタ内で疎通確認に失敗した場合は後続処理を行わない。
 
         Args:
-            *args (list): コマンドライン引数1。
-            **kwargs (dict): コマンドライン引数2。
+            *args (tuple): タプルの可変長引数。
+            **kwargs (dict): 辞書の可変長引数。
 
         '''
 
@@ -889,4 +896,4 @@ def split_string(target: str, split_words: str) -> list:
 
 if __name__ == '__main__':
     # GUIを呼び出す
-    SearchArticlesOfTech = SearchArticlesOfTech()
+    SearchArticlesOfTech()
