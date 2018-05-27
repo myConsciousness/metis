@@ -4,7 +4,7 @@ Now it is designated for Hatena.
 
 # Requirements
 Metis requires the following to run:  
-* Python 3.x
+* [Python 3.x](https://www.python.org/)
 
 # Help
 Source: https://github.com/myConsciousness/metis  

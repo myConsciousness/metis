@@ -12,13 +12,13 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='search_tech_articles',
+    name='metis',
     version='0.1.0',
     description='Client app for crawling, scraping, and searching tech articles.',
     long_description=readme,
     author='Kato Shinya',
     author_email='yourdream28@gmail.com',
-    url='https://github.com/myConsciousness/search-tech-articles',
+    url='https://github.com/myConsciousness/metis',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )
