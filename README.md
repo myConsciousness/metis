@@ -10,5 +10,5 @@ Metis requires the following to run:
 Source: https://github.com/myConsciousness/metis  
 Bug reports: https://github.com/myConsciousness/metis/issues
 
-# Licence
-This software is released under the MIT License, see [LICENCE](https://github.com/myConsciousness/metis/blob/master/LICENSE)
+# License
+This software is released under the MIT License, see [LICENSE](https://github.com/myConsciousness/metis/blob/master/LICENSE)

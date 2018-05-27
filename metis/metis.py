@@ -411,7 +411,7 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __disable_close_button(self):
         '''windowのcloseボタンを無効化する'''
 
-        messagebox.showerror('ERR_BUTTON_RESTRICTED', \
+        messagebox.showerror('ERR_BUTTON_LIMITED', \
                                 'Use Quit button or Esc key to close the window.')
 
     def __select_infos_by_search_word(self, cursor: sqlite3.Cursor, search_word: str) -> tuple:
