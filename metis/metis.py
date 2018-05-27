@@ -7,7 +7,6 @@ import html.parser as htmlparser
 import webbrowser
 import pyperclip
 from datetime import date, datetime, timedelta
-import json
 import os.path
 import sqlite3
 from logging import getLogger, FileHandler, StreamHandler, Formatter
@@ -23,7 +22,6 @@ from tqdm import tqdm
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
-# ログの設定
 PATH_TO_LOG_FILE = '../log/' + datetime.today().strftime('%Y%m%d') + '.log'
 logger = getLogger(__name__)
 logger.setLevel(10)
@@ -37,9 +35,10 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __init__(self, *args, **kwargs):
         '''コンストラクタ
 
-        Args:
-            *args (tuple): タプルの可変長引数。
-            **kwargs (dict): 辞書の可変長引数。
+        Args
+        ----
+        *args (tuple): タプルの可変長引数。
+        **kwargs (dict): 辞書の可変長引数。
 
         '''
 
@@ -47,9 +46,7 @@ class SearchArticlesOfTech(tkinter.Tk):
         check_status_of_log_file(PATH_TO_LOG_FILE)
 
         self.root = tkinter.Tk()
-        # closeボタンの無効化
         self.root.protocol('WM_DELETE_WINDOW', self.__disable_close_button)
-        # エスケープキーで処理終了するように設定
         self.root.bind('<Escape>', lambda x: self.__quit())
 
         # ファイルメニューの生成
@@ -84,8 +81,9 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __create_top_gui(self, parent: tkinter.Frame):
         '''TOP画面の出力を定義するメソッド
 
-        Args:
-            parent (tkinter.Frame): 画面の親フレーム。
+        Args
+        ----
+        parent (tkinter.Frame): 画面の親フレーム。
 
         '''
 
@@ -142,12 +140,11 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __refresh_tree_view(self):
         '''取得した記事情報からツリービューを生成するメソッド'''
 
-        # 検索ワードの取得
         search_word = self.btnSearchTerms.get()
         if search_word:
             # ツリービューの初期化
             self.tree.delete(*self.tree.get_children())
-            # DB接続を行う
+
             conn, cursor = connect_to_database()
 
             try:
@@ -181,8 +178,9 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __create_log_gui(self, parent: tkinter.Frame):
         '''Log検索画面の出力を定義するメソッド
 
-        Args:
-            parent (tkinter.Frame): 画面の親フレーム
+        Args
+        ----
+        parent (tkinter.Frame): 画面の親フレーム
 
         '''
 
@@ -256,11 +254,10 @@ class SearchArticlesOfTech(tkinter.Tk):
 
         # フォーカス部分の要素を辞書として取得
         item_dict = self.tree.item(self.tree.focus())
-        # valuesキーが要素を持っている場合
+
         if item_dict['values']:
-            # URLの取得
             url = item_dict['values'][3]
-            # ブラウザで開く
+
             webbrowser.open_new_tab(url)
 
     def __flush(self):
@@ -274,11 +271,10 @@ class SearchArticlesOfTech(tkinter.Tk):
 
         # フォーカス部分の要素を辞書として取得
         item_dict = self.tree.item(self.tree.focus())
-        # valuesキーが要素を持っている場合
+
         if item_dict['values']:
-            # URLの取得
             url = item_dict['values'][3]
-            # クリップボードへ追加
+
             pyperclip.copy(url)
 
     def __copy_title(self):
@@ -286,11 +282,10 @@ class SearchArticlesOfTech(tkinter.Tk):
 
         # フォーカス部分の要素を辞書として取得
         item_dict = self.tree.item(self.tree.focus())
-        # valuesキーが要素を持っている場合
+
         if item_dict['values']:
-            # タイトルの取得
             title = item_dict['values'][1]
-            # クリップボードへ追加
+
             pyperclip.copy(title)
 
     def __copy_informations(self):
@@ -298,15 +293,12 @@ class SearchArticlesOfTech(tkinter.Tk):
 
         # フォーカス部分の要素を辞書として取得
         item_dict = self.tree.item(self.tree.focus())
-        # valuesキーが要素を持っている場合
+
         if item_dict['values']:
             url = item_dict['values'][3]
-            # タイトルの取得
             title = item_dict['values'][1]
-            # ブックマーク数の取得
             bookmarks = str(item_dict['values'][2])
 
-            # クリップボードへ追加
             pyperclip.copy(' '.join([url, title, bookmarks]))
 
     def __open_by_double_click(self, event):
@@ -314,11 +306,10 @@ class SearchArticlesOfTech(tkinter.Tk):
 
         # フォーカス部分の要素を辞書として取得
         item_dict = self.tree.item(self.tree.focus())
-        # valuesキーが要素を持っている場合
+
         if item_dict['values']:
-            # URLの取得
             url = item_dict['values'][3]
-            # ブラウザで開く
+
             webbrowser.open_new_tab(url)
 
     def __copy_by_right_click(self, event):
@@ -326,11 +317,10 @@ class SearchArticlesOfTech(tkinter.Tk):
 
         # フォーカス部分の要素を辞書として取得
         item_dict = self.tree.item(self.tree.focus())
-        # valuesキーが要素を持っている場合
+
         if item_dict['values']:
-            # URLの取得
             url = item_dict['values'][3]
-            # クリップボードへ追加
+
             pyperclip.copy(url)
 
     def __open_licence(self):
@@ -352,7 +342,6 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __read_log(self):
         '''readボタン押下時の処理を定義'''
 
-        # 出力用テキストフォームが空ではない場合
         if self.OutputTextLog.get('1.0',tkinter.END):
             # テキストフォームの初期化
             self.OutputTextLog.delete('1.0', tkinter.END)
@@ -361,17 +350,12 @@ class SearchArticlesOfTech(tkinter.Tk):
         if '.log' in input_date:
             # ファイル名と拡張子を分割
             root, ext = os.path.splitext(input_date)
-            # 入力された日付を処理用に加工
             date = ''.join(split_string(root, '-/., '))
-            # 参照するログのパス
             path_name = '../log/' + date + '.log'
         else:
-            # 入力された日付を処理用に加工
             date = ''.join(split_string(input_date, '-/., '))
-            # 参照するログのパス
             path_name = '../log/' + date + '.log'
 
-        # 指定したパスが存在する場合
         if os.path.exists(path_name):
             text_lines = ''
             with open(path_name, 'r') as f:
@@ -388,7 +372,6 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __read_log_list(self):
         '''listボタン押下時の処理を定義'''
 
-        # 出力用テキストフォームが空ではない場合
         if self.OutputTextLog.get('1.0',tkinter.END):
             # テキストフォームの初期化
             self.OutputTextLog.delete('1.0', tkinter.END)
@@ -405,7 +388,6 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __quit(self):
         '''quitボタン押下時の処理を定義'''
 
-        # 処理を終了
         self.root.destroy()
 
     def __disable_close_button(self):
@@ -417,15 +399,18 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __select_infos_by_search_word(self, cursor: sqlite3.Cursor, search_word: str) -> tuple:
         '''検索ワードから記事情報を取得するクエリ
 
-        Note:
-            返り値はtuple型。
+        Note
+        ----
+        返り値はtuple型。
 
-        Args:
-            cursor (sqlite3.Cursor): カーソル。
-            search_word (str): 検索ワード。
+        Args
+        ----
+        cursor (sqlite3.Cursor): カーソル。
+        search_word (str): 検索ワード。
 
-        Returns:
-            検索結果。
+        Returns
+        -------
+        検索結果。
 
         '''
 
@@ -446,6 +431,7 @@ class SearchArticlesOfTech(tkinter.Tk):
                         LIKE
                             ?
                         ''',(search_word,))
+
         return cursor.fetchall()
 
 class CrawlingAndScrapingArticlesOfTech:
@@ -457,12 +443,14 @@ class CrawlingAndScrapingArticlesOfTech:
     def __init__(self, *args, **kwargs):
         '''コンストラクタ
 
-        Note:
-            コンストラクタ内で疎通確認に失敗した場合は後続処理を行わない。
+        Note
+        ----
+        コンストラクタ内で疎通確認に失敗した場合は後続処理を行わない。
 
-        Args:
-            *args (tuple): タプルの可変長引数。
-            **kwargs (dict): 辞書の可変長引数。
+        Args
+        ----
+        *args (tuple): タプルの可変長引数。
+        **kwargs (dict): 辞書の可変長引数。
 
         '''
 
@@ -472,10 +460,8 @@ class CrawlingAndScrapingArticlesOfTech:
         try:
             # 疎通確認
             with urlopen('http://info.cern.ch/'):
-                # 疎通成功の場合は何もしない
                 pass
         except URLError as e:
-            # 接続エラー時はエラーメッセージを出力し処理終了
             self.root = tkinter.Tk()
             self.root.withdraw()
             self.root.iconbitmap('../common/icon/python_icon.ico')
@@ -485,38 +471,34 @@ class CrawlingAndScrapingArticlesOfTech:
                                     '■Checking the network cables, modem, and router\r\n' \
                                     '■Reconnecting to Wi-Fi')
 
-            # 通信処理時の例外制御
             self.__handling_url_exception(e)
             return
 
-        # 処理実行
         self.__main()
 
     def __main(self):
 
-        # DB接続を行う
         conn, cursor = connect_to_database()
 
         try:
             # hatenaへのクローリング処理を開始
             self.__crawl_hatena(conn, cursor)
         except sqlite3.Error as e:
-            # ロールバック
             conn.rollback()
             logger.error(e)
             logger.exception(e)
             logger.log(20, 'ロールバック処理を完了しました。')
         finally:
-            # 開放処理
             conn.close()
             logger.log(20, 'データベースの開放処理を完了しました。')
 
     def __crawl_hatena(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
         '''Hatenaに対してクローリング処理を行うメソッド
 
-        Args:
-            conn (sqlite3.Connection): DBとのコネクション。
-            cursor (sqlite3.Cursor): カーソル。
+        Args
+        ----
+        conn (sqlite3.Connection): DBとのコネクション。
+        cursor (sqlite3.Cursor): カーソル。
 
         '''
 
@@ -545,19 +527,15 @@ class CrawlingAndScrapingArticlesOfTech:
                             break
                         else:
                             if not self.__select_by_primary_key(cursor, list_article_infos[0]):
-                                # リストに削除予定日を追加
                                 list_article_infos.append(RESERVED_DEL_DATE)
                                 # リストを結合し辞書を生成
                                 list_article_infos = dict(zip(INSERT_COLUMNS_INFO_TECH_TBL, list_article_infos))
-                                # 登録処理
                                 self.__insert_new_article_infos(cursor, list_article_infos)
 
-                                # カウンタを初期化
                                 count_duplication = 0
                             else:
                                 # 重複している場合
                                 count_duplication += 1
-                    # コミット
                     conn.commit()
 
         logger.log(10, 'クローリング処理を完了しました。')
@@ -565,17 +543,24 @@ class CrawlingAndScrapingArticlesOfTech:
     def __scrape_info_of_hatena(self, html: str) -> list:
         '''HTMLソースに対してスクレイピング処理を行うメソッド
 
-        Args:
-            html (str): スクレイピング対象HTML。
+        Note
+        ----
+        返り値のデータ構造: Two-dimensional Arrays
+            [[URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG],
+            [[URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG],...]
 
-        Returns:
-            スクレイピングした全記事情報を含むリスト。
+        Args
+        ----
+        html (str): スクレイピング対象HTML。
+
+        Returns
+        -------
+        スクレイピングした全記事情報を含むリスト。
 
         '''
 
         logger.log(10, 'スクレイピング処理を開始しました。')
 
-        # 取得したhtmlが空の場合
         if not html:
             return []
 
@@ -587,11 +572,10 @@ class CrawlingAndScrapingArticlesOfTech:
             if list_new_article_infos:
                 # リストから探索処理の終了位置を取り出す
                 last_index_of_search = list_new_article_infos.pop()
-                # 記事情報をリストに格納
                 list_infos.append(list_new_article_infos)
 
                 if last_index_of_search != -1:
-                    # htmlの更新
+                    # 未取得の記事がある場合
                     html = html[last_index_of_search:]
                 else:
                     # ページ内の全情報を取得し終えた場合
@@ -607,12 +591,20 @@ class CrawlingAndScrapingArticlesOfTech:
     def __get_infos_of_article(self, html: str) -> list:
         '''HTMLソースに対してスクレイピング処理を行い記事情報を取得するメソッド
 
-        Args:
-            html (str): スクレイピング対象HTML。
+        Note
+        ----
+        返り値のデータ構造: Array
+            [URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG, LAST_INDEX]
 
-        Returns:
-            スクレイピングした記事情報を含むリスト。
-            URL部分を取得できなかった場合は空のリストを返す。
+        Args
+        ----
+        html (str): スクレイピング対象HTML。
+
+        Returns
+        ----
+        スクレイピングした記事情報を含むリスト。
+        URLを取得できなかった場合は、
+        URL取得以降の処理を行わず空のリストを返す。
 
         '''
 
@@ -626,9 +618,8 @@ class CrawlingAndScrapingArticlesOfTech:
         end_index_of_url = html.find('"', start_index_of_url+1)
         url = html[start_index_of_url+1:end_index_of_url]
 
-        # 短縮されていないURLを取得した場合
+        # 取得したURLが短縮化されていない場合
         if url and not 'ift.tt' in url:
-            # 取得したURLをリストに追加
             list_article_infos.append(url)
 
             # タイトル部の取得
@@ -661,14 +652,12 @@ class CrawlingAndScrapingArticlesOfTech:
             # 最初のアンカータグ開始インデックス
             start_index_of_anchor = html_of_tags.find('<a')
 
-            # 次のアンカータグがなくなるまでループ処理
             while start_index_of_anchor != -1:
                 # タグの取得
                 start_index_of_tag = html_of_tags.find('>', start_index_of_anchor+1)
                 end_index_of_tag = html_of_tags.find('</a', start_index_of_tag+1)
                 list_of_tags.append(html_of_tags[start_index_of_tag+1:end_index_of_tag])
 
-                # インデックスの更新
                 start_index_of_anchor = html_of_tags.find('<a', end_index_of_tag)
             else:
                 # タグの取得処理完了後処理
@@ -682,18 +671,26 @@ class CrawlingAndScrapingArticlesOfTech:
     def __get_html(self, url: str, params={}, headers=DEF_USER_AGENT) -> str:
         '''HTTP(s)通信を行いWebサイトからHTMLソースを取得するメソッド
 
-        Args:
-            url (str): 取得対象URL。
-            params (dict): パラメータ生成用辞書。初期値は空の辞書。
-            headers (dict): ヘッダ生成用辞書。初期値は定数"UserAgent定義"。
+        Note
+        ----
+        decode時に引数として'ignore'を渡しているのは、
+        APIからプレーンテキストを取得する際に文字コードを取得できないことによって、
+        プログラムが異常終了するのを防ぐため。
 
-        Returns:
-            対象URLにHTTP(s)通信を行い取得したHTMLソース
+        Args
+        ----
+        url (str): 取得対象URL。
+        params (dict): パラメータ生成用辞書。初期値は空の辞書。
+        headers (dict): ヘッダ生成用辞書。初期値は定数"UserAgent定義"。
+
+        Returns
+        -------
+        対象URLにHTTP(s)通信を行い取得したHTMLソース。
+        接続エラー時には空文字を返す。
 
         '''
 
         try:
-            # ページを開きリソースを取得
             with urlopen(Request(url='{}?{}'.format(url, urlencode(params)), headers=headers)) as source:
                 # リソースから文字コードを取得
                 charset = source.headers.get_content_charset(failobj='utf-8')
@@ -708,17 +705,22 @@ class CrawlingAndScrapingArticlesOfTech:
     def __edit_html(self, html: str) -> str:
         '''取得したHTMLをスクレイピング用に加工するメソッド
 
-        Args:
-            html (str): 未加工のHTMLソース。
+        Note
+        ----
+        Hatena以外から記事情報を取得するようにする際は、
+        当該メソッドを共通化する。
 
-        Returns:
-            スクレイピング用に加工したHTMLソース。
+        Args
+        ----
+        html (str): 未加工のHTMLソース。
+
+        Returns
+        -------
+        スクレイピング用に加工したHTMLソース。
 
         '''
 
-        # 開始インデックス
         start_idx = html.find('<li', html.find('class="entrysearch-articles"'))
-        # 終了インデックス
         end_idx = html.find('class="centerarticle-pager"', start_idx)
 
         return html[start_idx+1:end_idx]
@@ -726,8 +728,9 @@ class CrawlingAndScrapingArticlesOfTech:
     def __handling_url_exception(self, e):
         '''通信処理における例外を処理するメソッド
 
-        Args:
-            e (urllib.error.URLError): 通信処理において発生した例外情報
+        Args
+        ----
+        e : 通信処理において発生した例外情報。
 
         '''
 
@@ -743,15 +746,18 @@ class CrawlingAndScrapingArticlesOfTech:
     def __select_params_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
         '''主キーを用いてパラメータTBLから値を取得するクエリ
 
-        Note:
-            返り値はtuple型。
+        Note
+        ----
+        返り値はtuple型。
 
-        Args:
-            cursor (sqlite3.Cursor): カーソル。
-            primary_key (str): 主キー。
+        Args
+        ----
+        cursor (sqlite3.Cursor): カーソル。
+        primary_key (str): 主キー。
 
-        Returns:
-            主キーを用いて検索した結果。
+        Returns
+        -------
+        主キーを用いて検索した結果。
 
         '''
 
@@ -771,15 +777,18 @@ class CrawlingAndScrapingArticlesOfTech:
     def __select_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
         '''主キーを使用してDBから記事情報を取得するクエリ
 
-        Note:
-            返り値はtuple型。
+        Note
+        ----
+        返り値はtuple型。
 
-        Args:
-            cursor (sqlite3.Cursor): カーソル。
-            primary_key (str): 主キー。
+        Args
+        ----
+        cursor (sqlite3.Cursor): カーソル。
+        primary_key (str): 主キー。
 
-        Returns:
-            主キーを用いて検索した結果。
+        Returns
+        -------
+        主キーを用いて検索した結果。
 
         '''
 
@@ -806,9 +815,10 @@ class CrawlingAndScrapingArticlesOfTech:
     def __insert_new_article_infos(self, cursor: sqlite3.Cursor, article_infos: dict):
         '''取得した記事情報をDBへ挿入するクエリ
 
-        Args:
-            cursor (sqlite3.Cursor): カーソル。
-            article_infos (dict): カラムと挿入する記事情報の対応辞書。
+        Args
+        ----
+        cursor (sqlite3.Cursor): カーソル。
+        article_infos (dict): カラムと挿入する記事情報の対応辞書。
 
         '''
 
@@ -832,11 +842,13 @@ class CrawlingAndScrapingArticlesOfTech:
 def check_status_of_log_file(path_to_log: str):
     '''ログファイルの有効性を判定する関数
 
-    Note:
-        ログファイルが存在しない場合には生成処理を行う。
+    Note
+    ----
+    ログファイルが存在しない場合には生成処理を行う。
 
-    Args:
-        path_to_log (str): ログファイルへのパス。
+    Args
+    ----
+    path_to_log (str): ログファイルへのパス。
 
     '''
 
@@ -848,19 +860,20 @@ def check_status_of_log_file(path_to_log: str):
 def connect_to_database():
     '''データベースへ接続する関数
 
-    Note:
-        コネクションの開放処理は別途行うこと。
+    Note
+    ----
+    コネクションの開放処理は別途行うこと。
 
-    Returns:
-        コネクション、カーソルオブジェクトを格納したリスト。
+    Returns
+    -------
+    コネクション、カーソルオブジェクトを格納したリスト。
 
     '''
 
     # トレースバックの設定
     sqlite3.enable_callback_tracebacks(True)
-    # データベースへの接続
+
     conn = sqlite3.connect('../common/db/USER01.db')
-    # カーソル
     cursor = conn.cursor()
 
     return conn, cursor
@@ -868,15 +881,27 @@ def connect_to_database():
 def split_string(target: str, split_words: str) -> list:
     '''組み込みsplit関数の拡張関数
 
-    Note:
-        正規表現を使用しないため高速処理が可能。
+    Note
+    ----
+    正規表現を使用しないため高速処理が可能。
 
-    Args:
-        target (str): 対象文字列。
-        splitlist (str): 区切り文字。
+    Args
+    ----
+    target (str): 対象文字列。
+    splitlist (str): 区切り文字。
 
-    Returns:
-        区切り文字によって分割された文字列のリスト。
+    Returns
+    -------
+    区切り文字によって分割された文字列のリスト。
+    引数の型が正しくない場合はからのリストを返す。
+
+    Examples
+    --------
+    >>> split_string('test//sp"rit%st$ring', '/"%$')
+    >>> ['test', 'sp', 'rit', 'st', 'ring']
+    >>>
+    >>> ''.join(split_string('test//sp"rit%st$ring', '/"%$'))
+    >>> testspritstring
 
     '''
 
@@ -895,5 +920,4 @@ def split_string(target: str, split_words: str) -> list:
     return output
 
 if __name__ == '__main__':
-    # GUIを呼び出す
     SearchArticlesOfTech()
