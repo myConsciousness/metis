@@ -127,13 +127,13 @@ class SearchArticlesOfTech(tkinter.Tk):
         style.configure('Treeview', font=('Consolas', 10))
         style.configure('Treeview.Heading', font=('Consolas', 10, 'bold'))
 
-        # ブラウザで開くボタン
+
         open_button = ttk.Button(parent, text='Open', width=10, command=self.__open)
         open_button.place(width=150, relx=0.12, rely=0.86)
-        # 初期化ボタン
+
         flush_button = ttk.Button(parent, text='Flush', width=10, command=self.__flush)
         flush_button.place(width=150, relx=0.42, rely=0.86)
-        # 終了ボタン
+
         quit_button = ttk.Button(parent, text='Quit', width=10, command=self.__quit)
         quit_button.place(width=150, relx=0.72, rely=0.86)
 
@@ -158,6 +158,7 @@ class SearchArticlesOfTech(tkinter.Tk):
                         if i & 1:
                             # 偶数行の背景色を変更
                             self.tree.tag_configure(i, background='#CCFFFF')
+
                     self.tree.pack(fill='x', padx=20, pady=30)
                 else:
                     messagebox.showinfo('NO_RESULTS_FOUND',
@@ -168,7 +169,6 @@ class SearchArticlesOfTech(tkinter.Tk):
                 logger.error(e)
                 logger.exception(e)
             finally:
-                # 開放処理
                 conn.close()
                 logger.log(20, 'データベースの開放処理を完了しました。')
         else:
@@ -198,13 +198,13 @@ class SearchArticlesOfTech(tkinter.Tk):
         self.OutputTextLog = tkst.ScrolledText(frameTextLog, font=('Consolas', 10), height=35, width=130)
         self.OutputTextLog.pack()
 
-        # readボタン
+
         read_button = ttk.Button(parent, text='Read', width=10, command=self.__read_log)
         read_button.place(relx=0.25, rely=0.88)
-        # 一覧ボタン
+
         list_button = ttk.Button(parent, text='List', width=10, command=self.__read_log_list)
         list_button.place(relx=0.45, rely=0.88)
-        # 終了ボタン
+
         quit_button = ttk.Button(parent, text='Quit', width=10, command=self.__quit)
         quit_button.place(relx=0.65, rely=0.88)
 
@@ -213,11 +213,10 @@ class SearchArticlesOfTech(tkinter.Tk):
 
         menubar = Menu(self.root)
 
+        # ファイルメニュー
         file_menu = Menu(menubar, tearoff=0)
-        # パラメータ設定画面
         file_menu.add_command(label='Parameters')
         file_menu.add_separator()
-        # 終了コマンド
         file_menu.add_command(label='Exit', command=quit)
         menubar.add_cascade(label='File', menu=file_menu)
 
@@ -244,7 +243,6 @@ class SearchArticlesOfTech(tkinter.Tk):
         help_menu.add_command(label='About Software', command=self.__open_readme)
         help_menu.add_separator()
         help_menu.add_command(label='Licence', command=self.__open_licence)
-
         menubar.add_cascade(label='Help', menu=help_menu)
 
         self.root.config(menu=menubar)
@@ -336,7 +334,6 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __execute_crawling_hatena(self):
         '''hatenaへのクローリング処理を実行する'''
 
-        # クローリング処理を実行
         CrawlingAndScrapingArticlesOfTech()
 
     def __read_log(self):
@@ -474,9 +471,10 @@ class CrawlingAndScrapingArticlesOfTech:
             self.__handling_url_exception(e)
             return
 
-        self.__main()
+        self.__execute()
 
-    def __main(self):
+    def __execute(self):
+        '''クローリング処理を実行するメソッド'''
 
         conn, cursor = connect_to_database()
 
