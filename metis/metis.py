@@ -703,11 +703,6 @@ class CrawlingAndScrapingArticlesOfTech:
     def __edit_html(self, html: str) -> str:
         '''取得したHTMLをスクレイピング用に加工するメソッド
 
-        Note
-        ----
-        Hatena以外から記事情報を取得するようにする際は、
-        当該メソッドを共通化する。
-
         Args
         ----
         html (str): 未加工のHTMLソース。
@@ -860,11 +855,11 @@ def connect_to_database():
 
     Note
     ----
-    コネクションの開放処理は別途行うこと。
+    コネクションの開放処理は別途行う。
 
     Returns
     -------
-    コネクション、カーソルオブジェクトを格納したリスト。
+    コネクション、カーソルオブジェクト。
 
     '''
 
