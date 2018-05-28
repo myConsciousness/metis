@@ -14,10 +14,10 @@ import tkinter
 from tkinter import messagebox, Menu
 import tkinter.ttk as ttk
 from tkinter import N, S, W, E
+from progressbar import ProgressBar
 import webbrowser
 import pyperclip
 import tkinter.scrolledtext as tkst
-from tqdm import tqdm
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
@@ -29,7 +29,7 @@ fh = FileHandler(PATH_TO_LOG_FILE)
 logger.addHandler(fh)
 fh.setFormatter(Formatter('%(asctime)s:%(levelname)s:[%(lineno)d]%(name)s:%(message)s'))
 
-class SearchArticlesOfTech(tkinter.Tk):
+class Application(tkinter.Tk):
     '''GUIの出力処理を定義するクラス'''
 
     def __init__(self, *args, **kwargs):
@@ -127,7 +127,6 @@ class SearchArticlesOfTech(tkinter.Tk):
         style.configure('Treeview', font=('Consolas', 10))
         style.configure('Treeview.Heading', font=('Consolas', 10, 'bold'))
 
-
         open_button = ttk.Button(parent, text='Open', width=10, command=self.__open)
         open_button.place(width=150, relx=0.12, rely=0.86)
 
@@ -197,7 +196,6 @@ class SearchArticlesOfTech(tkinter.Tk):
         frameTextLog.pack()
         self.OutputTextLog = tkst.ScrolledText(frameTextLog, font=('Consolas', 10), height=35, width=130)
         self.OutputTextLog.pack()
-
 
         read_button = ttk.Button(parent, text='Read', width=10, command=self.__read_log)
         read_button.place(relx=0.25, rely=0.88)
@@ -334,7 +332,8 @@ class SearchArticlesOfTech(tkinter.Tk):
     def __execute_crawling_hatena(self):
         '''hatenaへのクローリング処理を実行する'''
 
-        CrawlingAndScrapingArticlesOfTech()
+        if messagebox.askyesno('UPDATE_ARTICLES', 'Are you sure you want to run?'):
+            CrawlingHatena()
 
     def __read_log(self):
         '''readボタン押下時の処理を定義'''
@@ -431,8 +430,8 @@ class SearchArticlesOfTech(tkinter.Tk):
 
         return cursor.fetchall()
 
-class CrawlingAndScrapingArticlesOfTech:
-    '''クローリングとスクレイピングの処理を定義するクラス'''
+class CrawlingHatena:
+    '''Hatenaへのクローリング処理を定義するクラス'''
 
     # UserAgent定義
     DEF_USER_AGENT = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0'}
@@ -509,7 +508,7 @@ class CrawlingAndScrapingArticlesOfTech:
 
         # DBから検索ワードの取得
         SEARCH_WORDS = split_string(''.join(list(self.__select_params_by_primary_key(cursor, 'SEARCH_WORDS_FOR_TECH_ARTICLES'))), ',')
-        for key_val in tqdm(SEARCH_WORDS):
+        for i, key_val in enumerate(SEARCH_WORDS):
             for query_page_val in range(1, 6):
                 # パラメータ生成用辞書
                 params = {'q' : key_val, 'page' : query_page_val, 'safe' : 'on', 'sort' : 'recent', 'users' : '1'}
@@ -913,4 +912,4 @@ def split_string(target: str, split_words: str) -> list:
     return output
 
 if __name__ == '__main__':
-    SearchArticlesOfTech()
+    Application()
