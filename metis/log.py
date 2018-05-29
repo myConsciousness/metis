@@ -9,9 +9,6 @@ from enum import Enum
 import inspect
 import os.path
 
-import sys
-sys.dont_write_bytecode = True
-
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
