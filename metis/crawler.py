@@ -4,9 +4,13 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 from urllib.parse import urlencode
 import html.parser as htmlparser
+import time
 from datetime import date, timedelta
 import sqlite3
+from tqdm import tqdm
 from log import LogLevel, Log
+from cowsay import Cowsay
+from common import *
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
@@ -63,6 +67,7 @@ class CrawlingHatena:
 
         try:
             conn, cursor = connect_to_database()
+
             # hatenaへのクローリング処理を開始
             self.__crawl_hatena(conn, cursor)
 
@@ -79,6 +84,7 @@ class CrawlingHatena:
             conn.close()
             self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                     self.log.location(), self.log.MSG_CLOSE_COMPLETED)
+            time.sleep(3)
 
     def __crawl_hatena(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
         '''Hatenaに対してクローリング処理を行うメソッド
@@ -98,12 +104,31 @@ class CrawlingHatena:
         # 削除予定日
         RESERVED_DEL_DATE = (date.today() + timedelta(21)).strftime('%Y%m%d')
 
+        cowsay = Cowsay()
+        quote = 'Dog goes woof\n' \
+                'Cat goes meow\n' \
+                'Bird goes tweet\n' \
+                'And mouse goes squeek\n' \
+                'Cow goes moo\n' \
+                'Duck goes quack\n' \
+                'And the solution will go to you'
+
+        print(cowsay.cowsay(quote))
+
         # DBから検索ワードの取得
-        SEARCH_WORDS = split_string(''.join(list(self.__select_params_by_primary_key(cursor, 'SEARCH_WORDS_FOR_TECH_ARTICLES'))), ',')
-        for i, key_val in enumerate(SEARCH_WORDS):
-            for query_page_val in range(1, 6):
+        SEARCH_WORDS = split(''.join(list(self.__select_params_by_primary_key(cursor, 'SEARCH_WORDS_FOR_TECH_ARTICLES'))), ',')
+        for i, word in enumerate(tqdm(SEARCH_WORDS, ncols=60, leave=False, ascii=True, desc='Main process')):
+            for page in tqdm(range(1, 6), ncols=60, leave=False, ascii=True, desc='Sub process'):
+
                 # パラメータ生成用辞書
-                params = {'q' : key_val, 'page' : query_page_val, 'safe' : 'on', 'sort' : 'recent', 'users' : '1'}
+                params = {
+                            'q' : word,
+                            'page' : page,
+                            'safe' : 'on',
+                            'sort' : 'recent',
+                            'users' : '1'
+                        }
+
                 # htmlを取得し抽出用に加工
                 html = self.__edit_html(self.__get_html('http://b.hatena.ne.jp/search/tag', params))
                 list_infos_of_hatena = self.__scrape_info_of_hatena(html)
@@ -126,6 +151,11 @@ class CrawlingHatena:
                                 # 重複している場合
                                 count_duplication += 1
                     conn.commit()
+
+            count_changes = conn.total_changes
+            print(cowsay.cowsay('Search word is {}.\n{} {} were addded!' \
+                                    .format(word, count_changes, 'records' if count_changes > 1 else 'record')))
+        print(cowsay.cowsay('The crawling has been completed!'))
 
         self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                 self.log.location(), self.log.MSG_CRAWLING_COMPLETED)
@@ -441,7 +471,7 @@ def connect_to_database():
 
     return conn, cursor
 
-def split_string(target: str, split_words: str) -> list:
+def split(target: str, split_words: str) -> list:
     '''組み込みsplit関数の拡張関数
 
     Note
@@ -460,10 +490,10 @@ def split_string(target: str, split_words: str) -> list:
 
     Examples
     --------
-    >>> split_string('test//sp"rit%st$ring', '/"%$')
+    >>> split('test//sp"rit%st$ring', '/"%$')
     >>> ['test', 'sp', 'rit', 'st', 'ring']
     >>>
-    >>> ''.join(split_string('test//sp"rit%st$ring', '/"%$'))
+    >>> ''.join(split('test//sp"rit%st$ring', '/"%$'))
     >>> testspritstring
 
     '''
@@ -481,3 +511,6 @@ def split_string(target: str, split_words: str) -> list:
             else:
                 output[-1] += char
     return output
+
+if __name__ == '__main__':
+    CrawlingHatena()

@@ -6,6 +6,7 @@ from logging import StreamHandler
 from logging import Formatter
 from datetime import datetime
 from enum import Enum
+import configparser
 import inspect
 import os.path
 
@@ -55,8 +56,11 @@ class Log:
     def __init__(self, child=False):
         '''コンストラクタ'''
 
-        # ログファイルへのパス
-        PATH_TO_LOG_FILE = '../log/' + datetime.today().strftime('%Y%m%d') + '.log'
+        config = configparser.ConfigParser()
+        config.read('../env/config.ini')
+        self.DIR_LOG = config['path']['dir_log']
+
+        PATH_TO_LOG_FILE = self.DIR_LOG + datetime.today().strftime('%Y%m%d') + '.log'
         # ログファイルの有効性チェック
         self.__check_status_of_log_file(PATH_TO_LOG_FILE)
 
@@ -65,7 +69,7 @@ class Log:
         else:
             self.logger = getLogger(__name__).getChild(__name__)
 
-        self.logger.setLevel(10)
+        self.logger.setLevel(int(config['general']['log_level']))
         fh = FileHandler(PATH_TO_LOG_FILE)
         self.logger.addHandler(fh)
         fh.setFormatter(Formatter('%(asctime)s:%(levelname)s:%(message)s'))
@@ -121,7 +125,7 @@ class Log:
 
         Note
         ----
-        ログファイルが存在しない場合には生成処理を行う。
+        格納ディレクトリとログファイルが存在しない場合には生成処理を行う。
 
         Args
         ----
@@ -129,7 +133,14 @@ class Log:
 
         '''
 
-        if not os.path.exists(path_to_log):
+        if not os.path.exists(self.DIR_LOG):
+            # ディレクトリの作成
+            os.mkdir(self.DIR_LOG)
             # logファイルの作成
             with open(path_to_log, 'w'):
                 pass
+        else:
+            if not os.path.exists(path_to_log):
+                # logファイルの作成
+                with open(path_to_log, 'w'):
+                    pass

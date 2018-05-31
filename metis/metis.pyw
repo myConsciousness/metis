@@ -11,7 +11,8 @@ import tkinter.ttk as ttk
 from tkinter import N, S, W, E
 import tkinter.scrolledtext as tkst
 from log import LogLevel, Log
-from crawler import CrawlingHatena
+import subprocess
+from common import *
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
@@ -328,7 +329,7 @@ class Application(tkinter.Tk):
         '''hatenaへのクローリング処理を実行する'''
 
         if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
-            CrawlingHatena()
+            subprocess.Popen('python crawler.py')
 
     def __read_log(self):
         '''readボタン押下時の処理を定義'''
@@ -341,10 +342,10 @@ class Application(tkinter.Tk):
         if '.log' in input_date:
             # ファイル名と拡張子を分割
             root, ext = os.path.splitext(input_date)
-            date = ''.join(split_string(root, '-/., '))
+            date = ''.join(split(root, '-/., '))
             path_name = '../log/' + date + '.log'
         else:
-            date = ''.join(split_string(input_date, '-/., '))
+            date = ''.join(split(input_date, '-/., '))
             path_name = '../log/' + date + '.log'
 
         if os.path.exists(path_name):
@@ -428,68 +429,6 @@ class Application(tkinter.Tk):
                         ''',(search_word,))
 
         return cursor.fetchall()
-
-def connect_to_database():
-    '''データベースへ接続する関数
-
-    Note
-    ----
-    コネクションの開放処理は別途行う。
-
-    Returns
-    -------
-    コネクション、カーソルオブジェクト。
-
-    '''
-
-    # トレースバックの設定
-    sqlite3.enable_callback_tracebacks(True)
-
-    conn = sqlite3.connect('../common/db/USER01.db')
-    cursor = conn.cursor()
-
-    return conn, cursor
-
-def split_string(target: str, split_words: str) -> list:
-    '''組み込みsplit関数の拡張関数
-
-    Note
-    ----
-    正規表現を使用しないため高速処理が可能。
-
-    Args
-    ----
-    target (str): 対象文字列。
-    splitlist (str): 区切り文字。
-
-    Returns
-    -------
-    区切り文字によって分割された文字列のリスト。
-    引数の型が正しくない場合はからのリストを返す。
-
-    Examples
-    --------
-    >>> split_string('test//sp"rit%st$ring', '/"%$')
-    >>> ['test', 'sp', 'rit', 'st', 'ring']
-    >>>
-    >>> ''.join(split_string('test//sp"rit%st$ring', '/"%$'))
-    >>> testspritstring
-
-    '''
-
-    output = []
-    atsplit = True
-
-    for char in target:
-        if char in split_words:
-            atsplit = True
-        else:
-            if atsplit:
-                output.append(char)
-                atsplit = False
-            else:
-                output[-1] += char
-    return output
 
 if __name__ == '__main__':
     Application()
