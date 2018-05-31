@@ -14,7 +14,7 @@ __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
 class LogLevel(Enum):
-    '''enum型としてログレベルを定義'''
+    '''enum型としてログレベルを定義。'''
 
     NOTEST = 0
     DEBUG = 10
@@ -24,7 +24,7 @@ class LogLevel(Enum):
     CRITICAL = 50
 
 class Log:
-    '''ログ出力を行うクラス'''
+    '''ログ出力を行うクラス。'''
 
     # プロセス開始
     MSG_PROCESS_STARTED = '[{}]:【START】The process has been started in {} method, {} class.'
@@ -54,7 +54,7 @@ class Log:
     MSG_NO_RESPONSE = '[{}]:【CRITICAL】The server couldn\'t fulfill the request. It has been occurred in {} method, {} class.'
 
     def __init__(self, child=False):
-        '''コンストラクタ'''
+        '''コンストラクタ。'''
 
         config = configparser.ConfigParser()
         config.read('../env/config.ini')
@@ -75,62 +75,40 @@ class Log:
         fh.setFormatter(Formatter('%(asctime)s:%(levelname)s:%(message)s'))
 
     def normal(self, level: int, class_name: str, location: list, message: str):
-        '''例外情報以外のログ出力を行うメソッド
+        '''例外情報以外のログ出力を行うメソッド。
+        ログレベルと出力するメッセージに関しては、当該モジュールで定義された値を用いること。
 
-        Note
-        ----
-        ログレベルと出力するメッセージに関しては、
-        当該モジュールで定義された値を用いること。
-
-        Args
-        ----
-        level (int): ログレベル。
-        class_name (str): クラス名。
-        location (list): メソッド名/関数名と行番号が格納されたリスト。
-        message (str): 出力するログメッセージ。
-
+        :param int level: ログレベル。
+        :param str class_name: クラス名。
+        :param list location: メソッド名/関数名と行番号が格納されたリスト。
+        :param str message: 出力するログメッセージ。
         '''
 
         self.logger.log(level, message.format(location[1], location[0], class_name))
 
     def error(self, error_info):
-        '''例外情報のログ出力を行うメソッド
+        '''例外情報のログ出力を行うメソッド。
 
-        Args
-        ----
-        error_info: プロセス実行中に発生した例外情報。
-
+        :param Exception error_info: プロセス実行中に発生した例外情報。
         '''
 
         self.logger.exception(e)
 
     def location(self) -> list:
-        '''実行中のメソッド名/関数名と行番号を返すメソッド
+        '''実行中のメソッド名/関数名と行番号を返すメソッド。
 
-        Note
-        ----
-        返り値のデータ構造 : [メソッド名/関数名, 行番号]
-
-        Returns
-        -------
-        実行中のメソッド名/関数名と行番号を格納したリスト。
-
+        :rtype: list
+        :return: 実行中のメソッド名/関数名と行番号を格納したリスト。
         '''
 
         frame = inspect.currentframe().f_back
         return [frame.f_code.co_name, frame.f_lineno]
 
     def __check_status_of_log_file(self, path_to_log: str):
-        '''ログファイルの有効性を判定する関数
-
-        Note
-        ----
+        '''ログファイルの有効性を判定する関数。
         格納ディレクトリとログファイルが存在しない場合には生成処理を行う。
 
-        Args
-        ----
-        path_to_log (str): ログファイルへのパス。
-
+        :param str path_to_log: ログファイルへのパス。
         '''
 
         if not os.path.exists(self.DIR_LOG):

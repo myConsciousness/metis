@@ -1,5 +1,25 @@
 # -*- coding: utf-8 -*-
 
+'''
+
+A Web crawler, sometimes called a spider,
+is an Internet bot that systematically browses the World Wide Web,
+typically for the purpose of Web indexing (web spidering).
+
+Web search engines and some other sites use Web crawling or spidering software
+to update their web content or indices of others sites' web content.
+Web crawlers copy pages for processing by a search engine
+which indexes the downloaded pages so users can search more efficiently.
+
+Web scraping, web harvesting, or web data extraction is data scraping used for extracting data from websites.
+Web scraping software may access the World Wide Web directly using the Hypertext Transfer Protocol, or through a web browser.
+While web scraping can be done manually by a software user,
+the term typically refers to automated processes implemented using a bot or web crawler.
+It is a form of copying, in which specific data is gathered and copied from the web,
+typically into a central local database or spreadsheet, for later retrieval or analysis.
+
+'''
+
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 from urllib.parse import urlencode
@@ -11,28 +31,22 @@ from tqdm import tqdm
 from log import LogLevel, Log
 from cowsay import Cowsay
 from common import *
+from sql import *
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
 class CrawlingHatena:
-    '''Hatenaへのクローリング処理を定義するクラス'''
+    '''Hatenaへのクローリング処理を定義するクラス。'''
 
     # UserAgent定義
     DEF_USER_AGENT = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0'}
 
     def __init__(self, *args, **kwargs):
-        '''コンストラクタ
+        '''コンストラクタ。コンストラクタ内で疎通確認に失敗した場合は後続処理を行わない。
 
-        Note
-        ----
-        コンストラクタ内で疎通確認に失敗した場合は後続処理を行わない。
-
-        Args
-        ----
-        *args (tuple): タプルの可変長引数。
-        **kwargs (dict): 辞書の可変長引数。
-
+        :param tuple args: タプルの可変長引数。
+        :param dict kwargs: 辞書の可変長引数。
         '''
 
         # ログ出力のためインスタンス生成
@@ -57,19 +71,19 @@ class CrawlingHatena:
                                     '■Checking the network cables, modem, and router\r\n' \
                                     '■Reconnecting to Wi-Fi')
 
-            self.__handling_url_exception(e)
+            self.handling_url_exception(e)
             return
 
-        self.__execute()
+        self.execute()
 
-    def __execute(self):
-        '''クローリング処理を実行するメソッド'''
+    def execute(self):
+        '''クローリング処理を実行するメソッド。'''
 
         try:
             conn, cursor = connect_to_database()
 
             # hatenaへのクローリング処理を開始
-            self.__crawl_hatena(conn, cursor)
+            self.crawl_hatena(conn, cursor)
 
             self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                     self.log.location(), self.log.MSG_PROCESS_COMPLETED)
@@ -86,14 +100,11 @@ class CrawlingHatena:
                                     self.log.location(), self.log.MSG_CLOSE_COMPLETED)
             time.sleep(3)
 
-    def __crawl_hatena(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
-        '''Hatenaに対してクローリング処理を行うメソッド
+    def crawl_hatena(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
+        '''Hatenaに対してクローリング処理を行うメソッド。
 
-        Args
-        ----
-        conn (sqlite3.Connection): DBとのコネクション。
-        cursor (sqlite3.Cursor): カーソル。
-
+        :param sqlite3.Connection conn: DBとのコネクション。
+        :param sqlite3.Cursor cursor: カーソル。
         '''
 
         self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
@@ -105,18 +116,18 @@ class CrawlingHatena:
         RESERVED_DEL_DATE = (date.today() + timedelta(21)).strftime('%Y%m%d')
 
         cowsay = Cowsay()
-        quote = 'Dog goes woof\n' \
-                'Cat goes meow\n' \
-                'Bird goes tweet\n' \
-                'And mouse goes squeek\n' \
-                'Cow goes moo\n' \
-                'Duck goes quack\n' \
-                'And the solution will go to you'
+        cowquote =  'Dog goes woof\n' \
+                    'Cat goes meow\n' \
+                    'Bird goes tweet\n' \
+                    'And mouse goes squeek\n' \
+                    'Cow goes moo\n' \
+                    'Duck goes quack\n' \
+                    'And the solution will go to you'
 
-        print(cowsay.cowsay(quote))
+        print(cowsay.cowsay(cowquote))
 
         # DBから検索ワードの取得
-        SEARCH_WORDS = split(''.join(list(self.__select_params_by_primary_key(cursor, 'SEARCH_WORDS_FOR_TECH_ARTICLES'))), ',')
+        SEARCH_WORDS = split(''.join(list(select_params_by_primary_key(cursor, 'SEARCH_WORDS_FOR_TECH_ARTICLES'))), ',')
         for i, word in enumerate(tqdm(SEARCH_WORDS, ncols=60, leave=False, ascii=True, desc='Main process')):
             for page in tqdm(range(1, 6), ncols=60, leave=False, ascii=True, desc='Sub process'):
 
@@ -130,8 +141,8 @@ class CrawlingHatena:
                         }
 
                 # htmlを取得し抽出用に加工
-                html = self.__edit_html(self.__get_html('http://b.hatena.ne.jp/search/tag', params))
-                list_infos_of_hatena = self.__scrape_info_of_hatena(html)
+                html = self.edit_html(self.get_html('http://b.hatena.ne.jp/search/tag', params))
+                list_infos_of_hatena = self.scrape_info_of_hatena(html)
 
                 if list_infos_of_hatena:
                     count_duplication = 0
@@ -140,11 +151,11 @@ class CrawlingHatena:
                             # 10回以上重複した場合は処理終了
                             break
                         else:
-                            if not self.__select_by_primary_key(cursor, list_article_infos[0]):
+                            if not select_by_primary_key(cursor, list_article_infos[0]):
                                 list_article_infos.append(RESERVED_DEL_DATE)
                                 # リストを結合し辞書を生成
                                 list_article_infos = dict(zip(INSERT_COLUMNS_INFO_TECH_TBL, list_article_infos))
-                                self.__insert_new_article_infos(cursor, list_article_infos)
+                                insert_new_article_infos(cursor, list_article_infos)
 
                                 count_duplication = 0
                             else:
@@ -160,23 +171,15 @@ class CrawlingHatena:
         self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                 self.log.location(), self.log.MSG_CRAWLING_COMPLETED)
 
-    def __scrape_info_of_hatena(self, html: str) -> list:
-        '''HTMLソースに対してスクレイピング処理を行うメソッド
+    def scrape_info_of_hatena(self, html: str) -> list:
+        '''HTMLソースに対してスクレイピング処理を行うメソッド。
 
-        Note
-        ----
-        返り値のデータ構造: Two-dimensional Arrays
-            [[URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG],
-            [[URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG],...]
+        :param str html: スクレイピング対象HTML。
+        :rtype: list
+        :return: スクレイピングした全記事情報を含むリスト。
 
-        Args
-        ----
-        html (str): スクレイピング対象HTML。
-
-        Returns
-        -------
-        スクレイピングした全記事情報を含むリスト。
-
+        >>> scrape_info_of_hatena(html)
+        >>> [[URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG], [URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG],...]
         '''
 
         self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
@@ -189,7 +192,7 @@ class CrawlingHatena:
         list_infos = []
         while True:
             # 記事に関する情報を抽出
-            list_new_article_infos = self.__get_infos_of_article(html)
+            list_new_article_infos = self.get_infos_of_article(html)
             if list_new_article_infos:
                 # リストから探索処理の終了位置を取り出す
                 last_index_of_search = list_new_article_infos.pop()
@@ -210,24 +213,16 @@ class CrawlingHatena:
 
         return list_infos
 
-    def __get_infos_of_article(self, html: str) -> list:
-        '''HTMLソースに対してスクレイピング処理を行い記事情報を取得するメソッド
+    def get_infos_of_article(self, html: str) -> list:
+        '''HTMLソースに対してスクレイピング処理を行い記事情報を取得するメソッド。
+        URLを取得できなかった場合は、URL取得以降の処理を行わず空のリストを返す。
 
-        Note
-        ----
-        返り値のデータ構造: Array
-            [URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG, LAST_INDEX]
+        :param str html: スクレイピング対象HTML。
+        :rtype: list
+        :return: スクレイピングした記事情報を含むリスト。
 
-        Args
-        ----
-        html (str): スクレイピング対象HTML。
-
-        Returns
-        ----
-        スクレイピングした記事情報を含むリスト。
-        URLを取得できなかった場合は、
-        URL取得以降の処理を行わず空のリストを返す。
-
+        >>> get_infos_of_article(html)
+        >>> [URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG, LAST_INDEX]
         '''
 
         # 記事情報格納用リスト
@@ -260,7 +255,7 @@ class CrawlingHatena:
 
             # APIからブックマーク数の取得
             params = {'url' : url}
-            count_bookmark = self.__get_html(url='http://api.b.st-hatena.com/entry.count', params=params)
+            count_bookmark = self.get_html(url='http://api.b.st-hatena.com/entry.count', params=params)
             list_article_infos.append(count_bookmark if count_bookmark else '0')
 
             # 後続ループ処理のためタグ部分のみを抽出
@@ -290,26 +285,18 @@ class CrawlingHatena:
 
         return list_article_infos
 
-    def __get_html(self, url: str, params={}, headers=DEF_USER_AGENT) -> str:
-        '''HTTP(s)通信を行いWebサイトからHTMLソースを取得するメソッド
-
-        Note
-        ----
+    def get_html(self, url: str, params={}, headers=DEF_USER_AGENT) -> str:
+        '''HTTP(s)通信を行いWebサイトからHTMLソースを取得するメソッド。
         decode時に引数として'ignore'を渡しているのは、
         APIからプレーンテキストを取得する際に文字コードを取得できないことによって、
         プログラムが異常終了するのを防ぐため。
-
-        Args
-        ----
-        url (str): 取得対象URL。
-        params (dict): パラメータ生成用辞書。初期値は空の辞書。
-        headers (dict): ヘッダ生成用辞書。初期値は定数"UserAgent定義"。
-
-        Returns
-        -------
-        対象URLにHTTP(s)通信を行い取得したHTMLソース。
         接続エラー時には空文字を返す。
 
+        :param str url: 取得対象URL。
+        :param dict params: パラメータ生成用辞書。初期値は空の辞書。
+        :param dict headers: ヘッダ生成用辞書。初期値は定数"UserAgent定義"。
+        :rtype: str
+        :return: 対象URLにHTTP(s)通信を行い取得したHTMLソース。
         '''
 
         try:
@@ -321,20 +308,15 @@ class CrawlingHatena:
             return html
         except URLError as e:
             # 接続エラー
-            self.__handling_url_exception(e, method_name)
+            self.handling_url_exception(e, method_name)
             return ''
 
-    def __edit_html(self, html: str) -> str:
-        '''取得したHTMLをスクレイピング用に加工するメソッド
+    def edit_html(self, html: str) -> str:
+        '''取得したHTMLをスクレイピング用に加工するメソッド。
 
-        Args
-        ----
-        html (str): 未加工のHTMLソース。
-
-        Returns
-        -------
-        スクレイピング用に加工したHTMLソース。
-
+        :param str html: 取得対象URL。
+        :rtype: str
+        :return: スクレイピング用に加工したHTMLソース。
         '''
 
         start_idx = html.find('<li', html.find('class="entrysearch-articles"'))
@@ -342,13 +324,11 @@ class CrawlingHatena:
 
         return html[start_idx+1:end_idx]
 
-    def __handling_url_exception(self, e, method_name: str):
-        '''通信処理における例外を処理するメソッド
+    def handling_url_exception(self, e, method_name: str):
+        '''通信処理における例外を処理するメソッド。
 
-        Args
-        ----
-        e : 通信処理において発生した例外情報。
-
+        :param urllib.error.URLError e: 通信処理において発生した例外情報。
+        :param str method_name: メソッド名。
         '''
 
         if hasattr(e, 'reason'):
@@ -359,96 +339,6 @@ class CrawlingHatena:
             self.log.normal(LogLevel.CRITICAL.value, self.CLASS_NAME, \
                                     self.log.location(), self.log.MSG_NO_RESPONSE)
             logger.error(e.code)
-
-    def __select_params_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
-        '''主キーを用いてパラメータTBLから値を取得するクエリ
-
-        Note
-        ----
-        返り値はtuple型。
-
-        Args
-        ----
-        cursor (sqlite3.Cursor): カーソル。
-        primary_key (str): 主キー。
-
-        Returns
-        -------
-        主キーを用いて検索した結果。
-
-        '''
-
-        cursor.execute('''
-                        SELECT
-                            VALUE
-                        FROM
-                            MST_PARAMETER
-                        WHERE
-                            PARAM_NAME = ?
-                        ''', (primary_key,))
-
-        return cursor.fetchone()
-
-    def __select_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
-        '''主キーを使用してDBから記事情報を取得するクエリ
-
-        Note
-        ----
-        返り値はtuple型。
-
-        Args
-        ----
-        cursor (sqlite3.Cursor): カーソル。
-        primary_key (str): 主キー。
-
-        Returns
-        -------
-        主キーを用いて検索した結果。
-
-        '''
-
-        cursor.execute('''
-                        SELECT
-                            URL,
-                            TITLE,
-                            PUBLISHED_DATE,
-                            BOOKMARKS,
-                            TAG,
-                            REGISTER_DATE,
-                            UPDATED_DATE,
-                            RESERVED_DEL_DATE
-                        FROM
-                            INFO_TECH
-                        WHERE
-                            URL = ?
-                        ''', (primary_key,))
-
-        return cursor.fetchone()
-
-    def __insert_new_article_infos(self, cursor: sqlite3.Cursor, article_infos: dict):
-        '''取得した記事情報をDBへ挿入するクエリ
-
-        Args
-        ----
-        cursor (sqlite3.Cursor): カーソル。
-        article_infos (dict): カラムと挿入する記事情報の対応辞書。
-
-        '''
-
-        cursor.execute('''
-                        INSERT INTO
-                            INFO_TECH
-                        VALUES (
-                            :URL,
-                            :TITLE,
-                            :PUBLISHED_DATE,
-                            :BOOKMARKS,
-                            :TAG,
-                            datetime('now', 'localtime'),
-                            datetime('now', 'localtime'),
-                            :RESERVED_DEL_DATE
-                        )
-                        ''',(article_infos))
 
 if __name__ == '__main__':
     CrawlingHatena()

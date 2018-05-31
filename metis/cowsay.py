@@ -1,21 +1,11 @@
 # -*- coding: utf-8 -*-
 
 '''
+
 The original Cowsays are written in the Perl programming language,
 and as such are easily adaptable to system tasks in Unix.
 They can perform functions such as telling users their home directories are full,
 that they have new mail, etc.
-
-Question) What does the cow say?
-
- _________________________________
-< Do. Or do not. There is no try. >
- ---------------------------------
-    \   ^__^
-     \  (oo)\_______
-        (__)\       )\/\
-            ||----w |
-            ||     ||
 
 '''
 
@@ -25,10 +15,10 @@ __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
 class Cowsay:
-    ''' Pythonを用いたCowsaysの実装クラス '''
+    ''' PythonでのCowsays実装クラス。 '''
 
     def __init__(self):
-        ''' コンストラクタ '''
+        ''' コンストラクタ。 '''
 
         self.COW = r'''
     \   ^__^
@@ -41,16 +31,21 @@ class Cowsay:
         self.MAX_LENGTH = 39
 
     def cowsay(self, text: str) -> str:
-        '''牛のアスキー画像とテキストを融合させるメソッド
+        '''牛のアスキー画像と引数として渡されたテキストを融合させるメソッド。
 
-        Args
-        ----
-        text (str): 牛に喋らせる文章。
+        :param str text: 牛に喋らせる文章。
+        :rtype: str
+        :return: アスキー画像。
 
-        Returns
-        -------
-        アスキー画像。
-
+        >>> cowsay('Helle World!')
+        >>>  ______________
+        >>> < Hello World! >
+        >>>  --------------
+        >>>     \   ^__^
+        >>>      \  (oo)\_______
+        >>>         (__)\       )\/\
+        >>>             ||----w |
+        >>>             ||     ||
         '''
 
         lines = []
@@ -73,16 +68,11 @@ class Cowsay:
         return '\n'.join(cowquote)
 
     def cut(self, phrase: str) -> list:
-        '''文章を仕分けるメソッド
+        '''文章を仕分けるメソッド。
 
-        Args
-        ----
-        phrase (str): 仕分け対象のフレーズ。
-
-        Returns
-        -------
-        仕分けされたフレーズを格納したリスト。
-
+        :param str phrase: 仕分け対象のフレーズ。
+        :trype: list
+        :return: 仕分けされたフレーズを格納したリスト。
         '''
 
         words = re.split(' +', phrase)
@@ -110,19 +100,14 @@ class Cowsay:
         return lines
 
     def format_line(self, line: str, length: int, first: str, last: str) -> str:
-        '''文章を覆う枠を作成するメソッド
+        '''文章を覆う枠を作成するメソッド。
 
-        Args
-        ----
-        line (str): 文章。
-        length (int): 文章中の最大文字列長。
-        first (str): 開始枠。
-        last (str): 終了枠。
-
-        Returns
-        -------
-        枠に覆われた文章。
-
+        :param str line: 文章。
+        :param int length: 文章中の最大文字列長。
+        :param str first: 開始枠。
+        :param str last: 終了枠。
+        :rtype: str
+        :return: 枠に覆われた文章。
         '''
 
         return ''.join((first, line, ' ' * (length - len(line)), last))

@@ -10,16 +10,13 @@ config = configparser.ConfigParser()
 config.read('../env/config.ini')
 
 def connect_to_database():
-    '''データベースへ接続する関数
+    '''データベースへ接続する関数。
+    コネクションの開放処理は呼び出し元で別途行う。
 
-    Note
-    ----
-    コネクションの開放処理は別途行う。
-
-    Returns
-    -------
-    コネクション、カーソルオブジェクト。
-
+    :rtype: sqlite3.Cursor
+    :rtype: sqlite3.Connection
+    :return: コネクション。
+    :return: カーソルオブジェクト。
     '''
 
     # トレースバックの設定
@@ -31,24 +28,14 @@ def connect_to_database():
     return conn, cursor
 
 def split(target: str, split_words: str) -> list:
-    '''組み込みsplit関数の拡張関数
-
-    Note
-    ----
+    '''組み込みsplit関数の拡張関数。
     正規表現を使用しないため高速処理が可能。
 
-    Args
-    ----
-    target (str): 対象文字列。
-    splitlist (str): 区切り文字。
+    :param str target: 対象文字列。
+    :param str splitlist: 区切り文字。
+    :rtype: list
+    :return: 区切り文字によって分割された文字列のリスト。
 
-    Returns
-    -------
-    区切り文字によって分割された文字列のリスト。
-    引数の型が正しくない場合はからのリストを返す。
-
-    Examples
-    --------
     >>> split('test//sp"rit%st$ring', '/"%$')
     >>> ['test', 'sp', 'rit', 'st', 'ring']
     >>>
