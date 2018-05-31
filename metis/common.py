@@ -28,8 +28,6 @@ def connect_to_database():
     conn = sqlite3.connect(config['path']['database'])
     cursor = conn.cursor()
 
-    print(type(conn))
-
     return conn, cursor
 
 def split(target: str, split_words: str) -> list:
