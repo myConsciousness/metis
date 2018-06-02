@@ -206,7 +206,7 @@ class Application(Command):
         self.root.bind('<Escape>', lambda x: self.quit())
 
         # メニューバーの生成
-        self.create_menubar()
+        self.__create_menubar()
 
         notebook = ttk.Notebook(self.root, height=700, width=999)
         # top画面用のフレーム
@@ -220,9 +220,9 @@ class Application(Command):
         notebook.add(frameShowLog, text='Log')
 
         # TOP画面の作成
-        self.create_top_gui(frameUpdateArticles)
+        self.__create_top_gui(frameUpdateArticles)
         # ログ出力画面の作成
-        self.create_log_gui(frameShowLog)
+        self.__create_log_gui(frameShowLog)
 
         notebook.grid(row=0, column=0, sticky=N+S+W+E)
 
@@ -234,7 +234,7 @@ class Application(Command):
 
         self.root.mainloop()
 
-    def create_top_gui(self, parent: tkinter.Frame):
+    def __create_top_gui(self, parent: tkinter.Frame):
         '''TOP画面の出力を定義するメソッド。
 
         :param tkinter.Frame parent: 画面の親フレーム。
@@ -246,11 +246,11 @@ class Application(Command):
         lblSearchTerms.pack()
         self.btnSearchTerms = ttk.Entry(parent, justify='center', width=40)
         # リターンキー押下で検索を開始するように設定
-        self.btnSearchTerms.bind('<Return>', lambda x: self.refresh_tree_view())
+        self.btnSearchTerms.bind('<Return>', lambda x: self.__refresh_tree_view())
         self.btnSearchTerms.pack()
 
         # 検索ボタン
-        search_button = ttk.Button(parent, text='Search', width=10, command=self.refresh_tree_view)
+        search_button = ttk.Button(parent, text='Search', width=10, command=self.__refresh_tree_view)
         search_button.place(relx=0.63, rely=0.058)
 
         # ツリービューの作成
@@ -289,7 +289,7 @@ class Application(Command):
         quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit)
         quit_button.place(width=150, relx=0.72, rely=0.86)
 
-    def refresh_tree_view(self):
+    def __refresh_tree_view(self):
         '''取得した記事情報からツリービューを生成するメソッド。'''
 
         search_word = self.btnSearchTerms.get()
@@ -329,7 +329,7 @@ class Application(Command):
             messagebox.showerror('ERR_EMPTY_REQUESTED', \
                                     'This field must not be empty.')
 
-    def create_log_gui(self, parent: tkinter.Frame):
+    def __create_log_gui(self, parent: tkinter.Frame):
         '''Log検索画面の出力を定義するメソッド。
 
         :param tkinter.Frame parent: 画面の親フレーム。
@@ -358,7 +358,7 @@ class Application(Command):
         quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit)
         quit_button.place(relx=0.65, rely=0.88)
 
-    def create_menubar(self):
+    def __create_menubar(self):
         '''メニューバーの出力を定義するメソッド。'''
 
         menubar = Menu(self.root)

@@ -60,7 +60,7 @@ class CrawlingHatena:
         self.CLASS_NAME = self.__class__.__name__
 
         # インターネットとの疎通確認を行う
-        self.check_internet_connection()
+        self.__check_internet_connection()
 
         # MST_PARAMETER.TBLのDAOクラス
         self.mst_parameter_dao = MstParameterDao()
@@ -72,7 +72,6 @@ class CrawlingHatena:
         self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                 self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
 
-
     def execute(self):
         '''クローリング処理を実行するメソッド。'''
 
@@ -80,19 +79,19 @@ class CrawlingHatena:
             conn, cursor = connect_to_database()
 
             # 処理開始時においてワークテーブルにレコードが残っている場合は、
-            # 前回処理が異常終了したのみなしバックアップ情報の移行処理を行う
+            # 前回処理が異常終了したとみなしバックアップ情報の移行処理を行う
             count_records = self.work_article_info_hatena_dao.count_records(cursor)[0]
             if count_records > 0:
                 print('Detected an abnormal termination last time a program was run.')
                 print('Start the backup operation.............')
 
                 # ワークテーブルからバックアップ情報を移行させる
-                self.transfer_article_info_from_work(conn, cursor)
+                self.__transfer_article_info_from_work(conn, cursor)
 
                 print('{} {} were added!'.format(count_records, 'records' if count_records else 'record'))
 
             # hatenaへのクローリング処理を開始
-            self.crawl_hatena(conn, cursor)
+            self.__crawl_hatena(conn, cursor)
 
             self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                     self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
@@ -109,7 +108,7 @@ class CrawlingHatena:
                                     self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
             time.sleep(3)
 
-    def crawl_hatena(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
+    def __crawl_hatena(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
         '''Hatenaに対してクローリング処理を行うメソッド。
 
         :param sqlite3.Connection conn: DBとのコネクション。
@@ -152,17 +151,17 @@ class CrawlingHatena:
                         }
 
                 # htmlを取得し抽出用に加工
-                html = self.get_html('http://b.hatena.ne.jp/search/tag', params)
+                html = self.__get_html('http://b.hatena.ne.jp/search/tag', params)
                 # 取得したhtmlをスクレイピング用に加工する
-                html = self.edit_html(html, 'class="entrysearch-articles"', 'class="centerarticle-pager"')
+                html = self.__edit_html(html, 'class="entrysearch-articles"', 'class="centerarticle-pager"')
 
                 # スクレイピング処理
-                article_infos = self.scrape_info_of_hatena(html)
+                article_infos = self.__scrape_info_of_hatena(html)
                 # ワークテーブルへ記事情報を登録
-                count_inserted += self.insert_article_info_to_work(conn, cursor, article_infos)
+                count_inserted += self.__insert_article_info_to_work(conn, cursor, article_infos)
 
             # ワークテーブルから記事情報を移行させる
-            self.transfer_article_info_from_work(conn, cursor)
+            self.__transfer_article_info_from_work(conn, cursor)
 
             print(cowsay.cowsay('Search word is {}.\n{} {} were addded!' \
                                     .format(word, count_inserted, 'records' if count_inserted > 1 else 'record')))
@@ -171,7 +170,7 @@ class CrawlingHatena:
         self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                 self.log.location(), self.log_msg.MSG_CRAWLING_COMPLETED)
 
-    def scrape_info_of_hatena(self, html: str) -> list:
+    def __scrape_info_of_hatena(self, html: str) -> list:
         '''HTMLソースに対してスクレイピング処理を行うメソッド。
 
         :param str html: スクレイピング対象HTML。
@@ -193,7 +192,7 @@ class CrawlingHatena:
 
         while True:
             # 記事に関する情報を抽出
-            list_new_article_infos = self.get_infos_of_article(html)
+            list_new_article_infos = self.__get_infos_of_article(html)
 
             if len(list_new_article_infos) == 1:
                 # リストから探索処理の終了位置を取り出す
@@ -222,7 +221,7 @@ class CrawlingHatena:
 
         return list_infos
 
-    def get_infos_of_article(self, html: str) -> list:
+    def __get_infos_of_article(self, html: str) -> list:
         '''HTMLソースに対してスクレイピング処理を行い記事情報を取得するメソッド。
         URLを取得できなかった場合は、URL取得以降の処理を行わず空のリストを返す。
 
@@ -267,7 +266,7 @@ class CrawlingHatena:
 
             # APIからブックマーク数の取得
             params = {'url' : url}
-            count_bookmark = self.get_html(url='http://api.b.st-hatena.com/entry.count', params=params)
+            count_bookmark = self.__get_html(url='http://api.b.st-hatena.com/entry.count', params=params)
             # ブックマーク数が0の場合はAPIが空を返すため値の変換処理を行う
             count_bookmark = count_bookmark if count_bookmark else '0'
             list_article_infos.append(count_bookmark)
@@ -315,7 +314,7 @@ class CrawlingHatena:
 
         return list_article_infos
 
-    def get_html(self, url: str, params={}, headers=DEF_USER_AGENT) -> str:
+    def __get_html(self, url: str, params={}, headers=DEF_USER_AGENT) -> str:
         '''HTTP(s)通信を行いWebサイトからHTMLソースを取得するメソッド。
         decode時に引数として'ignore'を渡しているのは、
         APIからプレーンテキストを取得する際に文字コードを取得できないことによって、
@@ -345,10 +344,10 @@ class CrawlingHatena:
             return html
         except URLError as e:
             # 接続エラー
-            self.handling_url_exception(e)
+            self.__handling_url_exception(e)
             return ''
 
-    def edit_html(self, html: str, start_name: str, end_name: str) -> str:
+    def __edit_html(self, html: str, start_name: str, end_name: str) -> str:
         '''取得したHTMLをスクレイピング用に加工するメソッド。
 
         :param str html: 編集対象HTML
@@ -363,7 +362,7 @@ class CrawlingHatena:
 
         return html[start_idx+1:end_idx]
 
-    def insert_article_info_to_work(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor, article_infos: list) -> int:
+    def __insert_article_info_to_work(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor, article_infos: list) -> int:
         '''ワークテーブルへ記事情報を登録するメソッド。
 
         :param sqlite3.Connection conn: DBとのコネクション。
@@ -409,7 +408,7 @@ class CrawlingHatena:
 
         return count_inserted
 
-    def transfer_article_info_from_work(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
+    def __transfer_article_info_from_work(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
         '''ワークテーブルからメインテーブルへ記事情報を移行させるメソッド。
 
         :param sqlite3.Connection conn: DBとのコネクション。
@@ -423,7 +422,7 @@ class CrawlingHatena:
         # 移行処理終了
         conn.commit()
 
-    def check_internet_connection(self):
+    def __check_internet_connection(self):
         '''インターネットとの疎通確認を行うメソッド。
         疎通確認に失敗した場合は後続処理が不可能なためプロセスを終了させる。
         '''
@@ -442,11 +441,11 @@ class CrawlingHatena:
                                     '■Checking the network cables, modem, and router\r\n' \
                                     '■Reconnecting to Wi-Fi')
 
-            self.handling_url_exception(e)
+            self.__handling_url_exception(e)
             # 後続処理継続不可のためプロセス終了
             sys.exit()
 
-    def handling_url_exception(self, e):
+    def __handling_url_exception(self, e):
         '''通信処理における例外を処理するメソッド。
 
         :param urllib.error.URLError e: 通信処理において発生した例外情報。
