@@ -348,7 +348,7 @@ class CrawlingHatena:
                 # リソースから文字コードを取得
                 charset = source.headers.get_content_charset(failobj='utf-8')
                 # リソースをbytes型からString型にデコード
-                html = source.read().decode(charset)
+                html = source.read().decode(charset, 'ignore')
             return html
         except URLError as e:
             # 接続エラー
