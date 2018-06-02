@@ -104,7 +104,7 @@ class Log:
         return inspect.currentframe().f_back.f_code.co_name
 
     def __check_status_of_log_file(self, path_to_log: str):
-        '''ログファイルの有効性を判定する関数。
+        '''ログファイルの有効性を判定するメソッド。
         格納ディレクトリとログファイルが存在しない場合には生成処理を行う。
 
         :param str path_to_log: ログファイルへのパス。
