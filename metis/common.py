@@ -6,8 +6,6 @@ import configparser
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
-config = configparser.ConfigParser()
-config.read('../env/config.ini')
 
 def connect_to_database():
     '''データベースへ接続する関数。
@@ -18,6 +16,10 @@ def connect_to_database():
     :return: コネクション。
     :return: カーソルオブジェクト。
     '''
+
+    # 設定ファイルの読み込み
+    config = configparser.ConfigParser()
+    config.read('../env/config.ini')
 
     # トレースバックの設定
     sqlite3.enable_callback_tracebacks(True)

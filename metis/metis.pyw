@@ -10,15 +10,174 @@ from tkinter import messagebox, Menu
 import tkinter.ttk as ttk
 from tkinter import N, S, W, E
 import tkinter.scrolledtext as tkst
-from log import LogLevel, Log
+from log import LogLevel, Log, LogMessage
 import subprocess
 from common import *
-from sql import *
+from sql import ArticleInfoHatenaDao
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
-class Application(tkinter.Tk):
+class Command:
+    '''アプリケーションのコマンド処理を定義するクラス。'''
+
+    def open(self):
+        '''openボタン押下時の処理を定義。'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+
+        if item_dict['values']:
+            url = item_dict['values'][3]
+
+            webbrowser.open_new_tab(url)
+
+    def flush(self):
+        '''flushボタン押下時の処理を定義。'''
+
+        # ツリービューの初期化
+        self.tree.delete(*self.tree.get_children())
+
+    def copy_url(self):
+        '''URLをクリップボードに追加する処理を定義。'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+
+        if item_dict['values']:
+            url = item_dict['values'][3]
+
+            pyperclip.copy(url)
+
+    def copy_title(self):
+        '''タイトルをクリップボードに追加する処理を定義。'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+
+        if item_dict['values']:
+            title = item_dict['values'][1]
+
+            pyperclip.copy(title)
+
+    def copy_informations(self):
+        '''タイトル、URL、ブックマーク数をコピーする処理を定義。'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+
+        if item_dict['values']:
+            url = item_dict['values'][3]
+            title = item_dict['values'][1]
+            bookmarks = str(item_dict['values'][2])
+
+            pyperclip.copy(' '.join([url, title, bookmarks]))
+
+    def open_by_double_click(self, event):
+        '''左ダブルクリック時に発生する処理を定義。'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+
+        if item_dict['values']:
+            url = item_dict['values'][3]
+
+            webbrowser.open_new_tab(url)
+
+    def copy_by_right_click(self, event):
+        '''右クリック時に発生する処理を定義。'''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = self.tree.item(self.tree.focus())
+
+        if item_dict['values']:
+            url = item_dict['values'][3]
+
+            pyperclip.copy(url)
+
+    def open_docs(self):
+        '''ドキュメントを記述したページを開く。'''
+
+        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/docs')
+
+    def open_licence(self):
+        '''ライセンスを記述したページを開く。'''
+
+        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/LICENSE')
+
+    def open_readme(self):
+        '''readmeを記述したページを開く'''
+
+        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/README.md')
+
+    def execute_crawling_hatena(self):
+        '''hatenaへのクローリング処理を実行する'''
+
+        if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
+            subprocess.Popen('python crawler.py')
+
+    def read_log(self):
+        '''readボタン押下時の処理を定義。'''
+
+        if self.OutputTextLog.get('1.0',tkinter.END):
+            # テキストフォームの初期化
+            self.OutputTextLog.delete('1.0', tkinter.END)
+
+        input_date = self.inputDate.get()
+        if '.log' in input_date:
+            # ファイル名と拡張子を分割
+            root, ext = os.path.splitext(input_date)
+            date = ''.join(split(root, '-/., '))
+            path_name = '../log/' + date + '.log'
+        else:
+            date = ''.join(split(input_date, '-/., '))
+            path_name = '../log/' + date + '.log'
+
+        if os.path.exists(path_name):
+            text_lines = ''
+            with open(path_name, 'r') as f:
+                text_lines = f.readlines()
+
+            # 取得した行数分だけ処理
+            for line in text_lines:
+                self.OutputTextLog.insert(tkinter.END, line)
+            self.OutputTextLog.pack()
+        else:
+            # ログファイルが存在しなかった場合
+            messagebox.showerror('ERR_NO_FILE_FOUND', 'Failed to open log file.\r\nNo such file or directory.')
+
+    def read_log_list(self):
+        '''listボタン押下時の処理を定義'''
+
+        if self.OutputTextLog.get('1.0',tkinter.END):
+            # テキストフォームの初期化
+            self.OutputTextLog.delete('1.0', tkinter.END)
+
+        # logディレクトリ内のファイルを取得
+        log_files = os.listdir('../log')
+        for log in log_files:
+            # ファイル名と拡張子を分割
+            _, ext = os.path.splitext(log)
+            if ext == '.log':
+                self.OutputTextLog.insert(tkinter.END, log + '\r\n')
+        self.OutputTextLog.pack()
+
+    def quit(self):
+        '''quitボタン押下時の処理を定義。'''
+
+        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+                                self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
+
+        # 処理終了
+        self.root.destroy()
+
+    def disable_close_button(self):
+        '''windowのcloseボタンを無効化する'''
+
+        messagebox.showerror('ERR_BUTTON_LIMITED', \
+                                'Use Quit button or Esc key to close the window.')
+
+class Application(Command):
     '''GUIの出力処理を定義するクラス。'''
 
     def __init__(self, *args, **kwargs):
@@ -31,11 +190,16 @@ class Application(tkinter.Tk):
 
         # ログ出力のためインスタンス生成
         self.log = Log()
+        self.log_msg = LogMessage()
+
         # クラス名
         self.CLASS_NAME = self.__class__.__name__
 
         self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log.MSG_PROCESS_STARTED)
+                                self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
+
+        # ARTICLE_INFO_HATENA.TBLのDAOクラス
+        self.article_info_hatena_dao = ArticleInfoHatenaDao()
 
         self.root = tkinter.Tk()
         self.root.protocol('WM_DELETE_WINDOW', self.disable_close_button)
@@ -136,7 +300,7 @@ class Application(tkinter.Tk):
             try:
                 conn, cursor = connect_to_database()
 
-                article_infos = select_infos_by_search_word(cursor, '%' + search_word + '%')
+                article_infos = self.article_info_hatena_dao.select_infos_by_search_word(cursor, '%' + search_word + '%')
                 if article_infos:
                     # TreeViewの生成
                     for i, infos in enumerate(article_infos):
@@ -155,12 +319,12 @@ class Application(tkinter.Tk):
                                             + ' - did not match any documents.')
             except sqlite3.Error as e:
                 self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
-                                        self.log.location(), self.log.MSG_ERROR)
+                                        self.log.location(),self.log_msg.MSG_ERROR)
                 self.log.error(e)
             finally:
                 conn.close()
                 self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                        self.log.location(), self.log.MSG_CLOSE_COMPLETED)
+                                        self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
         else:
             messagebox.showerror('ERR_EMPTY_REQUESTED', \
                                     'This field must not be empty.')
@@ -215,14 +379,13 @@ class Application(tkinter.Tk):
         menubar.add_cascade(label='Edit', menu=edit_menu)
 
         # 更新メニュー
-        update_menu = Menu(menubar, tearoff=0)
+        crawler_menu = Menu(menubar, tearoff=0)
         start_crawling = Menu(menubar, tearoff=0)
         update_bookmarks = Menu(menubar, tearoff=0)
-        update_menu.add_cascade(label='Start Crawling', menu=start_crawling)
-        start_crawling.add_command(label='Hatena', command=self.execute_crawling_hatena)
-        update_menu.add_cascade(label='Update Bookmarks', menu=update_bookmarks)
-        update_bookmarks.add_command(label='Hatena')
-        menubar.add_cascade(label='Update', menu=update_menu)
+        crawler_menu.add_cascade(label='Hatena', menu=start_crawling)
+        start_crawling.add_command(label='Start Crawling', command=self.execute_crawling_hatena)
+        start_crawling.add_command(label='Update Bookmarks')
+        menubar.add_cascade(label='Crawler', menu=crawler_menu)
 
         # helpメニュー
         help_menu = Menu(menubar, tearoff=0)
@@ -233,157 +396,6 @@ class Application(tkinter.Tk):
         menubar.add_cascade(label='Help', menu=help_menu)
 
         self.root.config(menu=menubar)
-
-    def open(self):
-        '''openボタン押下時の処理を定義。'''
-
-        # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
-
-        if item_dict['values']:
-            url = item_dict['values'][3]
-
-            webbrowser.open_new_tab(url)
-
-    def flush(self):
-        '''flushボタン押下時の処理を定義。'''
-
-        # ツリービューの初期化
-        self.tree.delete(*self.tree.get_children())
-
-    def copy_url(self):
-        '''URLをクリップボードに追加する処理を定義。'''
-
-        # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
-
-        if item_dict['values']:
-            url = item_dict['values'][3]
-
-            pyperclip.copy(url)
-
-    def copy_title(self):
-        '''タイトルをクリップボードに追加する処理を定義。'''
-
-        # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
-
-        if item_dict['values']:
-            title = item_dict['values'][1]
-
-            pyperclip.copy(title)
-
-    def copy_informations(self):
-        '''タイトル、URL、ブックマーク数をコピーする処理を定義。'''
-
-        # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
-
-        if item_dict['values']:
-            url = item_dict['values'][3]
-            title = item_dict['values'][1]
-            bookmarks = str(item_dict['values'][2])
-
-            pyperclip.copy(' '.join([url, title, bookmarks]))
-
-    def open_by_double_click(self, event):
-        '''左ダブルクリック時に発生する処理を定義。'''
-
-        # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
-
-        if item_dict['values']:
-            url = item_dict['values'][3]
-
-            webbrowser.open_new_tab(url)
-
-    def copy_by_right_click(self, event):
-        '''右クリック時に発生する処理を定義。'''
-
-        # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
-
-        if item_dict['values']:
-            url = item_dict['values'][3]
-
-            pyperclip.copy(url)
-
-    def open_licence(self):
-        '''ライセンスを記述したページを開く。'''
-
-        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/LICENSE')
-
-    def open_readme(self):
-        '''readmeを記述したページを開く'''
-
-        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/README.rst')
-
-    def execute_crawling_hatena(self):
-        '''hatenaへのクローリング処理を実行する'''
-
-        if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
-            subprocess.Popen('python crawler.py')
-
-    def read_log(self):
-        '''readボタン押下時の処理を定義。'''
-
-        if self.OutputTextLog.get('1.0',tkinter.END):
-            # テキストフォームの初期化
-            self.OutputTextLog.delete('1.0', tkinter.END)
-
-        input_date = self.inputDate.get()
-        if '.log' in input_date:
-            # ファイル名と拡張子を分割
-            root, ext = os.path.splitext(input_date)
-            date = ''.join(split(root, '-/., '))
-            path_name = '../log/' + date + '.log'
-        else:
-            date = ''.join(split(input_date, '-/., '))
-            path_name = '../log/' + date + '.log'
-
-        if os.path.exists(path_name):
-            text_lines = ''
-            with open(path_name, 'r') as f:
-                text_lines = f.readlines()
-
-            # 取得した行数分だけ処理
-            for line in text_lines:
-                self.OutputTextLog.insert(tkinter.END, line)
-            self.OutputTextLog.pack()
-        else:
-            # ログファイルが存在しなかった場合
-            self.OutputTextLog.insert(tkinter.END, 'Failed to open log file\r\nNo such file or directory')
-
-    def read_log_list(self):
-        '''listボタン押下時の処理を定義'''
-
-        if self.OutputTextLog.get('1.0',tkinter.END):
-            # テキストフォームの初期化
-            self.OutputTextLog.delete('1.0', tkinter.END)
-
-        # logディレクトリ内のファイルを取得
-        log_files = os.listdir('../log')
-        for log in log_files:
-            # ファイル名と拡張子を分割
-            _, ext = os.path.splitext(log)
-            if ext == '.log':
-                self.OutputTextLog.insert(tkinter.END, log + '\r\n')
-        self.OutputTextLog.pack()
-
-    def quit(self):
-        '''quitボタン押下時の処理を定義。'''
-
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log.MSG_PROCESS_COMPLETED)
-
-        # 処理終了
-        self.root.destroy()
-
-    def disable_close_button(self):
-        '''windowのcloseボタンを無効化する'''
-
-        messagebox.showerror('ERR_BUTTON_LIMITED', \
-                                'Use Quit button or Esc key to close the window.')
 
 if __name__ == '__main__':
     Application()

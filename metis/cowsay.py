@@ -50,24 +50,24 @@ class Cowsay:
 
         lines = []
         for phrase in text.split('\n'):
-            lines.extend(self.cut(phrase))
+            lines.extend(self.__cut(phrase))
 
         length = max(len(line) for line in lines)
         cowquote = ['', ' ' + '_' * (length + 2)]
 
         if len(lines) == 1:
-            cowquote.append(self.format_line(lines[0], length, '< ', ' >'))
+            cowquote.append(self.__format_line(lines[0], length, '< ', ' >'))
         else:
-            cowquote.append(self.format_line(lines[0], length, '/ ', ' \\'))
+            cowquote.append(self.__format_line(lines[0], length, '/ ', ' \\'))
             for i in range(1, len(lines) - 1):
-                cowquote.append(self.format_line(lines[i], length, '| ', ' |'))
+                cowquote.append(self.__format_line(lines[i], length, '| ', ' |'))
 
-            cowquote.append(self.format_line(lines[-1], length, '\\ ', ' /'))
+            cowquote.append(self.__format_line(lines[-1], length, '\\ ', ' /'))
         cowquote.append(''.join((' ', '-' * (length + 2), self.COW)))
 
         return '\n'.join(cowquote)
 
-    def cut(self, phrase: str) -> list:
+    def __cut(self, phrase: str) -> list:
         '''文章を仕分けるメソッド。
 
         :param str phrase: 仕分け対象のフレーズ。
@@ -99,7 +99,7 @@ class Cowsay:
 
         return lines
 
-    def format_line(self, line: str, length: int, first: str, last: str) -> str:
+    def __format_line(self, line: str, length: int, first: str, last: str) -> str:
         '''文章を覆う枠を作成するメソッド。
 
         :param str line: 文章。
