@@ -156,50 +156,6 @@ that they have new mail, etc.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>PythonでのCowsays実装クラス。</p>
 <dl class="method">
-<dt id="cowsay.Cowsay._Cowsay__cut">
-<code class="descname">_Cowsay__cut</code><span class="sig-paren">(</span><em>phrase: str</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#cowsay.Cowsay._Cowsay__cut" title="Permalink to this definition">¶</a></dt>
-<dd><p>文章を仕分けるメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>phrase</strong> (<em>str</em>) – 仕分け対象のフレーズ。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Trype:</th><td class="field-body">list</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">仕分けされたフレーズを格納したリスト。</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="cowsay.Cowsay._Cowsay__format_line">
-<code class="descname">_Cowsay__format_line</code><span class="sig-paren">(</span><em>line: str</em>, <em>length: int</em>, <em>first: str</em>, <em>last: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#cowsay.Cowsay._Cowsay__format_line" title="Permalink to this definition">¶</a></dt>
-<dd><p>文章を覆う枠を作成するメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>line</strong> (<em>str</em>) – 文章。</li>
-<li><strong>length</strong> (<em>int</em>) – 文章中の最大文字列長。</li>
-<li><strong>first</strong> (<em>str</em>) – 開始枠。</li>
-<li><strong>last</strong> (<em>str</em>) – 終了枠。</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">str</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">枠に覆われた文章。</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="cowsay.Cowsay.cowsay">
 <code class="descname">cowsay</code><span class="sig-paren">(</span><em>text: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#cowsay.Cowsay.cowsay" title="Permalink to this definition">¶</a></dt>
 <dd><p>牛のアスキー画像と引数として渡されたテキストを融合させるメソッド。</p>
