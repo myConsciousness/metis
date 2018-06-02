@@ -2,6 +2,9 @@
 Metis is the client application for crawling, scraping, and searching articles.  
 Now it is designated for Hatena.
 
+# About modules
+https://myconsciousness.github.io/metis/index.html
+
 # Requirements
 Metis requires the following to run (preparing):  
 * [Python 3.x](https://www.python.org/)
