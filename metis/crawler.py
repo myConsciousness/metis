@@ -375,7 +375,7 @@ class CrawlingHatena:
 
         :param sqlite3.Connection conn: DBとのコネクション。
         :param sqlite3.Cursor cursor: カーソルオブジェクト。
-        :param sqlite3.Cursor cursor: 記事情報が格納されたリスト。
+        :param list article_infos: 記事情報が格納されたリスト。
         :rtype: int
         :return: ワークテーブルへの登録数。
         '''
@@ -457,7 +457,6 @@ class CrawlingHatena:
         '''通信処理における例外を処理するメソッド。
 
         :param urllib.error.URLError e: 通信処理において発生した例外情報。
-        :param str method_name: メソッド名。
         '''
 
         if hasattr(e, 'reason'):
