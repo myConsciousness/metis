@@ -1,9 +1,9 @@
 # Metis
-Metis is the client application for crawling, scraping, and searching tech-articles.  
+Metis is the client application for crawling, scraping, and searching articles.  
 Now it is designated for Hatena.
 
 # Requirements
-Metis requires the following to run:  
+Metis requires the following to run (preparing):  
 * [Python 3.x](https://www.python.org/)
 
 # Help
