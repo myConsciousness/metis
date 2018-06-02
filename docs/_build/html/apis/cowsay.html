@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cowsay module &mdash; Metis 2018/05/31 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Metis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">cowsay module</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Metis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>cowsay module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apis/cowsay.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-cowsay">
+<span id="cowsay-module"></span><h1>cowsay module<a class="headerlink" href="#module-cowsay" title="Permalink to this headline">¶</a></h1>
+<p>The original Cowsays are written in the Perl programming language,
+and as such are easily adaptable to system tasks in Unix.
+They can perform functions such as telling users their home directories are full,
+that they have new mail, etc.</p>
+<dl class="class">
+<dt id="cowsay.Cowsay">
+<em class="property">class </em><code class="descclassname">cowsay.</code><code class="descname">Cowsay</code><a class="headerlink" href="#cowsay.Cowsay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>PythonでのCowsays実装クラス。</p>
+<dl class="method">
+<dt id="cowsay.Cowsay._Cowsay__cut">
+<code class="descname">_Cowsay__cut</code><span class="sig-paren">(</span><em>phrase: str</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#cowsay.Cowsay._Cowsay__cut" title="Permalink to this definition">¶</a></dt>
+<dd><p>文章を仕分けるメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>phrase</strong> (<em>str</em>) – 仕分け対象のフレーズ。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Trype:</th><td class="field-body">list</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">仕分けされたフレーズを格納したリスト。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cowsay.Cowsay._Cowsay__format_line">
+<code class="descname">_Cowsay__format_line</code><span class="sig-paren">(</span><em>line: str</em>, <em>length: int</em>, <em>first: str</em>, <em>last: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#cowsay.Cowsay._Cowsay__format_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>文章を覆う枠を作成するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line</strong> (<em>str</em>) – 文章。</li>
+<li><strong>length</strong> (<em>int</em>) – 文章中の最大文字列長。</li>
+<li><strong>first</strong> (<em>str</em>) – 開始枠。</li>
+<li><strong>last</strong> (<em>str</em>) – 終了枠。</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">str</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">枠に覆われた文章。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cowsay.Cowsay.cowsay">
+<code class="descname">cowsay</code><span class="sig-paren">(</span><em>text: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#cowsay.Cowsay.cowsay" title="Permalink to this definition">¶</a></dt>
+<dd><p>牛のアスキー画像と引数として渡されたテキストを融合させるメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> (<em>str</em>) – 牛に喋らせる文章。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">アスキー画像。</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; cowsay(&#39;Helle World!&#39;)
+&gt;&gt;&gt;  ______________
+&gt;&gt;&gt; &lt; Hello World! &gt;
+&gt;&gt;&gt;  --------------
+&gt;&gt;&gt;     \   ^__^
+&gt;&gt;&gt;      \  (oo)\_______
+&gt;&gt;&gt;         (__)\       )\/        &gt;&gt;&gt;             ||----w |
+&gt;&gt;&gt;             ||     ||
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kato Shinya.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2018/05/31',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

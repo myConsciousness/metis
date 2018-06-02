@@ -1,0 +1,422 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>crawler module &mdash; Metis 2018/05/31 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Metis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">crawler module</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Metis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>crawler module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apis/crawler.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-crawler">
+<span id="crawler-module"></span><h1>crawler module<a class="headerlink" href="#module-crawler" title="Permalink to this headline">¶</a></h1>
+<p>A Web crawler, sometimes called a spider,
+is an Internet bot that systematically browses the World Wide Web,
+typically for the purpose of Web indexing (web spidering).</p>
+<p>Web search engines and some other sites use Web crawling or spidering software
+to update their web content or indices of others sites’ web content.
+Web crawlers copy pages for processing by a search engine
+which indexes the downloaded pages so users can search more efficiently.</p>
+<p>Web scraping, web harvesting, or web data extraction is data scraping used for extracting data from websites.
+Web scraping software may access the World Wide Web directly using the Hypertext Transfer Protocol, or through a web browser.
+While web scraping can be done manually by a software user,
+the term typically refers to automated processes implemented using a bot or web crawler.
+It is a form of copying, in which specific data is gathered and copied from the web,
+typically into a central local database or spreadsheet, for later retrieval or analysis.</p>
+<dl class="class">
+<dt id="crawler.CrawlingHatena">
+<em class="property">class </em><code class="descclassname">crawler.</code><code class="descname">CrawlingHatena</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Hatenaへのクローリング処理を定義するクラス。</p>
+<dl class="attribute">
+<dt id="crawler.CrawlingHatena.DEF_USER_AGENT">
+<code class="descname">DEF_USER_AGENT</code><em class="property"> = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'}</em><a class="headerlink" href="#crawler.CrawlingHatena.DEF_USER_AGENT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__check_internet_connection">
+<code class="descname">_CrawlingHatena__check_internet_connection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__check_internet_connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>インターネットとの疎通確認を行うメソッド。
+疎通確認に失敗した場合は後続処理が不可能なためプロセスを終了させる。</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__crawl_hatena">
+<code class="descname">_CrawlingHatena__crawl_hatena</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__crawl_hatena" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hatenaに対してクローリング処理を行うメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__edit_html">
+<code class="descname">_CrawlingHatena__edit_html</code><span class="sig-paren">(</span><em>html: str</em>, <em>start_name: str</em>, <em>end_name: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__edit_html" title="Permalink to this definition">¶</a></dt>
+<dd><p>取得したHTMLをスクレイピング用に加工するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>html</strong> (<em>str</em>) – 編集対象HTML</li>
+<li><strong>start_name</strong> (<em>str</em>) – 切り取り対象の開始名。</li>
+<li><strong>end_name</strong> (<em>str</em>) – 切り取り対象の終了名。</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">str</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">スクレイピング用に加工したHTMLソース。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__get_html">
+<code class="descname">_CrawlingHatena__get_html</code><span class="sig-paren">(</span><em>url: str</em>, <em>params={}</em>, <em>headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML</em>, <em>like Gecko) Chrome/66.0.3359.181 Safari/537.36'}</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__get_html" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP(s)通信を行いWebサイトからHTMLソースを取得するメソッド。
+decode時に引数として’ignore’を渡しているのは、
+APIからプレーンテキストを取得する際に文字コードを取得できないことによって、
+プログラムが異常終了するのを防ぐため。
+接続エラー時には空文字を返す。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> (<em>str</em>) – 取得対象URL。</li>
+<li><strong>params</strong> (<em>dict</em>) – パラメータ生成用辞書。初期値は空の辞書。</li>
+<li><strong>headers</strong> (<em>dict</em>) – ヘッダ生成用辞書。初期値は定数”UserAgent定義”。</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">str</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">対象URLにHTTP(s)通信を行い取得したHTMLソース。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__get_infos_of_article">
+<code class="descname">_CrawlingHatena__get_infos_of_article</code><span class="sig-paren">(</span><em>html: str</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__get_infos_of_article" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTMLソースに対してスクレイピング処理を行い記事情報を取得するメソッド。
+URLを取得できなかった場合は、URL取得以降の処理を行わず空のリストを返す。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>html</strong> (<em>str</em>) – スクレイピング対象HTML。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">スクレイピングした記事情報を含むリスト。</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_infos_of_article</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">URL</span><span class="p">,</span> <span class="n">TITLE</span><span class="p">,</span> <span class="n">PUBILISHED_DATE</span><span class="p">,</span> <span class="n">BOOKMARKS</span><span class="p">,</span> <span class="n">TAG</span><span class="p">,</span> <span class="n">LAST_INDEX</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__handling_url_exception">
+<code class="descname">_CrawlingHatena__handling_url_exception</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__handling_url_exception" title="Permalink to this definition">¶</a></dt>
+<dd><p>通信処理における例外を処理するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>e</strong> (<em>urllib.error.URLError</em>) – 通信処理において発生した例外情報。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__insert_article_info_to_work">
+<code class="descname">_CrawlingHatena__insert_article_info_to_work</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em>, <em>article_infos: list</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__insert_article_info_to_work" title="Permalink to this definition">¶</a></dt>
+<dd><p>ワークテーブルへ記事情報を登録するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソルオブジェクト。</li>
+<li><strong>article_infos</strong> (<em>list</em>) – 記事情報が格納されたリスト。</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">int</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">ワークテーブルへの登録数。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__scrape_info_of_hatena">
+<code class="descname">_CrawlingHatena__scrape_info_of_hatena</code><span class="sig-paren">(</span><em>html: str</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__scrape_info_of_hatena" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTMLソースに対してスクレイピング処理を行うメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>html</strong> (<em>str</em>) – スクレイピング対象HTML。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">スクレイピングした全記事情報を含むリスト。</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scrape_info_of_hatena</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[[</span><span class="n">URL</span><span class="p">,</span> <span class="n">TITLE</span><span class="p">,</span> <span class="n">PUBILISHED_DATE</span><span class="p">,</span> <span class="n">BOOKMARKS</span><span class="p">,</span> <span class="n">TAG</span><span class="p">],</span> <span class="p">[</span><span class="n">URL</span><span class="p">,</span> <span class="n">TITLE</span><span class="p">,</span> <span class="n">PUBILISHED_DATE</span><span class="p">,</span> <span class="n">BOOKMARKS</span><span class="p">,</span> <span class="n">TAG</span><span class="p">],</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__transfer_article_info_from_work">
+<code class="descname">_CrawlingHatena__transfer_article_info_from_work</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__transfer_article_info_from_work" title="Permalink to this definition">¶</a></dt>
+<dd><p>ワークテーブルからメインテーブルへ記事情報を移行させるメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソルオブジェクト。</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CrawlingHatena.execute">
+<code class="descname">execute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>クローリング処理を実行するメソッド。</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kato Shinya.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2018/05/31',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
