@@ -6,9 +6,9 @@ Now it is designated for Hatena.
 https://myconsciousness.github.io/metis/index.html
 
 # Clone
-'''
+```
 git clone git@github.com:myConsciousness/metis.git
-''' 
+```
 
 # Requirements
 Metis requires the following to run (preparing):  
