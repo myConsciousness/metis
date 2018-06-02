@@ -98,7 +98,7 @@ class Command:
     def open_docs(self):
         '''ドキュメントを記述したページを開く。'''
 
-        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/docs')
+        webbrowser.open_new_tab('https://myconsciousness.github.io/metis/index.html')
 
     def open_licence(self):
         '''ライセンスを記述したページを開く。'''
