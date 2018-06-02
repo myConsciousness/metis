@@ -152,6 +152,21 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>ログ出力を行うクラス。</p>
 <dl class="method">
+<dt id="log.Log._Log__check_status_of_log_file">
+<code class="descname">_Log__check_status_of_log_file</code><span class="sig-paren">(</span><em>path_to_log: str</em><span class="sig-paren">)</span><a class="headerlink" href="#log.Log._Log__check_status_of_log_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>ログファイルの有効性を判定するメソッド。
+格納ディレクトリとログファイルが存在しない場合には生成処理を行う。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path_to_log</strong> (<em>str</em>) – ログファイルへのパス。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="log.Log.debug">
 <code class="descname">debug</code><span class="sig-paren">(</span><em>message: str</em><span class="sig-paren">)</span><a class="headerlink" href="#log.Log.debug" title="Permalink to this definition">¶</a></dt>
 <dd><p>デバッグ情報のログ出力を行うメソッド。</p>
