@@ -299,9 +299,11 @@ class CrawlingHatena:
             last_index = html.find('class="bookmark-item', end_index_of_title)
             list_article_infos.append(last_index)
 
+            # デバッグログ
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'title', title))
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'date', date))
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'tags', tags))
+            self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'count_bookmark', count_bookmark))
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'last_index', last_index))
 
         else:
