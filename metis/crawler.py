@@ -140,6 +140,7 @@ class CrawlingHatena:
                 self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
                 self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'word', word))
                 self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'page', page))
+                self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
 
                 # パラメータ生成用辞書
                 params = {
@@ -300,16 +301,20 @@ class CrawlingHatena:
             list_article_infos.append(last_index)
 
             # デバッグログ
+            self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+            self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'title', title))
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'date', date))
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'tags', tags))
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'count_bookmark', count_bookmark))
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'last_index', last_index))
+            self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
 
         else:
             # デバッグログ
             self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
             self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
+            self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
 
             # 次処理の探索開始位置をリストで返す
             return [html.find('class="bookmark-item', start_search_index)]
@@ -336,6 +341,7 @@ class CrawlingHatena:
         # デバッグログ
         self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
         self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
+        self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
 
         try:
             with urlopen(Request(url=url, headers=headers)) as source:

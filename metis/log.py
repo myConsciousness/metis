@@ -38,9 +38,9 @@ class Log:
         self.__check_status_of_log_file(PATH_TO_LOG_FILE)
 
         if child:
-            self.logger = getLogger(__name__)
-        else:
             self.logger = getLogger(__name__).getChild(__name__)
+        else:
+            self.logger = getLogger(__name__)
 
         self.logger.setLevel(int(config['general']['log_level']))
         fh = FileHandler(PATH_TO_LOG_FILE)
@@ -156,9 +156,11 @@ class LogMessage:
         self.__MSG_NO_RESPONSE = '[{}]:【CRITICAL】The server couldn\'t fulfill the request. It has been occurred in {} method, {} class.'
 
         # デバッグ開始
-        self.__MSG_DEBUG_START = '[{}]: The debug has been started in {} method, {} class.'
+        self.__MSG_DEBUG_START = '[{}]:【DEBUG START】The debug has been started in {} method, {} class.'
         # 変数値のデバッグ情報
         self.__MSG_DEBUG_VALUE = '[{}]: A variable "{}" has a value "{}".'
+        # デバッグ終了
+        self.__MSG_DEBUG_COMPLETED = '[{}]:【DEBUG END】The debug has been completed in {} method, {} class.'
 
     @property
     def MSG_PROCESS_STARTED(self):
@@ -237,3 +239,9 @@ class LogMessage:
         '''変数値のデバッグ情報メッセージのプロパティ。'''
 
         return self.__MSG_DEBUG_VALUE
+
+    @property
+    def MSG_DEBUG_COMPLETED(self):
+        '''デバッグ終了メッセージのプロパティ。'''
+
+        return self.__MSG_DEBUG_COMPLETED
