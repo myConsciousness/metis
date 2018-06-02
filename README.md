@@ -15,7 +15,7 @@ Metis requires the following to run (preparing):
 * [Python 3.x](https://www.python.org/)
 
 # Help
-Source: https://github.com/myConsciousness/metis/metis  
+Source: https://github.com/myConsciousness/metis/tree/master/metis  
 Bug reports: https://github.com/myConsciousness/metis/issues
 
 # License
