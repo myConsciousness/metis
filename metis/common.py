@@ -6,7 +6,6 @@ import configparser
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
-
 def connect_to_database():
     '''データベースへ接続する関数。
     コネクションの開放処理は呼び出し元で別途行う。
