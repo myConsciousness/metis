@@ -19,6 +19,10 @@ sys.path.insert(0, os.path.abspath('../metis'))
 
 extensions = ["sphinx.ext.autodoc"]
 
+autodoc_default_flags = [
+    'members',
+    'private-members'
+]
 
 # -- Project information -----------------------------------------------------
 
