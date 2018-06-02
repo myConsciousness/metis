@@ -389,7 +389,7 @@ class Application(Command):
 
         # helpメニュー
         help_menu = Menu(menubar, tearoff=0)
-        help_menu.add_command(label='Document')
+        help_menu.add_command(label='Document', command=self.open_docs)
         help_menu.add_command(label='About Software', command=self.open_readme)
         help_menu.add_separator()
         help_menu.add_command(label='Licence', command=self.open_licence)
