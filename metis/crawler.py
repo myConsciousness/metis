@@ -203,7 +203,7 @@ class CrawlingHatena:
                     break
                 else:
                     # 記事情報を取得できなかった場合
-                    html = html[list_new_article_infos[0]:]
+                    html = html[last_index_of_search:]
             else:
                 # リストから探索処理の終了位置を取り出す
                 last_index_of_search = list_new_article_infos.pop()
