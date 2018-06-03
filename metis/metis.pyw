@@ -235,7 +235,6 @@ class Application(Command):
         file_menu = Menu(menubar, tearoff=0)
         file_menu.add_command(label='Parameters')
         file_menu.add_separator()
-
         file_menu.add_command(label='Exit', command=self.quit)
         menubar.add_cascade(label='File', menu=file_menu)
 
@@ -246,7 +245,7 @@ class Application(Command):
         edit_menu.add_command(label='Copy Informations', command=self.copy_informations)
         menubar.add_cascade(label='Edit', menu=edit_menu)
 
-        # 更新メニュー
+        # クローラメニュー
         crawler_menu = Menu(menubar, tearoff=0)
         start_crawling = Menu(menubar, tearoff=0)
         update_bookmarks = Menu(menubar, tearoff=0)
@@ -313,32 +312,8 @@ class Application(Command):
         search_button = ttk.Button(parent, text='Search', width=10, command=self.__refresh_tree_view)
         search_button.place(relx=0.63, rely=0.058)
 
-        # ツリービューの作成
-        self.tree = ttk.Treeview(parent, height=15)
-        self.scroll = tkinter.Scrollbar(parent, orient=tkinter.VERTICAL, command=self.tree.yview)
-        self.scroll.place(relx=0.962, y=95, height=474.45)
-        self.tree['columns'] = (1, 2, 3, 4)
-        self.tree['show'] = 'headings'
-        self.tree.column(1, width=70)
-        self.tree.column(2, width=700)
-        self.tree.column(3, width=100)
-        self.tree.column(4)
-        self.tree.heading(1, text='No.')
-        self.tree.heading(2, text='Title')
-        self.tree.heading(3, text='Bookmarks')
-        self.tree.heading(4)
-        self.tree.configure(style='my.Treeview', displaycolumns=(1,2,3), yscroll=self.scroll.set)
-        # ダブルクリックでページを開くように設定
-        self.tree.bind('<Double-1>', self.open_by_double_click)
-        # 右クリックでURLをコピーするように設定
-        self.tree.bind('<ButtonRelease-3>', self.copy_by_right_click)
-        self.tree.pack(fill='x', padx=20, pady=30)
-
-        # ツリービューのレイアウト設定
-        style = ttk.Style(parent)
-        style.configure('my.Treeview', rowheight=30)
-        style.configure('Treeview', font=('Consolas', 10))
-        style.configure('Treeview.Heading', font=('Consolas', 10, 'bold'))
+        # ツリービューの構築
+        self.__create_tree_view(parent)
 
         open_button = ttk.Button(parent, text='Open', width=10, command=self.open)
         open_button.place(width=150, relx=0.12, rely=0.86)
@@ -348,6 +323,46 @@ class Application(Command):
 
         quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit)
         quit_button.place(width=150, relx=0.72, rely=0.86)
+
+    def __create_tree_view(self, parent: tkinter.Frame):
+        '''ツリービューの構築を行うメソッド。
+
+        :param tkinter.Frame parent: 画面の親フレーム。
+        '''
+
+        self.tree = ttk.Treeview(parent, height=15)
+
+        # スクロールバーの生成
+        self.scroll = tkinter.Scrollbar(parent, orient=tkinter.VERTICAL, command=self.tree.yview)
+        self.scroll.place(relx=0.962, y=95, height=474.45)
+
+        # カラムの設定
+        self.tree['columns'] = (1, 2, 3, 4)
+        self.tree.column(1, width=70)
+        self.tree.column(2, width=700)
+        self.tree.column(3, width=100)
+        self.tree.column(4)
+
+        # ヘッダの設定
+        self.tree['show'] = 'headings'
+        self.tree.heading(1, text='No.')
+        self.tree.heading(2, text='Title')
+        self.tree.heading(3, text='Bookmarks')
+        self.tree.heading(4)
+        self.tree.configure(style='my.Treeview', displaycolumns=(1,2,3), yscroll=self.scroll.set)
+
+        # ダブルクリックでページを開くように設定
+        self.tree.bind('<Double-1>', self.open_by_double_click)
+        # 右クリックでURLをコピーするように設定
+        self.tree.bind('<ButtonRelease-3>', self.copy_by_right_click)
+
+        # ツリービューのレイアウト設定
+        style = ttk.Style(parent)
+        style.configure('my.Treeview', rowheight=30)
+        style.configure('Treeview', font=('Consolas', 10))
+        style.configure('Treeview.Heading', font=('Consolas', 10, 'bold'))
+
+        self.tree.pack(fill='x', padx=20, pady=30)
 
     def __refresh_tree_view(self):
         '''取得した記事情報からツリービューを生成するメソッド。'''
