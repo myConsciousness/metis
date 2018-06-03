@@ -6,7 +6,7 @@ from logging import StreamHandler
 from logging import Formatter
 from datetime import datetime
 from enum import Enum
-import configparser
+from common import *
 import inspect
 import os.path
 
@@ -29,11 +29,11 @@ class Log:
     def __init__(self, child=False):
         '''コンストラクタ。'''
 
-        config = configparser.ConfigParser()
-        config.read('../env/config.ini')
-        self.DIR_LOG = config['path']['dir_log']
+        # 設定ファイルの読み込み
+        config = read_config_file()
+        self.PATH_DIR_LOG = config['path']['dir_log']
 
-        PATH_TO_LOG_FILE = self.DIR_LOG + datetime.today().strftime('%Y%m%d') + '.log'
+        PATH_TO_LOG_FILE = self.PATH_DIR_LOG + datetime.today().strftime('%Y%m%d') + '.log'
         # ログファイルの有効性チェック
         self.__check_status_of_log_file(PATH_TO_LOG_FILE)
 
@@ -110,9 +110,9 @@ class Log:
         :param str path_to_log: ログファイルへのパス。
         '''
 
-        if not os.path.exists(self.DIR_LOG):
+        if not os.path.exists(self.PATH_DIR_LOG):
             # ディレクトリの作成
-            os.mkdir(self.DIR_LOG)
+            os.mkdir(self.PATH_DIR_LOG)
             # logファイルの作成
             with open(path_to_log, 'w'):
                 pass

@@ -6,6 +6,19 @@ import configparser
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
+def read_config_file():
+    '''configファイルを読み込む関数。
+
+    :rtype: configparser.ConfigParser
+    :return: configファイル。
+    '''
+
+    # 設定ファイルの読み込み
+    config = configparser.ConfigParser()
+    config.read('../env/config.ini')
+
+    return config
+
 def connect_to_database():
     '''データベースへ接続する関数。
     コネクションの開放処理は呼び出し元で別途行う。
@@ -17,8 +30,7 @@ def connect_to_database():
     '''
 
     # 設定ファイルの読み込み
-    config = configparser.ConfigParser()
-    config.read('../env/config.ini')
+    config = read_config_file()
 
     # トレースバックの設定
     sqlite3.enable_callback_tracebacks(True)
@@ -39,7 +51,6 @@ def split(target: str, split_words: str) -> list:
 
     >>> split('test//sp"rit%st$ring', '/"%$')
     >>> ['test', 'sp', 'rit', 'st', 'ring']
-    >>>
     >>> ''.join(split('test//sp"rit%st$ring', '/"%$'))
     >>> testspritstring
 

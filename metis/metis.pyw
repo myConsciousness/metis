@@ -21,6 +21,14 @@ __date__ = '2018/04/21'
 class Command:
     '''アプリケーションのコマンド処理を定義するクラス。'''
 
+    def __init__(self):
+        '''コンストラクタ。'''
+
+        # 設定ファイルの読み込み
+        config = read_config_file()
+        self.PATH_DIR_LOG = config['path']['dir_log']
+        self.PATH_CRAWLER_MODULE = config['path']['crawler_module']
+
     def open(self):
         '''openボタン押下時の処理を定義。'''
 
@@ -103,18 +111,18 @@ class Command:
     def open_licence(self):
         '''ライセンスを記述したページを開く。'''
 
-        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/LICENSE')
+        webbrowser.open_new_tab('https://github.com/myConsciousness/metis/blob/master/LICENSE')
 
     def open_readme(self):
         '''readmeを記述したページを開く'''
 
-        webbrowser.open_new_tab('https://github.com/myConsciousness/search-tech-articles/blob/master/README.md')
+        webbrowser.open_new_tab('https://github.com/myConsciousness/metis/blob/master/README.md')
 
     def execute_crawling_hatena(self):
         '''hatenaへのクローリング処理を実行する'''
 
         if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
-            subprocess.Popen('python crawler.py')
+            subprocess.Popen('python ' + self.PATH_CRAWLER_MODULE)
 
     def read_log(self):
         '''readボタン押下時の処理を定義。'''
@@ -128,10 +136,10 @@ class Command:
             # ファイル名と拡張子を分割
             root, ext = os.path.splitext(input_date)
             date = ''.join(split(root, '-/., '))
-            path_name = '../log/' + date + '.log'
+            path_name = self.PATH_DIR_LOG + date + '.log'
         else:
             date = ''.join(split(input_date, '-/., '))
-            path_name = '../log/' + date + '.log'
+            path_name = self.PATH_DIR_LOG + date + '.log'
 
         if os.path.exists(path_name):
             text_lines = ''
@@ -146,7 +154,7 @@ class Command:
             # ログファイルが存在しなかった場合
             messagebox.showerror('ERR_NO_FILE_FOUND', 'Failed to open log file.\r\nNo such file or directory.')
 
-    def read_log_list(self):
+    def get_log_list(self):
         '''listボタン押下時の処理を定義'''
 
         if self.OutputTextLog.get('1.0',tkinter.END):
@@ -154,7 +162,7 @@ class Command:
             self.OutputTextLog.delete('1.0', tkinter.END)
 
         # logディレクトリ内のファイルを取得
-        log_files = os.listdir('../log')
+        log_files = os.listdir(self.PATH_DIR_LOG)
         for log in log_files:
             # ファイル名と拡張子を分割
             _, ext = os.path.splitext(log)
@@ -188,6 +196,9 @@ class Application(Command):
 
         '''
 
+        # 親クラスのコンストラクタを実行
+        super().__init__()
+
         # ログ出力のためインスタンス生成
         self.log = Log()
         self.log_msg = LogMessage()
@@ -195,18 +206,67 @@ class Application(Command):
         # クラス名
         self.CLASS_NAME = self.__class__.__name__
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
-
         # ARTICLE_INFO_HATENA.TBLのDAOクラス
         self.article_info_hatena_dao = ArticleInfoHatenaDao()
 
+    def execute_application(self):
+        '''アプリケーションを実行するメソッド。'''
+
+        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+                                self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
+
         self.root = tkinter.Tk()
+        # ウィンドウの閉じるボタンを無効化
         self.root.protocol('WM_DELETE_WINDOW', self.disable_close_button)
+        # エスケープキーに画面を閉じる機能を割り当て
         self.root.bind('<Escape>', lambda x: self.quit())
 
         # メニューバーの生成
         self.__create_menubar()
+        # アプリケーション画面の構築
+        self.__create_application()
+
+    def __create_menubar(self):
+        '''メニューバーを生成するメソッド。'''
+
+        menubar = Menu(self.root)
+
+        # ファイルメニュー
+        file_menu = Menu(menubar, tearoff=0)
+        file_menu.add_command(label='Parameters')
+        file_menu.add_separator()
+
+        file_menu.add_command(label='Exit', command=self.quit)
+        menubar.add_cascade(label='File', menu=file_menu)
+
+        # 編集メニュー
+        edit_menu = Menu(menubar, tearoff=0)
+        edit_menu.add_command(label='Copy Path', command=self.copy_url)
+        edit_menu.add_command(label='Copy Title', command=self.copy_title)
+        edit_menu.add_command(label='Copy Informations', command=self.copy_informations)
+        menubar.add_cascade(label='Edit', menu=edit_menu)
+
+        # 更新メニュー
+        crawler_menu = Menu(menubar, tearoff=0)
+        start_crawling = Menu(menubar, tearoff=0)
+        update_bookmarks = Menu(menubar, tearoff=0)
+        crawler_menu.add_cascade(label='Hatena', menu=start_crawling)
+        start_crawling.add_command(label='Start Crawling', command=self.execute_crawling_hatena)
+        start_crawling.add_command(label='Update Bookmarks')
+        menubar.add_cascade(label='Crawler', menu=crawler_menu)
+
+        # helpメニュー
+        help_menu = Menu(menubar, tearoff=0)
+        help_menu.add_command(label='Document', command=self.open_docs)
+        help_menu.add_command(label='About Software', command=self.open_readme)
+        help_menu.add_separator()
+        help_menu.add_command(label='Licence', command=self.open_licence)
+        menubar.add_cascade(label='Help', menu=help_menu)
+
+        self.root.config(menu=menubar)
+
+    def __create_application(self):
+        '''アプリケーション画面を構築するメソッド。'''
 
         notebook = ttk.Notebook(self.root, height=700, width=999)
         # top画面用のフレーム
@@ -352,50 +412,12 @@ class Application(Command):
         read_button = ttk.Button(parent, text='Read', width=10, command=self.read_log)
         read_button.place(relx=0.25, rely=0.88)
 
-        list_button = ttk.Button(parent, text='List', width=10, command=self.read_log_list)
+        list_button = ttk.Button(parent, text='List', width=10, command=self.get_log_list)
         list_button.place(relx=0.45, rely=0.88)
 
         quit_button = ttk.Button(parent, text='Quit', width=10, command=self.quit)
         quit_button.place(relx=0.65, rely=0.88)
 
-    def __create_menubar(self):
-        '''メニューバーの出力を定義するメソッド。'''
-
-        menubar = Menu(self.root)
-
-        # ファイルメニュー
-        file_menu = Menu(menubar, tearoff=0)
-        file_menu.add_command(label='Parameters')
-        file_menu.add_separator()
-
-        file_menu.add_command(label='Exit', command=self.quit)
-        menubar.add_cascade(label='File', menu=file_menu)
-
-        # 編集メニュー
-        edit_menu = Menu(menubar, tearoff=0)
-        edit_menu.add_command(label='Copy Path', command=self.copy_url)
-        edit_menu.add_command(label='Copy Title', command=self.copy_title)
-        edit_menu.add_command(label='Copy Informations', command=self.copy_informations)
-        menubar.add_cascade(label='Edit', menu=edit_menu)
-
-        # 更新メニュー
-        crawler_menu = Menu(menubar, tearoff=0)
-        start_crawling = Menu(menubar, tearoff=0)
-        update_bookmarks = Menu(menubar, tearoff=0)
-        crawler_menu.add_cascade(label='Hatena', menu=start_crawling)
-        start_crawling.add_command(label='Start Crawling', command=self.execute_crawling_hatena)
-        start_crawling.add_command(label='Update Bookmarks')
-        menubar.add_cascade(label='Crawler', menu=crawler_menu)
-
-        # helpメニュー
-        help_menu = Menu(menubar, tearoff=0)
-        help_menu.add_command(label='Document', command=self.open_docs)
-        help_menu.add_command(label='About Software', command=self.open_readme)
-        help_menu.add_separator()
-        help_menu.add_command(label='Licence', command=self.open_licence)
-        menubar.add_cascade(label='Help', menu=help_menu)
-
-        self.root.config(menu=menubar)
-
 if __name__ == '__main__':
-    Application()
+    app = Application()
+    app.execute_application()
