@@ -26,6 +26,8 @@ from urllib.parse import urlencode
 import html.parser as htmlparser
 import time
 import sys
+import tkinter
+from tkinter import messagebox
 from datetime import date, timedelta
 import sqlite3
 from tqdm import tqdm
@@ -444,7 +446,7 @@ class CrawlingHatena:
             self.root.withdraw()
             self.root.iconbitmap('../common/icon/python_icon.ico')
             messagebox.showerror('ERR_INTERNET_DISCONNECTED', \
-                                    'There is no Internet connection\r\n\r\n' \
+                                    'There is no Internet connection.\r\n\r\n' \
                                     'Try:\r\n' \
                                     '■Checking the network cables, modem, and router\r\n' \
                                     '■Reconnecting to Wi-Fi')

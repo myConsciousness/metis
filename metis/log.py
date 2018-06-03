@@ -73,7 +73,7 @@ class Log:
         :param Exception error_info: プロセス実行中に発生した例外情報。
         '''
 
-        self.logger.exception(e)
+        self.logger.exception(error_info)
 
     def location(self) -> list:
         '''実行中のメソッド名/関数名と行番号を返すメソッド。
