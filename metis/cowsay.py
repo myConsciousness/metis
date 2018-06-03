@@ -37,7 +37,7 @@ class Cowsay:
         :rtype: str
         :return: アスキー画像。
 
-        >>> cowsay('Helle World!')
+        >>> cowsay('Hello World!')
         >>>  ______________
         >>> < Hello World! >
         >>>  --------------

@@ -86,7 +86,7 @@ class CrawlingHatena:
                 print('Start the backup operation.............')
 
                 # ワークテーブルからバックアップ情報を移行させる
-                self.__transfer_article_info_from_work(conn, cursor)
+                self.__migrate_article_info_from_work(conn, cursor)
 
                 print('{} {} were added!'.format(count_records, 'records' if count_records else 'record'))
 
@@ -162,7 +162,7 @@ class CrawlingHatena:
                 count_inserted += self.__insert_article_info_to_work(conn, cursor, article_infos)
 
             # ワークテーブルから記事情報を移行させる
-            self.__transfer_article_info_from_work(conn, cursor)
+            self.__migrate_article_info_from_work(conn, cursor)
 
             print(cowsay.cowsay('Search word is {}.\n{} {} were addded!' \
                                     .format(word, count_inserted, 'records' if count_inserted > 1 else 'record')))
@@ -416,7 +416,7 @@ class CrawlingHatena:
 
         return count_inserted
 
-    def __transfer_article_info_from_work(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
+    def __migrate_article_info_from_work(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
         '''ワークテーブルからメインテーブルへ記事情報を移行させるメソッド。
 
         :param sqlite3.Connection conn: DBとのコネクション。
