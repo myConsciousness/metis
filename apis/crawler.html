@@ -311,6 +311,24 @@ URLを取得できなかった場合は、URL取得以降の処理を行わず�
 </dd></dl>
 
 <dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__migrate_article_info_from_work">
+<code class="descname">_CrawlingHatena__migrate_article_info_from_work</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__migrate_article_info_from_work" title="Permalink to this definition">¶</a></dt>
+<dd><p>ワークテーブルからメインテーブルへ記事情報を移行させるメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソルオブジェクト。</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="crawler.CrawlingHatena._CrawlingHatena__scrape_info_of_hatena">
 <code class="descname">_CrawlingHatena__scrape_info_of_hatena</code><span class="sig-paren">(</span><em>html: str</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__scrape_info_of_hatena" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTMLソースに対してスクレイピング処理を行うメソッド。</p>
@@ -330,24 +348,6 @@ URLを取得できなかった場合は、URL取得以降の処理を行わず�
 <span class="gp">&gt;&gt;&gt; </span><span class="p">[[</span><span class="n">URL</span><span class="p">,</span> <span class="n">TITLE</span><span class="p">,</span> <span class="n">PUBILISHED_DATE</span><span class="p">,</span> <span class="n">BOOKMARKS</span><span class="p">,</span> <span class="n">TAG</span><span class="p">],</span> <span class="p">[</span><span class="n">URL</span><span class="p">,</span> <span class="n">TITLE</span><span class="p">,</span> <span class="n">PUBILISHED_DATE</span><span class="p">,</span> <span class="n">BOOKMARKS</span><span class="p">,</span> <span class="n">TAG</span><span class="p">],</span><span class="o">...</span><span class="p">]</span>
 </pre></div>
 </div>
-</dd></dl>
-
-<dl class="method">
-<dt id="crawler.CrawlingHatena._CrawlingHatena__transfer_article_info_from_work">
-<code class="descname">_CrawlingHatena__transfer_article_info_from_work</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__transfer_article_info_from_work" title="Permalink to this definition">¶</a></dt>
-<dd><p>ワークテーブルからメインテーブルへ記事情報を移行させるメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
-<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソルオブジェクト。</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="method">

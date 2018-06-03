@@ -152,6 +152,12 @@
 <dd><p>Bases: <a class="reference internal" href="#metis.Command" title="metis.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">metis.Command</span></code></a></p>
 <p>GUIの出力処理を定義するクラス。</p>
 <dl class="method">
+<dt id="metis.Application._Application__create_application">
+<code class="descname">_Application__create_application</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_application" title="Permalink to this definition">¶</a></dt>
+<dd><p>アプリケーション画面を構築するメソッド。</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="metis.Application._Application__create_log_gui">
 <code class="descname">_Application__create_log_gui</code><span class="sig-paren">(</span><em>parent: tkinter.Frame</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_log_gui" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log検索画面の出力を定義するメソッド。</p>
@@ -168,7 +174,7 @@
 <dl class="method">
 <dt id="metis.Application._Application__create_menubar">
 <code class="descname">_Application__create_menubar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_menubar" title="Permalink to this definition">¶</a></dt>
-<dd><p>メニューバーの出力を定義するメソッド。</p>
+<dd><p>メニューバーを生成するメソッド。</p>
 </dd></dl>
 
 <dl class="method">
@@ -189,6 +195,12 @@
 <dt id="metis.Application._Application__refresh_tree_view">
 <code class="descname">_Application__refresh_tree_view</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__refresh_tree_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>取得した記事情報からツリービューを生成するメソッド。</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metis.Application.execute_application">
+<code class="descname">execute_application</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application.execute_application" title="Permalink to this definition">¶</a></dt>
+<dd><p>アプリケーションを実行するメソッド。</p>
 </dd></dl>
 
 </dd></dl>
@@ -241,6 +253,12 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="metis.Command.get_log_list">
+<code class="descname">get_log_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.get_log_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>listボタン押下時の処理を定義</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="metis.Command.open">
 <code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.open" title="Permalink to this definition">¶</a></dt>
 <dd><p>openボタン押下時の処理を定義。</p>
@@ -280,12 +298,6 @@
 <dt id="metis.Command.read_log">
 <code class="descname">read_log</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.read_log" title="Permalink to this definition">¶</a></dt>
 <dd><p>readボタン押下時の処理を定義。</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.Command.read_log_list">
-<code class="descname">read_log_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.read_log_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>listボタン押下時の処理を定義</p>
 </dd></dl>
 
 </dd></dl>

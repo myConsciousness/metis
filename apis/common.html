@@ -168,6 +168,22 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="common.read_config_file">
+<code class="descclassname">common.</code><code class="descname">read_config_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.read_config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>configファイルを読み込む関数。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">configparser.ConfigParser</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">configファイル。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="common.split">
 <code class="descclassname">common.</code><code class="descname">split</code><span class="sig-paren">(</span><em>target: str</em>, <em>split_words: str</em><span class="sig-paren">)</span> &#x2192; list<a class="headerlink" href="#common.split" title="Permalink to this definition">¶</a></dt>
 <dd><p>組み込みsplit関数の拡張関数。
@@ -192,7 +208,6 @@
 </table>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;test//sp&quot;rit</span><span class="si">%s</span><span class="s1">t$ring&#39;</span><span class="p">,</span> <span class="s1">&#39;/&quot;%$&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="s1">&#39;sp&#39;</span><span class="p">,</span> <span class="s1">&#39;rit&#39;</span><span class="p">,</span> <span class="s1">&#39;st&#39;</span><span class="p">,</span> <span class="s1">&#39;ring&#39;</span><span class="p">]</span>
-<span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;test//sp&quot;rit</span><span class="si">%s</span><span class="s1">t$ring&#39;</span><span class="p">,</span> <span class="s1">&#39;/&quot;%$&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">testspritstring</span>
 </pre></div>
