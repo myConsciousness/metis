@@ -71,11 +71,11 @@ class CrawlingHatena:
         # WORK_ARTICLE_INFO_HATENA.TBLのDAOクラス
         self.work_article_info_hatena_dao = WorkArticleInfoHatenaDao()
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
-
     def execute(self):
         '''クローリング処理を実行するメソッド。'''
+
+        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+                                self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
 
         try:
             conn, cursor = connect_to_database()
@@ -201,12 +201,12 @@ class CrawlingHatena:
                 # リストから探索処理の終了位置を取り出す
                 last_index_of_search = list_new_article_infos[0]
 
-                if last_index_of_search == -1:
-                    # ページ内の全情報を取得し終えた場合
-                    break
-                else:
+                if last_index_of_search != -1:
                     # 記事情報を取得できなかった場合
                     html = html[last_index_of_search:]
+                else:
+                    # ページ内の全情報を取得し終えた場合
+                    break
             else:
                 # リストから探索処理の終了位置を取り出す
                 last_index_of_search = list_new_article_infos.pop()
