@@ -2,6 +2,9 @@
 
 import sqlite3
 import configparser
+import string
+import random
+import hashlib
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
@@ -18,6 +21,35 @@ def read_config_file():
     config.read('../env/config.ini')
 
     return config
+
+def create_serial_number():
+    '''シリアル番号を生成する関数。
+
+    :rtype: str
+    :return: シリアル番号。
+    '''
+
+    return convert_to_hash_sha256(create_random_str(random.randint(40, 70)))
+
+def create_random_str(num_letters: int) -> str:
+    '''ランダムな文字列を生成する関数。
+
+    :param str num_letters: 生成する文字列の長さ。
+    :rtype: str
+    :return: 生成されたランダムな文字列。
+    '''
+
+    return ''.join([random.choice(string.ascii_letters + string.digits) for i in range(num_letters)])
+
+def convert_to_hash_sha256(message: str) -> str:
+    '''SHA256アルゴリズムを用いて文字列をハッシュ化する関数。
+
+    :param str message: ハッシュ化する文字列。
+    :rtype: str
+    :return: ハッシュ化された文字列。
+    '''
+
+    return hashlib.sha256(message.encode('cp932')).hexdigest()
 
 def connect_to_database():
     '''データベースへ接続する関数。

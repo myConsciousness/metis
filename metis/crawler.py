@@ -37,6 +37,7 @@ from common import *
 from sql import MstParameterDao
 from sql import ArticleInfoHatenaDao
 from sql import WorkArticleInfoHatenaDao
+from sql import ManageSerialDao
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
@@ -63,6 +64,11 @@ class CrawlingHatena:
 
         # インターネットとの疎通確認を行う
         self.__check_internet_connection()
+
+        # MANAGE_SERIAL.TBLのDAOクラス
+        self.manage_serial_dao = ManageSerialDao()
+        # シリアル番号の整合性チェックを行う
+        self.__check_serial_number(args)
 
         # MST_PARAMETER.TBLのDAOクラス
         self.mst_parameter_dao = MstParameterDao()
@@ -95,8 +101,8 @@ class CrawlingHatena:
             # hatenaへのクローリング処理を開始
             self.__crawl_hatena(conn, cursor)
 
-            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
+            # 管理テーブルからシリアル番号を消去
+            self.__flush_serial_number(conn, cursor)
         except sqlite3.Error as e:
             conn.rollback()
             self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
@@ -108,6 +114,8 @@ class CrawlingHatena:
             conn.close()
             self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                     self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
+            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+                                    self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
             time.sleep(3)
 
     def __crawl_hatena(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
@@ -442,9 +450,9 @@ class CrawlingHatena:
             with urlopen('http://info.cern.ch/'):
                 pass
         except URLError as e:
-            self.root = tkinter.Tk()
-            self.root.withdraw()
-            self.root.iconbitmap('../common/icon/python_icon.ico')
+            root = tkinter.Tk()
+            root.withdraw()
+            root.iconbitmap('../common/icon/python_icon.ico')
             messagebox.showerror('ERR_INTERNET_DISCONNECTED', \
                                     'There is no Internet connection.\r\n\r\n' \
                                     'Try:\r\n' \
@@ -454,6 +462,63 @@ class CrawlingHatena:
             self.__handling_url_exception(e)
             # 後続処理継続不可のためプロセス終了
             sys.exit()
+
+    def __check_serial_number(self, args: tuple):
+        '''クローラ起動のための整合性チェックを行う。
+
+        :param tuple args: 整合性チェック用のコマンドライン引数。
+        '''
+
+        try:
+            # データベースへの接続
+            conn, cursor = connect_to_database()
+
+            if len(args[0]) < 3:
+                # コマンドライン引数が指定数未満の場合
+                root = tkinter.Tk()
+                root.withdraw()
+                root.iconbitmap('../common/icon/python_icon.ico')
+                messagebox.showerror('ERR_INVALID_STARTUP', 'The application was unable to start correctly.')
+
+                # 管理テーブルからシリアル番号を消去
+                self.__flush_serial_number(conn, cursor)
+                # 不正な起動のためプロセス終了
+                sys.exit()
+            else:
+                # シリアル番号の取得
+                count_record = self.manage_serial_dao.count_records_by_primary_key(cursor, args[0][2])[0]
+
+                if count_record == 0:
+                    # 不正なシリアル番号の場合
+                    root = tkinter.Tk()
+                    root.withdraw()
+                    root.iconbitmap('../common/icon/python_icon.ico')
+                    messagebox.showerror('ERR_INVALID_SERIAL_NUMBER', 'The serial number is not valid for start up this module.')
+
+                    # 管理テーブルからシリアル番号を消去
+                    self.__flush_serial_number(conn, cursor)
+                    # 不正な起動のためプロセス終了
+                    sys.exit()
+
+        except sqlite3.Error as e:
+            self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
+                                    self.log.location(),self.log_msg.MSG_ERROR)
+            self.log.error(e)
+        finally:
+            conn.close()
+            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+                                    self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
+
+    def __flush_serial_number(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
+        '''シリアル番号管理テーブルから使用済みシリアル番号を削除するメソッド。
+
+        :param sqlite3.Connection conn: DBとのコネクション。
+        :param sqlite3.Cursor cursor: カーソルオブジェクト。
+        '''
+
+        # シリアル番号管理テーブルの中身を空にする
+        self.manage_serial_dao.delete_records(cursor)
+        conn.commit()
 
     def __handling_url_exception(self, e):
         '''通信処理における例外を処理するメソッド。
@@ -471,5 +536,5 @@ class CrawlingHatena:
             self.log.error(e.code)
 
 if __name__ == '__main__':
-    hatena = CrawlingHatena()
+    hatena = CrawlingHatena(sys.argv)
     hatena.execute()

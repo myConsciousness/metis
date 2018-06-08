@@ -47,6 +47,56 @@ class MstParameterDao:
 
         return cursor.fetchone()
 
+class ManageSerialDao:
+    '''MANAGE_SERIAL.TBLへのトランザクション処理を定義するDAOクラス。'''
+
+    def insert_serial_no(self, cursor: sqlite3.Cursor, serial_no: str):
+        '''生成したシリアル番号をMANAGE_SERIAL.TBLへ挿入するクエリ。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        :param str serial_no: クローラ起動用のシリアル番号。
+        '''
+
+        cursor.execute('''
+                        INSERT INTO
+                            MANAGE_SERIAL
+                        VALUES (
+                            ?,
+                            datetime('now', 'localtime')
+                        )
+                        ''',(serial_no,))
+
+    def count_records_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
+        '''主キーを用いてMANAGE_SERIAL.TBLから値を取得するクエリ。返り値はtuple型。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        :param str primary_key: 検索ワード。
+        :rtype: tuple
+        :return: 検索結果。
+        '''
+
+        cursor.execute('''
+                        SELECT
+                            COUNT(1)
+                        FROM
+                            MANAGE_SERIAL
+                        WHERE
+                            SERIAL_NO = ?
+                        ''', (primary_key,))
+
+        return cursor.fetchone()
+
+    def delete_records(self, cursor: sqlite3.Cursor):
+        '''MANAGE_SERIAL.TBLから全レコードを削除するクエリ。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        '''
+
+        cursor.execute('''
+                        DELETE FROM
+                            MANAGE_SERIAL
+                        ''')
+
 class ArticleInfoHatenaDao:
     '''ARTICLE_INFO_HATENA.TBLへのトランザクション処理を定義するDAOクラス。'''
 

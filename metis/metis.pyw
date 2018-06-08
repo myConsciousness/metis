@@ -12,8 +12,10 @@ from tkinter import N, S, W, E
 import tkinter.scrolledtext as tkst
 from log import LogLevel, Log, LogMessage
 import subprocess
+from functools import partial
 from common import *
 from sql import ArticleInfoHatenaDao
+from sql import ManageSerialDao
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
@@ -26,8 +28,20 @@ class Command:
 
         # 設定ファイルの読み込み
         config = read_config_file()
+        # ログファイルを格納したファイルへのパス
         self.PATH_DIR_LOG = config['path']['dir_log']
+        # クローラモジュールを格納したファイルへのパス
         self.PATH_CRAWLER_MODULE = config['path']['crawler_module']
+
+        # ドキュメントへのURL
+        self.URL_DOCS = 'https://myconsciousness.github.io/metis/index.html'
+        # ライセンスを定義したテキストへのURL
+        self.URL_LICENSE = 'https://github.com/myConsciousness/metis/blob/master/LICENSE'
+        # readmeを定義したmdファイルへのURL
+        self.URL_README = 'https://github.com/myConsciousness/metis/blob/master/README.md'
+
+        # MANAGE_SERIAL.TBLのDAOクラス
+        self.manage_serial_dao = ManageSerialDao()
 
     def open(self):
         '''openボタン押下時の処理を定義。'''
@@ -38,7 +52,7 @@ class Command:
         if item_dict['values']:
             url = item_dict['values'][3]
 
-            webbrowser.open_new_tab(url)
+            self.open_new_tab(url)
 
     def flush(self):
         '''flushボタン押下時の処理を定義。'''
@@ -68,7 +82,7 @@ class Command:
 
             pyperclip.copy(title)
 
-    def copy_informations(self):
+    def copy_information(self):
         '''タイトル、URL、ブックマーク数をコピーする処理を定義。'''
 
         # フォーカス部分の要素を辞書として取得
@@ -90,7 +104,7 @@ class Command:
         if item_dict['values']:
             url = item_dict['values'][3]
 
-            webbrowser.open_new_tab(url)
+            self.open_new_tab(url)
 
     def copy_by_right_click(self, event):
         '''右クリック時に発生する処理を定義。'''
@@ -103,35 +117,51 @@ class Command:
 
             pyperclip.copy(url)
 
-    def open_docs(self):
-        '''ドキュメントを記述したページを開く。'''
+    def open_new_tab(self, url: str):
+        '''引数で渡されたURLを新しいタブで開く。
 
-        webbrowser.open_new_tab('https://myconsciousness.github.io/metis/index.html')
+        :param str url: 対象URL。
+        '''
 
-    def open_licence(self):
-        '''ライセンスを記述したページを開く。'''
+        webbrowser.open_new_tab(url)
 
-        webbrowser.open_new_tab('https://github.com/myConsciousness/metis/blob/master/LICENSE')
+    def execute_crawler(self, order: str):
+        '''オーダに応じたクローリング処理を行う。
 
-    def open_readme(self):
-        '''readmeを記述したページを開く'''
+        :param str order: クローラの振る舞いを蹴っているするオーダ。
+        '''
 
-        webbrowser.open_new_tab('https://github.com/myConsciousness/metis/blob/master/README.md')
+        try:
+            conn, cursor = connect_to_database()
+            # シリアル番号の生成
+            serial_number = create_serial_number()
 
-    def execute_crawling_hatena(self):
-        '''hatenaへのクローリング処理を実行する'''
+            # クローラ起動のためのシリアル番号を管理テーブルに登録する
+            self.manage_serial_dao.insert_serial_no(cursor, serial_number)
+            conn.commit()
+        except sqlite3.Error as e:
+            self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
+                                    self.log.location(),self.log_msg.MSG_ERROR)
+            self.log.error(e)
+        finally:
+            conn.close()
+            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+                                    self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
 
-        if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
-            subprocess.Popen('python ' + self.PATH_CRAWLER_MODULE)
+        if order == '0':
+            if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
+                subprocess.Popen('python {} {} {}'.format(self.PATH_CRAWLER_MODULE, order, 'aaaa'))
+        elif order == '1':
+            pass
 
     def read_log(self):
         '''readボタン押下時の処理を定義。'''
 
-        if self.OutputTextLog.get('1.0',tkinter.END):
+        if self.output_text_log.get('1.0',tkinter.END):
             # テキストフォームの初期化
-            self.OutputTextLog.delete('1.0', tkinter.END)
+            self.output_text_log.delete('1.0', tkinter.END)
 
-        input_date = self.inputDate.get()
+        input_date = self.input_date.get()
         if '.log' in input_date:
             # ファイル名と拡張子を分割
             root, ext = os.path.splitext(input_date)
@@ -148,8 +178,8 @@ class Command:
 
             # 取得した行数分だけ処理
             for line in text_lines:
-                self.OutputTextLog.insert(tkinter.END, line)
-            self.OutputTextLog.pack()
+                self.output_text_log.insert(tkinter.END, line)
+            self.output_text_log.pack()
         else:
             # ログファイルが存在しなかった場合
             messagebox.showerror('ERR_NO_FILE_FOUND', 'Failed to open log file.\r\nNo such file or directory.')
@@ -157,9 +187,9 @@ class Command:
     def get_log_list(self):
         '''listボタン押下時の処理を定義'''
 
-        if self.OutputTextLog.get('1.0',tkinter.END):
+        if self.output_text_log.get('1.0',tkinter.END):
             # テキストフォームの初期化
-            self.OutputTextLog.delete('1.0', tkinter.END)
+            self.output_text_log.delete('1.0', tkinter.END)
 
         # logディレクトリ内のファイルを取得
         log_files = os.listdir(self.PATH_DIR_LOG)
@@ -167,8 +197,8 @@ class Command:
             # ファイル名と拡張子を分割
             _, ext = os.path.splitext(log)
             if ext == '.log':
-                self.OutputTextLog.insert(tkinter.END, log + '\r\n')
-        self.OutputTextLog.pack()
+                self.output_text_log.insert(tkinter.END, log + '\r\n')
+        self.output_text_log.pack()
 
     def quit(self):
         '''quitボタン押下時の処理を定義。'''
@@ -223,8 +253,8 @@ class Application(Command):
 
         # メニューバーの生成
         self.__create_menubar()
-        # アプリケーション画面の構築
-        self.__create_application()
+        # ウィンドウの構築
+        self.__create_window()
 
     def __create_menubar(self):
         '''メニューバーを生成するメソッド。'''
@@ -242,7 +272,7 @@ class Application(Command):
         edit_menu = Menu(menubar, tearoff=0)
         edit_menu.add_command(label='Copy Path', command=self.copy_url)
         edit_menu.add_command(label='Copy Title', command=self.copy_title)
-        edit_menu.add_command(label='Copy Informations', command=self.copy_informations)
+        edit_menu.add_command(label='Copy Informations', command=self.copy_information)
         menubar.add_cascade(label='Edit', menu=edit_menu)
 
         # クローラメニュー
@@ -250,38 +280,38 @@ class Application(Command):
         start_crawling = Menu(menubar, tearoff=0)
         update_bookmarks = Menu(menubar, tearoff=0)
         crawler_menu.add_cascade(label='Hatena', menu=start_crawling)
-        start_crawling.add_command(label='Start Crawling', command=self.execute_crawling_hatena)
-        start_crawling.add_command(label='Update Bookmarks')
+        start_crawling.add_command(label='Start Crawling', command=partial(self.execute_crawler, '0'))
+        start_crawling.add_command(label='Update Bookmarks', command=partial(self.execute_crawler, '1'))
         menubar.add_cascade(label='Crawler', menu=crawler_menu)
 
         # helpメニュー
         help_menu = Menu(menubar, tearoff=0)
-        help_menu.add_command(label='Document', command=self.open_docs)
-        help_menu.add_command(label='About Software', command=self.open_readme)
+        help_menu.add_command(label='Document', command=partial(self.open_new_tab, self.URL_DOCS))
+        help_menu.add_command(label='About Software', command=partial(self.open_new_tab, self.URL_README))
         help_menu.add_separator()
-        help_menu.add_command(label='Licence', command=self.open_licence)
+        help_menu.add_command(label='License', command=partial(self.open_new_tab, self.URL_LICENSE))
         menubar.add_cascade(label='Help', menu=help_menu)
 
         self.root.config(menu=menubar)
 
-    def __create_application(self):
-        '''アプリケーション画面を構築するメソッド。'''
+    def __create_window(self):
+        '''ウィンドウを構築するメソッド。'''
 
         notebook = ttk.Notebook(self.root, height=700, width=999)
         # top画面用のフレーム
-        frameUpdateArticles = tkinter.Frame(notebook, bd=2, relief='groove')
+        frame_update_articles = tkinter.Frame(notebook, bd=2, relief='groove')
         # log検索画面用のフレーム
-        frameShowLog = tkinter.Frame(notebook, bd=2, relief='groove')
+        frame_show_log = tkinter.Frame(notebook, bd=2, relief='groove')
 
         # top画面用のタブ
-        notebook.add(frameUpdateArticles, text='Top')
+        notebook.add(frame_update_articles, text='Top')
         # log検索画面用のタブ
-        notebook.add(frameShowLog, text='Log')
+        notebook.add(frame_show_log, text='Log')
 
         # TOP画面の作成
-        self.__create_top_gui(frameUpdateArticles)
+        self.__create_top_gui(frame_update_articles)
         # ログ出力画面の作成
-        self.__create_log_gui(frameShowLog)
+        self.__create_log_gui(frame_show_log)
 
         notebook.grid(row=0, column=0, sticky=N+S+W+E)
 
@@ -301,12 +331,14 @@ class Application(Command):
 
         tkinter.Label(parent).pack()
         # 最大表示件数入力フォームの設定
-        lblSearchTerms = tkinter.Label(parent, font=('Consolas', 10),text='Enter search terms')
-        lblSearchTerms.pack()
-        self.btnSearchTerms = ttk.Entry(parent, justify='center', width=40)
+        lbl_search_terms = tkinter.Label(parent, font=('Consolas', 10),text='Enter search terms')
+        lbl_search_terms.pack()
+        self.btn_search_terms = ttk.Entry(parent, justify='center', width=40)
         # リターンキー押下で検索を開始するように設定
-        self.btnSearchTerms.bind('<Return>', lambda x: self.__refresh_tree_view())
-        self.btnSearchTerms.pack()
+        self.btn_search_terms.bind('<Return>', lambda x: self.__refresh_tree_view())
+        # 画面開設時のフォーカスを入力欄に設定する
+        self.btn_search_terms.focus_set()
+        self.btn_search_terms.pack()
 
         # 検索ボタン
         search_button = ttk.Button(parent, text='Search', width=10, command=self.__refresh_tree_view)
@@ -367,7 +399,8 @@ class Application(Command):
     def __refresh_tree_view(self):
         '''取得した記事情報からツリービューを生成するメソッド。'''
 
-        search_word = self.btnSearchTerms.get()
+        # 検索ワードの取得
+        search_word = self.btn_search_terms.get()
         if search_word:
             # ツリービューの初期化
             self.tree.delete(*self.tree.get_children())
@@ -411,18 +444,19 @@ class Application(Command):
         '''
 
         # 入力フォームの設定
-        lblDate = tkinter.Label(parent, font=('Consolas', 10), text='Enter the date')
-        lblDate.pack()
-        self.inputDate = ttk.Entry(parent, font=('Consolas', 10), justify='center', width=20)
-        self.inputDate.insert(tkinter.END, datetime.today().strftime('%Y/%m/%d'))
-        self.inputDate.bind('<Leave>', lambda x: self.read_log())
-        self.inputDate.pack()
+        lbl_date = tkinter.Label(parent, font=('Consolas', 10), text='Enter the date')
+        lbl_date.pack()
+        self.input_date = ttk.Entry(parent, font=('Consolas', 10), justify='center', width=20)
+        self.input_date.insert(tkinter.END, datetime.today().strftime('%Y/%m/%d'))
+        self.input_date.bind('<Leave>', lambda x: self.read_log())
+        self.input_date.focus_set()
+        self.input_date.pack()
 
         # 出力用フォームの設定
-        frameTextLog = tkinter.Frame(parent, pady=10, bd=0)
-        frameTextLog.pack()
-        self.OutputTextLog = tkst.ScrolledText(frameTextLog, font=('Consolas', 10), height=35, width=130)
-        self.OutputTextLog.pack()
+        frame_text_log = tkinter.Frame(parent, pady=10, bd=0)
+        frame_text_log.pack()
+        self.output_text_log = tkst.ScrolledText(frame_text_log, font=('Consolas', 10), height=35, width=130)
+        self.output_text_log.pack()
 
         read_button = ttk.Button(parent, text='Read', width=10, command=self.read_log)
         read_button.place(relx=0.25, rely=0.88)
