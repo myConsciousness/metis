@@ -100,7 +100,6 @@ class CrawlingHatena:
 
             # hatenaへのクローリング処理を開始
             self.__crawl_hatena(conn, cursor)
-
             # 管理テーブルからシリアル番号を消去
             self.__flush_serial_number(conn, cursor)
         except sqlite3.Error as e:
