@@ -141,7 +141,7 @@ class CommunicateBase:
             return html
         except URLError as e:
             # 接続エラー
-            self.handling_url_exception(e)
+            self.__handling_url_exception(e)
             return ''
 
     def edit_html(self, html: str, start_name: str, end_name: str) -> str:
@@ -159,7 +159,7 @@ class CommunicateBase:
 
         return html[start_idx+1:end_idx]
 
-    def handling_url_exception(self, e):
+    def __handling_url_exception(self, e):
         '''通信処理における例外を処理するメソッド。
 
         :param urllib.error.URLError e: 通信処理において発生した例外情報。
@@ -193,7 +193,7 @@ class CommunicateBase:
                                     '■Checking the network cables, modem, and router\r\n' \
                                     '■Reconnecting to Wi-Fi')
 
-            self.handling_url_exception(e)
+            self.__handling_url_exception(e)
             # 後続処理継続不可のためプロセス終了
             sys.exit()
 
@@ -632,7 +632,7 @@ class UpdateBookmarks(CommunicateBase):
             time.sleep(3)
 
     def __update_bookmarks(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
-        '''ボックマーク数の更新処理を行うメソッド。
+        '''ブックマーク数の更新処理を行うメソッド。
 
         :param sqlite3.Connection conn: DBとのコネクション。
         :param sqlite3.Cursor cursor: カーソル。
