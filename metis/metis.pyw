@@ -20,11 +20,11 @@ from sql import ManageSerialDao
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
-class Command:
-    '''アプリケーションのコマンド処理を定義するクラス。'''
+class CommandBase:
+    '''アプリケーションのコマンド処理を定義する基底クラス。'''
 
     def __init__(self):
-        '''コンストラクタ。'''
+        '''基底クラスのコンストラクタ。'''
 
         # 設定ファイルの読み込み
         config = read_config_file()
@@ -39,6 +39,9 @@ class Command:
         self.URL_LICENSE = 'https://github.com/myConsciousness/metis/blob/master/LICENSE'
         # readmeを定義したmdファイルへのURL
         self.URL_README = 'https://github.com/myConsciousness/metis/blob/master/README.md'
+
+        # 基底クラス名
+        self.BASE_CLASS_NAME = 'CommandBase'
 
         # MANAGE_SERIAL.TBLのDAOクラス
         self.manage_serial_dao = ManageSerialDao()
@@ -136,23 +139,27 @@ class Command:
             # シリアル番号の生成
             serial_number = create_serial_number()
 
+            # シリアル番号登録前の管理テーブルは常に空であることを想定している
+            # 空でない場合はレコードの削除処理を行う
+            if self.manage_serial_dao.count_records(cursor) != 0:
+                self.manage_serial_dao.delete_records(cursor)
+
             # クローラ起動のためのシリアル番号を管理テーブルに登録する
             self.manage_serial_dao.insert_serial_no(cursor, serial_number)
             conn.commit()
         except sqlite3.Error as e:
-            self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
+            self.log.normal(LogLevel.ERROR.value, self.BASE_CLASS_NAME, \
                                     self.log.location(),self.log_msg.MSG_ERROR)
             self.log.error(e)
         finally:
             conn.close()
-            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+            self.log.normal(LogLevel.INFO.value, self.BASE_CLASS_NAME, \
                                     self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
 
-        if order == '0':
-            if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
-                subprocess.Popen('python {} {} {}'.format(self.PATH_CRAWLER_MODULE, order, 'aaaa'))
-        elif order == '1':
-            pass
+        # 実行コマンド
+        cmd = 'python {} {} {}'
+        if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
+            subprocess.Popen(cmd.format(self.PATH_CRAWLER_MODULE, order, serial_number))
 
     def read_log(self):
         '''readボタン押下時の処理を定義。'''
@@ -203,7 +210,7 @@ class Command:
     def quit(self):
         '''quitボタン押下時の処理を定義。'''
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+        self.log.normal(LogLevel.INFO.value, self.BASE_CLASS_NAME, \
                                 self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
 
         # 処理終了
@@ -215,7 +222,7 @@ class Command:
         messagebox.showerror('ERR_BUTTON_LIMITED', \
                                 'Use Quit button or Esc key to close the window.')
 
-class Application(Command):
+class Application(CommandBase):
     '''GUIの出力処理を定義するクラス。'''
 
     def __init__(self, *args, **kwargs):
@@ -226,7 +233,7 @@ class Application(Command):
 
         '''
 
-        # 親クラスのコンストラクタを実行
+        # 基底クラスのコンストラクタを実行
         super().__init__()
 
         # ログ出力のためインスタンス生成

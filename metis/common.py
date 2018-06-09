@@ -51,10 +51,11 @@ def convert_to_hash_sha256(message: str) -> str:
 
     return hashlib.sha256(message.encode('cp932')).hexdigest()
 
-def connect_to_database():
+def connect_to_database(isolation_level='EXCLUSIVE'):
     '''データベースへ接続する関数。
     コネクションの開放処理は呼び出し元で別途行う。
 
+    :param str isolation_level: トランザクション分離レベルを指定する。初期値は'EXCLUSIVE'。
     :rtype: sqlite3.Cursor
     :rtype: sqlite3.Connection
     :return: コネクション。
@@ -67,7 +68,7 @@ def connect_to_database():
     # トレースバックの設定
     sqlite3.enable_callback_tracebacks(True)
 
-    conn = sqlite3.connect(config['path']['database'])
+    conn = sqlite3.connect(config['path']['database'], isolation_level=isolation_level)
     cursor = conn.cursor()
 
     return conn, cursor

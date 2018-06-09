@@ -42,14 +42,36 @@ from sql import ManageSerialDao
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
-class CrawlingHatena:
-    '''Hatenaへのクローリング処理を定義するクラス。'''
-
-    # UserAgent定義
-    DEF_USER_AGENT = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'}
+class CrawlHandler:
+    '''処理オーダ毎にクローラの振る舞いを決定するクラス。'''
 
     def __init__(self, *args, **kwargs):
-        '''コンストラクタ。コンストラクタ内で疎通確認に失敗した場合は後続処理を行わない。
+        '''コンストラクタ。
+
+        :param tuple args: タプルの可変長引数。
+        :param dict kwargs: 辞書の可変長引数。
+        '''
+
+        # 処理オーダ
+        self.__order = args[0][1]
+        # 制御開始
+        self.__handle_proc(args[0])
+
+    def __handle_proc(self, args):
+
+        if self.__order == '0':
+            crawler = CrawlingHatena(args)
+            crawler.execute()
+        elif self.__order == '1':
+            crawler = UpdateBookmarks(args)
+            crawler.execute()
+
+class CommunicateBase:
+    '''通信処理を定義する基底クラス。'''
+
+    def __init__(self, *args, **kwargs):
+        '''コンストラクタ。
+        コンストラクタ内で疎通確認に失敗した場合は後続処理を行わない。
 
         :param tuple args: タプルの可変長引数。
         :param dict kwargs: 辞書の可変長引数。
@@ -59,8 +81,8 @@ class CrawlingHatena:
         self.log = Log(child=True)
         self.log_msg = LogMessage()
 
-        # クラス名
-        self.CLASS_NAME = self.__class__.__name__
+        # 基底クラス名
+        self.BASE_CLASS_NAME = 'CommunicateBase'
 
         # インターネットとの疎通確認を行う
         self.__check_internet_connection()
@@ -70,12 +92,178 @@ class CrawlingHatena:
         # シリアル番号の整合性チェックを行う
         self.__check_serial_number(args)
 
+        # UserAgent定義
+        self.DEF_USER_AGENT = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'}
+        # Hatenaブックマーク数取得API
+        self.HATENA_BOOKMARK_API = 'http://api.b.st-hatena.com/entry.count'
+
         # MST_PARAMETER.TBLのDAOクラス
         self.mst_parameter_dao = MstParameterDao()
         # ARTICLE_INFO_HATENA.TBLのDAOクラス
         self.article_info_hatena_dao = ArticleInfoHatenaDao()
         # WORK_ARTICLE_INFO_HATENA.TBLのDAOクラス
         self.work_article_info_hatena_dao = WorkArticleInfoHatenaDao()
+
+    def get_html(self, url: str, params={}, headers={}) -> str:
+        '''HTTP(s)通信を行いWebサイトからHTMLソースを取得するメソッド。
+        decode時に引数として'ignore'を渡しているのは、
+        APIからプレーンテキストを取得する際に文字コードを取得できないことによって、
+        プログラムが異常終了するのを防ぐため。
+        接続エラー時には空文字を返す。
+
+        :param str url: 取得対象URL。
+        :param dict params: パラメータ生成用辞書。初期値は空の辞書。
+        :param dict headers: ヘッダ生成用辞書。初期値は空の辞書。
+        :rtype: str
+        :return: 対象URLにHTTP(s)通信を行い取得したHTMLソース。
+        '''
+
+        # 接続先URL
+        url = '{}?{}'.format(url, urlencode(params))
+
+        # デバッグログ
+        self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.BASE_CLASS_NAME ))
+        self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
+        self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.BASE_CLASS_NAME))
+
+        try:
+            with urlopen(Request(url=url, headers=headers)) as source:
+                # リソースから文字コードを取得
+                charset = source.headers.get_content_charset(failobj='utf-8')
+                # リソースをbytes型からString型にデコード
+                html = source.read().decode(charset, 'ignore')
+            return html
+        except URLError as e:
+            # 接続エラー
+            self.handling_url_exception(e)
+            return ''
+
+    def edit_html(self, html: str, start_name: str, end_name: str) -> str:
+        '''取得したHTMLをスクレイピング用に加工するメソッド。
+
+        :param str html: 編集対象HTML
+        :param str start_name: 切り取り対象の開始名。
+        :param str end_name: 切り取り対象の終了名。
+        :rtype: str
+        :return: スクレイピング用に加工したHTMLソース。
+        '''
+
+        start_idx = html.find(start_name)
+        end_idx = html.find(end_name, start_idx)
+
+        return html[start_idx+1:end_idx]
+
+    def handling_url_exception(self, e):
+        '''通信処理における例外を処理するメソッド。
+
+        :param urllib.error.URLError e: 通信処理において発生した例外情報。
+        '''
+
+        if hasattr(e, 'reason'):
+            self.log.normal(LogLevel.CRITICAL.value, self.BASE_CLASS_NAME, \
+                                    self.log.location(), self.log_msg.MSG_NO_SERVER_FOUND)
+            self.log.error(e.reason)
+        elif hasattr(e, 'code'):
+            self.log.normal(LogLevel.CRITICAL.value, self.BASE_CLASS_NAME, \
+                                    self.log.location(), self.log_msg.MSG_NO_RESPONSE)
+            self.log.error(e.code)
+
+    def __check_internet_connection(self):
+        '''インターネットとの疎通確認を行うメソッド。
+        疎通確認に失敗した場合は後続処理が不可能なためプロセスを終了させる。
+        '''
+
+        try:
+            # 疎通確認
+            with urlopen('http://info.cern.ch/'):
+                pass
+        except URLError as e:
+            root = tkinter.Tk()
+            root.withdraw()
+            root.iconbitmap('../common/icon/python_icon.ico')
+            messagebox.showerror('ERR_INTERNET_DISCONNECTED', \
+                                    'There is no Internet connection.\r\n\r\n' \
+                                    'Try:\r\n' \
+                                    '■Checking the network cables, modem, and router\r\n' \
+                                    '■Reconnecting to Wi-Fi')
+
+            self.handling_url_exception(e)
+            # 後続処理継続不可のためプロセス終了
+            sys.exit()
+
+    def __check_serial_number(self, args: tuple):
+        '''クローラ起動のための整合性チェックを行う。
+
+        :param tuple args: 整合性チェック用のコマンドライン引数。
+        '''
+
+        try:
+            # データベースへの接続
+            conn, cursor = connect_to_database()
+
+            if len(args[0]) < 3:
+                # コマンドライン引数が指定数未満の場合
+                root = tkinter.Tk()
+                root.withdraw()
+                root.iconbitmap('../common/icon/python_icon.ico')
+                messagebox.showerror('ERR_INVALID_STARTUP', 'The application was unable to start correctly.')
+
+                # 管理テーブルからシリアル番号を消去
+                self.flush_serial_number(conn, cursor)
+                # 不正な起動のためプロセス終了
+                sys.exit()
+            else:
+                # シリアル番号の取得
+                count_record = self.manage_serial_dao.count_records_by_primary_key(cursor, args[0][2])[0]
+
+                if count_record == 0:
+                    # 不正なシリアル番号の場合
+                    root = tkinter.Tk()
+                    root.withdraw()
+                    root.iconbitmap('../common/icon/python_icon.ico')
+                    messagebox.showerror('ERR_INVALID_SERIAL_NUMBER', 'The serial number is not valid for start up this module.')
+
+                    # 管理テーブルからシリアル番号を消去
+                    self.flush_serial_number(conn, cursor)
+                    # 不正な起動のためプロセス終了
+                    sys.exit()
+
+        except sqlite3.Error as e:
+            self.log.normal(LogLevel.ERROR.value, self.BASE_CLASS_NAME, \
+                                    self.log.location(),self.log_msg.MSG_ERROR)
+            self.log.error(e)
+        finally:
+            conn.close()
+            self.log.normal(LogLevel.INFO.value, self.BASE_CLASS_NAME, \
+                                    self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
+
+    def flush_serial_number(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
+        '''シリアル番号管理テーブルから使用済みシリアル番号を削除するメソッド。
+
+        :param sqlite3.Connection conn: DBとのコネクション。
+        :param sqlite3.Cursor cursor: カーソルオブジェクト。
+        '''
+
+        # シリアル番号管理テーブルの中身を空にする
+        self.manage_serial_dao.delete_records(cursor)
+        conn.commit()
+
+class CrawlingHatena(CommunicateBase):
+    '''Hatenaへのクローリング処理を定義するクラス。'''
+
+    def __init__(self, *args, **kwargs):
+        '''コンストラクタ。
+        基底コンストラクタ内で疎通確認に失敗した場合は後続処理を行わない。
+
+        :param tuple args: タプルの可変長引数。
+        :param dict kwargs: 辞書の可変長引数。
+        '''
+
+        # 基底クラスのコンストラクタを実行
+        super().__init__(args[0])
+
+        # クラス名
+        self.CLASS_NAME = 'CrawlingHatena'
 
     def execute(self):
         '''クローリング処理を実行するメソッド。'''
@@ -101,7 +289,7 @@ class CrawlingHatena:
             # hatenaへのクローリング処理を開始
             self.__crawl_hatena(conn, cursor)
             # 管理テーブルからシリアル番号を消去
-            self.__flush_serial_number(conn, cursor)
+            self.flush_serial_number(conn, cursor)
         except sqlite3.Error as e:
             conn.rollback()
             self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
@@ -161,9 +349,9 @@ class CrawlingHatena:
                         }
 
                 # htmlを取得し抽出用に加工
-                html = self.__get_html('http://b.hatena.ne.jp/search/tag', params)
+                html = self.get_html(url='http://b.hatena.ne.jp/search/tag', params=params, headers=self.DEF_USER_AGENT)
                 # 取得したhtmlをスクレイピング用に加工する
-                html = self.__edit_html(html, 'class="entrysearch-articles"', 'class="centerarticle-pager"')
+                html = self.edit_html(html, 'class="entrysearch-articles"', 'class="centerarticle-pager"')
 
                 # スクレイピング処理
                 article_infos = self.__scrape_info_of_hatena(html)
@@ -276,7 +464,7 @@ class CrawlingHatena:
 
             # APIからブックマーク数の取得
             params = {'url' : url}
-            count_bookmark = self.__get_html(url='http://api.b.st-hatena.com/entry.count', params=params)
+            count_bookmark = self.get_html(url=self.HATENA_BOOKMARK_API, params=params, headers=self.DEF_USER_AGENT)
             # ブックマーク数が0の場合はAPIが空を返すため値の変換処理を行う
             count_bookmark = count_bookmark if count_bookmark else '0'
             list_article_infos.append(count_bookmark)
@@ -302,7 +490,9 @@ class CrawlingHatena:
                 start_index_of_anchor = html_of_tags.find('<a', end_index_of_tag)
             else:
                 # タグの取得処理完了後処理
-                tags = ','.join(list_of_tags)
+                tags = ','.join(list_of_tags).encode('cp932', 'ignore').decode('cp932')
+                # UnicodeDecodeError回避のために変換処理を行う
+                tags = tags.encode('cp932', 'ignore').decode('cp932')
                 list_article_infos.append(tags)
 
             # 当該処理終了位置の取得と保存
@@ -329,55 +519,6 @@ class CrawlingHatena:
             return [html.find('class="bookmark-item', start_search_index)]
 
         return list_article_infos
-
-    def __get_html(self, url: str, params={}, headers=DEF_USER_AGENT) -> str:
-        '''HTTP(s)通信を行いWebサイトからHTMLソースを取得するメソッド。
-        decode時に引数として'ignore'を渡しているのは、
-        APIからプレーンテキストを取得する際に文字コードを取得できないことによって、
-        プログラムが異常終了するのを防ぐため。
-        接続エラー時には空文字を返す。
-
-        :param str url: 取得対象URL。
-        :param dict params: パラメータ生成用辞書。初期値は空の辞書。
-        :param dict headers: ヘッダ生成用辞書。初期値は定数"UserAgent定義"。
-        :rtype: str
-        :return: 対象URLにHTTP(s)通信を行い取得したHTMLソース。
-        '''
-
-        # 接続先URL
-        url = '{}?{}'.format(url, urlencode(params))
-
-        # デバッグログ
-        self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
-        self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
-        self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
-
-        try:
-            with urlopen(Request(url=url, headers=headers)) as source:
-                # リソースから文字コードを取得
-                charset = source.headers.get_content_charset(failobj='utf-8')
-                # リソースをbytes型からString型にデコード
-                html = source.read().decode(charset, 'ignore')
-            return html
-        except URLError as e:
-            # 接続エラー
-            self.__handling_url_exception(e)
-            return ''
-
-    def __edit_html(self, html: str, start_name: str, end_name: str) -> str:
-        '''取得したHTMLをスクレイピング用に加工するメソッド。
-
-        :param str html: 編集対象HTML
-        :param str start_name: 切り取り対象の開始名。
-        :param str end_name: 切り取り対象の終了名。
-        :rtype: str
-        :return: スクレイピング用に加工したHTMLソース。
-        '''
-
-        start_idx = html.find(start_name)
-        end_idx = html.find(end_name, start_idx)
-
-        return html[start_idx+1:end_idx]
 
     def __insert_article_info_to_work(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor, article_infos: list) -> int:
         '''ワークテーブルへ記事情報を登録するメソッド。
@@ -439,101 +580,85 @@ class CrawlingHatena:
         # 移行処理終了
         conn.commit()
 
-    def __check_internet_connection(self):
-        '''インターネットとの疎通確認を行うメソッド。
-        疎通確認に失敗した場合は後続処理が不可能なためプロセスを終了させる。
+class UpdateBookmarks(CommunicateBase):
+    '''クローリング済みブックマーク数の更新処理を定義するクラス。'''
+
+    def __init__(self, *args, **kwargs):
+        '''コンストラクタ。
+        基底コンストラクタ内で疎通確認に失敗した場合は後続処理を行わない。
+
+        :param tuple args: タプルの可変長引数。
+        :param dict kwargs: 辞書の可変長引数。
         '''
 
-        try:
-            # 疎通確認
-            with urlopen('http://info.cern.ch/'):
-                pass
-        except URLError as e:
-            root = tkinter.Tk()
-            root.withdraw()
-            root.iconbitmap('../common/icon/python_icon.ico')
-            messagebox.showerror('ERR_INTERNET_DISCONNECTED', \
-                                    'There is no Internet connection.\r\n\r\n' \
-                                    'Try:\r\n' \
-                                    '■Checking the network cables, modem, and router\r\n' \
-                                    '■Reconnecting to Wi-Fi')
+        # 基底クラスのコンストラクタを実行
+        super().__init__(args[0])
 
-            self.__handling_url_exception(e)
-            # 後続処理継続不可のためプロセス終了
-            sys.exit()
+        # クラス名
+        self.CLASS_NAME = 'UpdateBookmarks'
 
-    def __check_serial_number(self, args: tuple):
-        '''クローラ起動のための整合性チェックを行う。
+    def execute(self):
+        '''ブックマーク数の更新処理を実行するメソッド。'''
 
-        :param tuple args: 整合性チェック用のコマンドライン引数。
-        '''
+        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+                                self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
 
         try:
-            # データベースへの接続
             conn, cursor = connect_to_database()
 
-            if len(args[0]) < 3:
-                # コマンドライン引数が指定数未満の場合
-                root = tkinter.Tk()
-                root.withdraw()
-                root.iconbitmap('../common/icon/python_icon.ico')
-                messagebox.showerror('ERR_INVALID_STARTUP', 'The application was unable to start correctly.')
-
-                # 管理テーブルからシリアル番号を消去
-                self.__flush_serial_number(conn, cursor)
-                # 不正な起動のためプロセス終了
-                sys.exit()
-            else:
-                # シリアル番号の取得
-                count_record = self.manage_serial_dao.count_records_by_primary_key(cursor, args[0][2])[0]
-
-                if count_record == 0:
-                    # 不正なシリアル番号の場合
-                    root = tkinter.Tk()
-                    root.withdraw()
-                    root.iconbitmap('../common/icon/python_icon.ico')
-                    messagebox.showerror('ERR_INVALID_SERIAL_NUMBER', 'The serial number is not valid for start up this module.')
-
-                    # 管理テーブルからシリアル番号を消去
-                    self.__flush_serial_number(conn, cursor)
-                    # 不正な起動のためプロセス終了
-                    sys.exit()
-
+            # ブックマーク数の更新処理を開始
+            self.__update_bookmarks(conn, cursor)
+            # 管理テーブルからシリアル番号を消去
+            self.flush_serial_number(conn, cursor)
         except sqlite3.Error as e:
+            conn.rollback()
             self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
-                                    self.log.location(),self.log_msg.MSG_ERROR)
+                                    self.log.location(), self.log_msg.MSG_ERROR)
+            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+                                    self.log.location(), self.log_msg.MSG_ROLLBACK_COMPLETED)
             self.log.error(e)
         finally:
             conn.close()
             self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                     self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
+            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
+                                    self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
+            time.sleep(3)
 
-    def __flush_serial_number(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
-        '''シリアル番号管理テーブルから使用済みシリアル番号を削除するメソッド。
+    def __update_bookmarks(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
+        '''ボックマーク数の更新処理を行うメソッド。
 
         :param sqlite3.Connection conn: DBとのコネクション。
-        :param sqlite3.Cursor cursor: カーソルオブジェクト。
+        :param sqlite3.Cursor cursor: カーソル。
         '''
 
-        # シリアル番号管理テーブルの中身を空にする
-        self.manage_serial_dao.delete_records(cursor)
-        conn.commit()
+        # テーブルからURLの取得
+        urls = self.article_info_hatena_dao.select_all_url(cursor)
+        # tuple構造からリスト構造へと変換する
+        urls = [url for tuple_url in urls for url in tuple_url]
 
-    def __handling_url_exception(self, e):
-        '''通信処理における例外を処理するメソッド。
+        if urls:
+            cowsay = Cowsay()
+            print(cowsay.cowsay('Updating {} {}.' \
+                                    .format(len(urls), 'records' if len(urls) > 1 else 'record')))
 
-        :param urllib.error.URLError e: 通信処理において発生した例外情報。
-        '''
+            for url in tqdm(urls, ncols=60, leave=False, ascii=True, desc='Updating...'):
+                # APIからブックマーク数の取得
+                params = {'url' : url}
+                count_bookmark = self.get_html(url=self.HATENA_BOOKMARK_API, params=params, headers=self.DEF_USER_AGENT)
+                # ブックマーク数が0の場合はAPIが空を返すため値の変換処理を行う
+                count_bookmark = count_bookmark if count_bookmark else '0'
 
-        if hasattr(e, 'reason'):
-            self.log.normal(LogLevel.CRITICAL.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_NO_SERVER_FOUND)
-            self.log.error(e.reason)
-        elif hasattr(e, 'code'):
-            self.log.normal(LogLevel.CRITICAL.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_NO_RESPONSE)
-            self.log.error(e.code)
+                # 更新処理
+                self.article_info_hatena_dao.update_bookmarks_by_primary_key(cursor, count_bookmark, url)
+
+            conn.commit()
+            print(cowsay.cowsay('The update has been completed!'))
+        else:
+            root = tkinter.Tk()
+            root.withdraw()
+            root.iconbitmap('../common/icon/python_icon.ico')
+            messagebox.showerror('ERR_NO_RECORD_FOUND', 'There is no record in the database.')
 
 if __name__ == '__main__':
-    hatena = CrawlingHatena(sys.argv)
-    hatena.execute()
+    CrawlHandler(sys.argv)

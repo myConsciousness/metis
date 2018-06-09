@@ -86,6 +86,23 @@ class ManageSerialDao:
 
         return cursor.fetchone()
 
+    def count_records(self, cursor: sqlite3.Cursor):
+        '''MANAGE_SERIAL.TBLのレコード数を取得するクエリ。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        :rtype: tuple
+        :return: 取得件数。
+        '''
+
+        cursor.execute('''
+                        SELECT
+                            COUNT(1)
+                        FROM
+                            MANAGE_SERIAL
+                        ''')
+
+        return cursor.fetchone()
+
     def delete_records(self, cursor: sqlite3.Cursor):
         '''MANAGE_SERIAL.TBLから全レコードを削除するクエリ。
 
@@ -100,11 +117,11 @@ class ManageSerialDao:
 class ArticleInfoHatenaDao:
     '''ARTICLE_INFO_HATENA.TBLへのトランザクション処理を定義するDAOクラス。'''
 
-    def select_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
-        '''主キーを用いてARTICLE_INFO_HATENA.TBLから記事情報を取得するクエリ。返り値はtuple型。
+    def select_by_primary_key(self, cursor: sqlite3.Cursor, search_word: str) -> tuple:
+        '''検索ワードを用いてARTICLE_INFO_HATENA.TBLから記事情報を取得するクエリ。返り値はtuple型。
 
         :param sqlite3.Cursor cursor: カーソル。
-        :param str primary_key: 検索ワード。
+        :param str search_word: 検索ワード。
         :rtype: tuple
         :return: 検索結果。
         '''
@@ -123,9 +140,44 @@ class ArticleInfoHatenaDao:
                             ARTICLE_INFO_HATENA
                         WHERE
                             URL = ?
-                        ''', (primary_key,))
+                        ''', (search_word,))
 
         return cursor.fetchone()
+
+    def select_all_url(self, cursor: sqlite3.Cursor) -> tuple:
+        '''ARTICLE_INFO_HATENA.TBLから全URLを取得するクエリ。返り値はtuple型。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        :rtype: tuple
+        :return: 登録されている全URL。
+        '''
+
+        cursor.execute('''
+                        SELECT
+                            URL
+                        FROM
+                            ARTICLE_INFO_HATENA
+                        ''')
+
+        return cursor.fetchall()
+
+    def update_bookmarks_by_primary_key(self, cursor: sqlite3.Cursor, bookmarks: str, primary_key: str):
+        '''主キーを用いてARTICLE_INFO_HATENA.TBLのブックマーク数を更新するクエリ。返り値はtuple型。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        :param str bookmarks: ブックマーク数。
+        :param str primary_key: 主キー。
+        '''
+
+        cursor.execute('''
+                        UPDATE
+                            ARTICLE_INFO_HATENA
+                        SET
+                            BOOKMARKS = ?
+                        WHERE
+                            URL = ?
+                        ''',(bookmarks, primary_key,))
+
 
     def insert_article_infos(self, cursor: sqlite3.Cursor, article_infos: dict):
         '''取得した記事情報をARTICLE_INFO_HATENA.TBLへ挿入するクエリ。
