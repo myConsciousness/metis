@@ -131,7 +131,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/api/metis.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/apis/metis.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -149,14 +149,8 @@
 <dl class="class">
 <dt id="metis.Application">
 <em class="property">class </em><code class="descclassname">metis.</code><code class="descname">Application</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#metis.Command" title="metis.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">metis.Command</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#metis.CommandBase" title="metis.CommandBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">metis.CommandBase</span></code></a></p>
 <p>GUIの出力処理を定義するクラス。</p>
-<dl class="method">
-<dt id="metis.Application._Application__create_application">
-<code class="descname">_Application__create_application</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_application" title="Permalink to this definition">¶</a></dt>
-<dd><p>アプリケーション画面を構築するメソッド。</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="metis.Application._Application__create_log_gui">
 <code class="descname">_Application__create_log_gui</code><span class="sig-paren">(</span><em>parent: tkinter.Frame</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_log_gui" title="Permalink to this definition">¶</a></dt>
@@ -206,6 +200,12 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="metis.Application._Application__create_window">
+<code class="descname">_Application__create_window</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>ウィンドウを構築するメソッド。</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="metis.Application._Application__refresh_tree_view">
 <code class="descname">_Application__refresh_tree_view</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__refresh_tree_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>取得した記事情報からツリービューを生成するメソッド。</p>
@@ -220,97 +220,101 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="metis.Command">
-<em class="property">class </em><code class="descclassname">metis.</code><code class="descname">Command</code><a class="headerlink" href="#metis.Command" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase">
+<em class="property">class </em><code class="descclassname">metis.</code><code class="descname">CommandBase</code><a class="headerlink" href="#metis.CommandBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>アプリケーションのコマンド処理を定義するクラス。</p>
+<p>アプリケーションのコマンド処理を定義する基底クラス。</p>
 <dl class="method">
-<dt id="metis.Command.copy_by_right_click">
-<code class="descname">copy_by_right_click</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.copy_by_right_click" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.copy_by_right_click">
+<code class="descname">copy_by_right_click</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.copy_by_right_click" title="Permalink to this definition">¶</a></dt>
 <dd><p>右クリック時に発生する処理を定義。</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.copy_informations">
-<code class="descname">copy_informations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.copy_informations" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.copy_information">
+<code class="descname">copy_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.copy_information" title="Permalink to this definition">¶</a></dt>
 <dd><p>タイトル、URL、ブックマーク数をコピーする処理を定義。</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.copy_title">
-<code class="descname">copy_title</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.copy_title" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.copy_title">
+<code class="descname">copy_title</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.copy_title" title="Permalink to this definition">¶</a></dt>
 <dd><p>タイトルをクリップボードに追加する処理を定義。</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.copy_url">
-<code class="descname">copy_url</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.copy_url" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.copy_url">
+<code class="descname">copy_url</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.copy_url" title="Permalink to this definition">¶</a></dt>
 <dd><p>URLをクリップボードに追加する処理を定義。</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.disable_close_button">
-<code class="descname">disable_close_button</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.disable_close_button" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.disable_close_button">
+<code class="descname">disable_close_button</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.disable_close_button" title="Permalink to this definition">¶</a></dt>
 <dd><p>windowのcloseボタンを無効化する</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.execute_crawling_hatena">
-<code class="descname">execute_crawling_hatena</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.execute_crawling_hatena" title="Permalink to this definition">¶</a></dt>
-<dd><p>hatenaへのクローリング処理を実行する</p>
+<dt id="metis.CommandBase.execute_crawler">
+<code class="descname">execute_crawler</code><span class="sig-paren">(</span><em>order: str</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.execute_crawler" title="Permalink to this definition">¶</a></dt>
+<dd><p>オーダに応じたクローリング処理を行う。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>order</strong> (<em>str</em>) – クローラの振る舞いを蹴っているするオーダ。</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.flush">
-<code class="descname">flush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.flush" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.flush">
+<code class="descname">flush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.flush" title="Permalink to this definition">¶</a></dt>
 <dd><p>flushボタン押下時の処理を定義。</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.get_log_list">
-<code class="descname">get_log_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.get_log_list" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.get_log_list">
+<code class="descname">get_log_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.get_log_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>listボタン押下時の処理を定義</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.open">
-<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.open" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.open" title="Permalink to this definition">¶</a></dt>
 <dd><p>openボタン押下時の処理を定義。</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.open_by_double_click">
-<code class="descname">open_by_double_click</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.open_by_double_click" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.open_by_double_click">
+<code class="descname">open_by_double_click</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.open_by_double_click" title="Permalink to this definition">¶</a></dt>
 <dd><p>左ダブルクリック時に発生する処理を定義。</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.open_docs">
-<code class="descname">open_docs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.open_docs" title="Permalink to this definition">¶</a></dt>
-<dd><p>ドキュメントを記述したページを開く。</p>
+<dt id="metis.CommandBase.open_new_tab">
+<code class="descname">open_new_tab</code><span class="sig-paren">(</span><em>url: str</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.open_new_tab" title="Permalink to this definition">¶</a></dt>
+<dd><p>引数で渡されたURLを新しいタブで開く。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<em>str</em>) – 対象URL。</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.open_licence">
-<code class="descname">open_licence</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.open_licence" title="Permalink to this definition">¶</a></dt>
-<dd><p>ライセンスを記述したページを開く。</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.Command.open_readme">
-<code class="descname">open_readme</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.open_readme" title="Permalink to this definition">¶</a></dt>
-<dd><p>readmeを記述したページを開く</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.Command.quit">
-<code class="descname">quit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.quit" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.quit">
+<code class="descname">quit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.quit" title="Permalink to this definition">¶</a></dt>
 <dd><p>quitボタン押下時の処理を定義。</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Command.read_log">
-<code class="descname">read_log</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.read_log" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.read_log">
+<code class="descname">read_log</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.read_log" title="Permalink to this definition">¶</a></dt>
 <dd><p>readボタン押下時の処理を定義。</p>
 </dd></dl>
 

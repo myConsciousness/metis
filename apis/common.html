@@ -131,7 +131,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/api/common.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/apis/common.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -148,20 +148,74 @@
 <span id="common-module"></span><h1>common module<a class="headerlink" href="#module-common" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="common.connect_to_database">
-<code class="descclassname">common.</code><code class="descname">connect_to_database</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.connect_to_database" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">common.</code><code class="descname">connect_to_database</code><span class="sig-paren">(</span><em>isolation_level='EXCLUSIVE'</em><span class="sig-paren">)</span><a class="headerlink" href="#common.connect_to_database" title="Permalink to this definition">¶</a></dt>
 <dd><p>データベースへ接続する関数。
 コネクションの開放処理は呼び出し元で別途行う。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">sqlite3.Cursor</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>isolation_level</strong> (<em>str</em>) – トランザクション分離レベルを指定する。初期値は’EXCLUSIVE’。</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">sqlite3.Connection</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">sqlite3.Cursor</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">コネクション。</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">sqlite3.Connection</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">カーソルオブジェクト。</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">コネクション。</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">カーソルオブジェクト。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="common.convert_to_hash_sha256">
+<code class="descclassname">common.</code><code class="descname">convert_to_hash_sha256</code><span class="sig-paren">(</span><em>message: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#common.convert_to_hash_sha256" title="Permalink to this definition">¶</a></dt>
+<dd><p>SHA256アルゴリズムを用いて文字列をハッシュ化する関数。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<em>str</em>) – ハッシュ化する文字列。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">ハッシュ化された文字列。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="common.create_random_str">
+<code class="descclassname">common.</code><code class="descname">create_random_str</code><span class="sig-paren">(</span><em>num_letters: int</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#common.create_random_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>ランダムな文字列を生成する関数。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num_letters</strong> (<em>str</em>) – 生成する文字列の長さ。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">生成されたランダムな文字列。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="common.create_serial_number">
+<code class="descclassname">common.</code><code class="descname">create_serial_number</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.create_serial_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>シリアル番号を生成する関数。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">シリアル番号。</td>
 </tr>
 </tbody>
 </table>

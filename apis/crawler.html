@@ -131,7 +131,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/api/crawler.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/apis/crawler.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -160,43 +160,34 @@ the term typically refers to automated processes implemented using a bot or web 
 It is a form of copying, in which specific data is gathered and copied from the web,
 typically into a central local database or spreadsheet, for later retrieval or analysis.</p>
 <dl class="class">
-<dt id="crawler.CrawlingHatena">
-<em class="property">class </em><code class="descclassname">crawler.</code><code class="descname">CrawlingHatena</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena" title="Permalink to this definition">¶</a></dt>
+<dt id="crawler.CommunicateBase">
+<em class="property">class </em><code class="descclassname">crawler.</code><code class="descname">CommunicateBase</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CommunicateBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Hatenaへのクローリング処理を定義するクラス。</p>
-<dl class="attribute">
-<dt id="crawler.CrawlingHatena.DEF_USER_AGENT">
-<code class="descname">DEF_USER_AGENT</code><em class="property"> = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'}</em><a class="headerlink" href="#crawler.CrawlingHatena.DEF_USER_AGENT" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<p>通信処理を定義する基底クラス。</p>
 <dl class="method">
-<dt id="crawler.CrawlingHatena._CrawlingHatena__check_internet_connection">
-<code class="descname">_CrawlingHatena__check_internet_connection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__check_internet_connection" title="Permalink to this definition">¶</a></dt>
+<dt id="crawler.CommunicateBase._CommunicateBase__check_internet_connection">
+<code class="descname">_CommunicateBase__check_internet_connection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CommunicateBase._CommunicateBase__check_internet_connection" title="Permalink to this definition">¶</a></dt>
 <dd><p>インターネットとの疎通確認を行うメソッド。
 疎通確認に失敗した場合は後続処理が不可能なためプロセスを終了させる。</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="crawler.CrawlingHatena._CrawlingHatena__crawl_hatena">
-<code class="descname">_CrawlingHatena__crawl_hatena</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__crawl_hatena" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hatenaに対してクローリング処理を行うメソッド。</p>
+<dt id="crawler.CommunicateBase._CommunicateBase__check_serial_number">
+<code class="descname">_CommunicateBase__check_serial_number</code><span class="sig-paren">(</span><em>args: tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CommunicateBase._CommunicateBase__check_serial_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>クローラ起動のための整合性チェックを行う。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
-<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> (<em>tuple</em>) – 整合性チェック用のコマンドライン引数。</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="crawler.CrawlingHatena._CrawlingHatena__edit_html">
-<code class="descname">_CrawlingHatena__edit_html</code><span class="sig-paren">(</span><em>html: str</em>, <em>start_name: str</em>, <em>end_name: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__edit_html" title="Permalink to this definition">¶</a></dt>
+<dt id="crawler.CommunicateBase.edit_html">
+<code class="descname">edit_html</code><span class="sig-paren">(</span><em>html: str</em>, <em>start_name: str</em>, <em>end_name: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#crawler.CommunicateBase.edit_html" title="Permalink to this definition">¶</a></dt>
 <dd><p>取得したHTMLをスクレイピング用に加工するメソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -220,8 +211,26 @@ typically into a central local database or spreadsheet, for later retrieval or a
 </dd></dl>
 
 <dl class="method">
-<dt id="crawler.CrawlingHatena._CrawlingHatena__get_html">
-<code class="descname">_CrawlingHatena__get_html</code><span class="sig-paren">(</span><em>url: str</em>, <em>params={}</em>, <em>headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML</em>, <em>like Gecko) Chrome/66.0.3359.181 Safari/537.36'}</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__get_html" title="Permalink to this definition">¶</a></dt>
+<dt id="crawler.CommunicateBase.flush_serial_number">
+<code class="descname">flush_serial_number</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CommunicateBase.flush_serial_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>シリアル番号管理テーブルから使用済みシリアル番号を削除するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソルオブジェクト。</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CommunicateBase.get_html">
+<code class="descname">get_html</code><span class="sig-paren">(</span><em>url: str</em>, <em>params={}</em>, <em>headers={}</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#crawler.CommunicateBase.get_html" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP(s)通信を行いWebサイトからHTMLソースを取得するメソッド。
 decode時に引数として’ignore’を渡しているのは、
 APIからプレーンテキストを取得する際に文字コードを取得できないことによって、
@@ -234,7 +243,7 @@ APIからプレーンテキストを取得する際に文字コードを取得�
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>url</strong> (<em>str</em>) – 取得対象URL。</li>
 <li><strong>params</strong> (<em>dict</em>) – パラメータ生成用辞書。初期値は空の辞書。</li>
-<li><strong>headers</strong> (<em>dict</em>) – ヘッダ生成用辞書。初期値は定数”UserAgent定義”。</li>
+<li><strong>headers</strong> (<em>dict</em>) – ヘッダ生成用辞書。初期値は空の辞書。</li>
 </ul>
 </td>
 </tr>
@@ -242,6 +251,66 @@ APIからプレーンテキストを取得する際に文字コードを取得�
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">対象URLにHTTP(s)通信を行い取得したHTMLソース。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.CommunicateBase.handling_url_exception">
+<code class="descname">handling_url_exception</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CommunicateBase.handling_url_exception" title="Permalink to this definition">¶</a></dt>
+<dd><p>通信処理における例外を処理するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>e</strong> (<em>urllib.error.URLError</em>) – 通信処理において発生した例外情報。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="crawler.CrawlHandler">
+<em class="property">class </em><code class="descclassname">crawler.</code><code class="descname">CrawlHandler</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>処理オーダ毎にクローラの振る舞いを決定するクラス。</p>
+<dl class="method">
+<dt id="crawler.CrawlHandler._CrawlHandler__handle_proc">
+<code class="descname">_CrawlHandler__handle_proc</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlHandler._CrawlHandler__handle_proc" title="Permalink to this definition">¶</a></dt>
+<dd><p>処理オーダ毎にプロセスの処理を制御するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> (<em>tuple</em>) – コマンドライン引数。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="crawler.CrawlingHatena">
+<em class="property">class </em><code class="descclassname">crawler.</code><code class="descname">CrawlingHatena</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#crawler.CommunicateBase" title="crawler.CommunicateBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">crawler.CommunicateBase</span></code></a></p>
+<p>Hatenaへのクローリング処理を定義するクラス。</p>
+<dl class="method">
+<dt id="crawler.CrawlingHatena._CrawlingHatena__crawl_hatena">
+<code class="descname">_CrawlingHatena__crawl_hatena</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__crawl_hatena" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hatenaに対してクローリング処理を行うメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -269,20 +338,6 @@ URLを取得できなかった場合は、URL取得以降の処理を行わず�
 <span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">URL</span><span class="p">,</span> <span class="n">TITLE</span><span class="p">,</span> <span class="n">PUBILISHED_DATE</span><span class="p">,</span> <span class="n">BOOKMARKS</span><span class="p">,</span> <span class="n">TAG</span><span class="p">,</span> <span class="n">LAST_INDEX</span><span class="p">]</span>
 </pre></div>
 </div>
-</dd></dl>
-
-<dl class="method">
-<dt id="crawler.CrawlingHatena._CrawlingHatena__handling_url_exception">
-<code class="descname">_CrawlingHatena__handling_url_exception</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena._CrawlingHatena__handling_url_exception" title="Permalink to this definition">¶</a></dt>
-<dd><p>通信処理における例外を処理するメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>e</strong> (<em>urllib.error.URLError</em>) – 通信処理において発生した例外情報。</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="method">
@@ -354,6 +409,37 @@ URLを取得できなかった場合は、URL取得以降の処理を行わず�
 <dt id="crawler.CrawlingHatena.execute">
 <code class="descname">execute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CrawlingHatena.execute" title="Permalink to this definition">¶</a></dt>
 <dd><p>クローリング処理を実行するメソッド。</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="crawler.UpdateBookmarks">
+<em class="property">class </em><code class="descclassname">crawler.</code><code class="descname">UpdateBookmarks</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#crawler.CommunicateBase" title="crawler.CommunicateBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">crawler.CommunicateBase</span></code></a></p>
+<p>クローリング済みブックマーク数の更新処理を定義するクラス。</p>
+<dl class="method">
+<dt id="crawler.UpdateBookmarks._UpdateBookmarks__update_bookmarks">
+<code class="descname">_UpdateBookmarks__update_bookmarks</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarks._UpdateBookmarks__update_bookmarks" title="Permalink to this definition">¶</a></dt>
+<dd><p>ボックマーク数の更新処理を行うメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crawler.UpdateBookmarks.execute">
+<code class="descname">execute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarks.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>ブックマーク数の更新処理を実行するメソッド。</p>
 </dd></dl>
 
 </dd></dl>

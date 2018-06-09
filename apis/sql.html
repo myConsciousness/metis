@@ -131,7 +131,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/api/sql.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/apis/sql.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -181,16 +181,34 @@ and embedded systems (such as mobile phones), among others.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="sql.ArticleInfoHatenaDao.select_all_url">
+<code class="descname">select_all_url</code><span class="sig-paren">(</span><em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span> &#x2192; tuple<a class="headerlink" href="#sql.ArticleInfoHatenaDao.select_all_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>ARTICLE_INFO_HATENA.TBLから全URLを取得するクエリ。返り値はtuple型。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tuple</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">登録されている全URL。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="sql.ArticleInfoHatenaDao.select_by_primary_key">
-<code class="descname">select_by_primary_key</code><span class="sig-paren">(</span><em>cursor: sqlite3.Cursor</em>, <em>primary_key: str</em><span class="sig-paren">)</span> &#x2192; tuple<a class="headerlink" href="#sql.ArticleInfoHatenaDao.select_by_primary_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>主キーを用いてARTICLE_INFO_HATENA.TBLから記事情報を取得するクエリ。返り値はtuple型。</p>
+<code class="descname">select_by_primary_key</code><span class="sig-paren">(</span><em>cursor: sqlite3.Cursor</em>, <em>search_word: str</em><span class="sig-paren">)</span> &#x2192; tuple<a class="headerlink" href="#sql.ArticleInfoHatenaDao.select_by_primary_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>検索ワードを用いてARTICLE_INFO_HATENA.TBLから記事情報を取得するクエリ。返り値はtuple型。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</li>
-<li><strong>primary_key</strong> (<em>str</em>) – 検索ワード。</li>
+<li><strong>search_word</strong> (<em>str</em>) – 検索ワード。</li>
 </ul>
 </td>
 </tr>
@@ -239,6 +257,106 @@ and embedded systems (such as mobile phones), among others.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</li>
 <li><strong>article_infos</strong> (<em>dict</em>) – カラムと挿入する記事情報の対応辞書。</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sql.ArticleInfoHatenaDao.update_bookmarks_by_primary_key">
+<code class="descname">update_bookmarks_by_primary_key</code><span class="sig-paren">(</span><em>cursor: sqlite3.Cursor</em>, <em>bookmarks: str</em>, <em>primary_key: str</em><span class="sig-paren">)</span><a class="headerlink" href="#sql.ArticleInfoHatenaDao.update_bookmarks_by_primary_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>主キーを用いてARTICLE_INFO_HATENA.TBLのブックマーク数を更新するクエリ。返り値はtuple型。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</li>
+<li><strong>bookmarks</strong> (<em>str</em>) – ブックマーク数。</li>
+<li><strong>primary_key</strong> (<em>str</em>) – 主キー。</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sql.ManageSerialDao">
+<em class="property">class </em><code class="descclassname">sql.</code><code class="descname">ManageSerialDao</code><a class="headerlink" href="#sql.ManageSerialDao" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>MANAGE_SERIAL.TBLへのトランザクション処理を定義するDAOクラス。</p>
+<dl class="method">
+<dt id="sql.ManageSerialDao.count_records">
+<code class="descname">count_records</code><span class="sig-paren">(</span><em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#sql.ManageSerialDao.count_records" title="Permalink to this definition">¶</a></dt>
+<dd><p>MANAGE_SERIAL.TBLのレコード数を取得するクエリ。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tuple</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">取得件数。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sql.ManageSerialDao.count_records_by_primary_key">
+<code class="descname">count_records_by_primary_key</code><span class="sig-paren">(</span><em>cursor: sqlite3.Cursor</em>, <em>primary_key: str</em><span class="sig-paren">)</span> &#x2192; tuple<a class="headerlink" href="#sql.ManageSerialDao.count_records_by_primary_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>主キーを用いてMANAGE_SERIAL.TBLから値を取得するクエリ。返り値はtuple型。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</li>
+<li><strong>primary_key</strong> (<em>str</em>) – 検索ワード。</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">tuple</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">検索結果。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sql.ManageSerialDao.delete_records">
+<code class="descname">delete_records</code><span class="sig-paren">(</span><em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#sql.ManageSerialDao.delete_records" title="Permalink to this definition">¶</a></dt>
+<dd><p>MANAGE_SERIAL.TBLから全レコードを削除するクエリ。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sql.ManageSerialDao.insert_serial_no">
+<code class="descname">insert_serial_no</code><span class="sig-paren">(</span><em>cursor: sqlite3.Cursor</em>, <em>serial_no: str</em><span class="sig-paren">)</span><a class="headerlink" href="#sql.ManageSerialDao.insert_serial_no" title="Permalink to this definition">¶</a></dt>
+<dd><p>生成したシリアル番号をMANAGE_SERIAL.TBLへ挿入するクエリ。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソル。</li>
+<li><strong>serial_no</strong> (<em>str</em>) – クローラ起動用のシリアル番号。</li>
 </ul>
 </td>
 </tr>
