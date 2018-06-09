@@ -52,10 +52,20 @@ class CrawlHandler:
         :param dict kwargs: 辞書の可変長引数。
         '''
 
-        # 処理オーダ
-        self.__order = args[0][1]
-        # 制御開始
-        self.__handle_proc(args[0])
+        if len(args[0]) < 3:
+            # コマンドライン引数が指定数未満の場合
+            root = tkinter.Tk()
+            root.withdraw()
+            root.iconbitmap('../common/icon/python_icon.ico')
+            messagebox.showerror('ERR_INVALID_STARTUP', 'The application was unable to start correctly.')
+
+            # 不正な起動のためプロセス終了
+            sys.exit()
+        else:
+            # 処理オーダ
+            self.__order = args[0][1]
+            # 制御開始
+            self.__handle_proc(args[0])
 
     def __handle_proc(self, args):
         '''処理オーダ毎にプロセスの処理を制御するメソッド。
@@ -83,12 +93,12 @@ class CommunicateBase:
         :param dict kwargs: 辞書の可変長引数。
         '''
 
+        # 基底クラス名
+        self.BASE_CLASS_NAME = 'CommunicateBase'
+
         # ログ出力のためインスタンス生成
         self.log = Log(child=True)
         self.log_msg = LogMessage()
-
-        # 基底クラス名
-        self.BASE_CLASS_NAME = 'CommunicateBase'
 
         # インターネットとの疎通確認を行う
         self.__check_internet_connection()
@@ -154,8 +164,13 @@ class CommunicateBase:
         :return: スクレイピング用に加工したHTMLソース。
         '''
 
-        start_idx = html.find(start_name)
-        end_idx = html.find(end_name, start_idx)
+        try:
+            start_idx = html.find(start_name)
+            end_idx = html.find(end_name, start_idx)
+        except Exception as e:
+            self.log.normal(LogLevel.ERROR.value, self.BASE_CLASS_NAME, self.log.location(), self.log_msg.MSG_ERROR)
+            self.log.error(e)
+            return ''
 
         return html[start_idx+1:end_idx]
 
@@ -206,33 +221,20 @@ class CommunicateBase:
         try:
             # データベースへの接続
             conn, cursor = connect_to_database()
+            # シリアル番号の取得
+            count_record = self.manage_serial_dao.count_records_by_primary_key(cursor, args[0][2])[0]
 
-            if len(args[0]) < 3:
-                # コマンドライン引数が指定数未満の場合
+            if count_record == 0:
+                # 不正なシリアル番号の場合
                 root = tkinter.Tk()
                 root.withdraw()
                 root.iconbitmap('../common/icon/python_icon.ico')
-                messagebox.showerror('ERR_INVALID_STARTUP', 'The application was unable to start correctly.')
+                messagebox.showerror('ERR_INVALID_SERIAL_NUMBER', 'The serial number is not valid for start up this module.')
 
                 # 管理テーブルからシリアル番号を消去
                 self.flush_serial_number(conn, cursor)
                 # 不正な起動のためプロセス終了
                 sys.exit()
-            else:
-                # シリアル番号の取得
-                count_record = self.manage_serial_dao.count_records_by_primary_key(cursor, args[0][2])[0]
-
-                if count_record == 0:
-                    # 不正なシリアル番号の場合
-                    root = tkinter.Tk()
-                    root.withdraw()
-                    root.iconbitmap('../common/icon/python_icon.ico')
-                    messagebox.showerror('ERR_INVALID_SERIAL_NUMBER', 'The serial number is not valid for start up this module.')
-
-                    # 管理テーブルからシリアル番号を消去
-                    self.flush_serial_number(conn, cursor)
-                    # 不正な起動のためプロセス終了
-                    sys.exit()
 
         except sqlite3.Error as e:
             self.log.normal(LogLevel.ERROR.value, self.BASE_CLASS_NAME, \
@@ -354,15 +356,17 @@ class CrawlingHatena(CommunicateBase):
                             'users' : '1'
                         }
 
-                # htmlを取得し抽出用に加工
+                # htmlを取得する
                 html = self.get_html(url='http://b.hatena.ne.jp/search/tag', params=params, headers=self.DEF_USER_AGENT)
-                # 取得したhtmlをスクレイピング用に加工する
-                html = self.edit_html(html, 'class="entrysearch-articles"', 'class="centerarticle-pager"')
+                # htmlを取得した場合
+                if html:
+                    # 取得したhtmlをスクレイピング用に加工する
+                    html = self.edit_html(html, 'class="entrysearch-articles"', 'class="centerarticle-pager"')
 
-                # スクレイピング処理
-                article_infos = self.__scrape_info_of_hatena(html)
-                # ワークテーブルへ記事情報を登録
-                count_inserted += self.__insert_article_info_to_work(conn, cursor, article_infos)
+                    # スクレイピング処理
+                    article_infos = self.__scrape_info_of_hatena(html)
+                    # ワークテーブルへ記事情報を登録
+                    count_inserted += self.__insert_article_info_to_work(conn, cursor, article_infos)
 
             # ワークテーブルから記事情報を移行させる
             self.__migrate_article_info_from_work(conn, cursor)
@@ -439,90 +443,96 @@ class CrawlingHatena(CommunicateBase):
 
         # 記事情報格納用リスト
         list_article_infos = []
-        # 探索開始インデックス
-        start_search_index = html.find('centerarticle-entry-title')
 
-        # URL部の取得
-        start_index_of_url = html.find('"', html.find('<a', start_search_index))
-        end_index_of_url = html.find('"', start_index_of_url+1)
-        url = html[start_index_of_url+1:end_index_of_url]
+        try:
+            # 探索開始インデックス
+            start_search_index = html.find('centerarticle-entry-title')
 
-        # 取得したURLが短縮化されていない場合
-        if url and not 'ift.tt' in url:
-            list_article_infos.append(url)
+            # URL部の取得
+            start_index_of_url = html.find('"', html.find('<a', start_search_index))
+            end_index_of_url = html.find('"', start_index_of_url+1)
+            url = html[start_index_of_url+1:end_index_of_url]
 
-            # タイトル部の取得
-            start_index_of_title = html.find('">', html.find('img', end_index_of_url+1))
-            end_index_of_title = html.find('</a', start_index_of_title+1)
-            title = html[start_index_of_title+2:end_index_of_title].strip()
+            # 取得したURLが短縮化されていない場合
+            if url and not 'ift.tt' in url:
+                list_article_infos.append(url)
 
-            # 取得したタイトルをパースしてリストに格納
-            parser = htmlparser.HTMLParser()
-            # UnicodeDecodeError回避のために変換処理を行う
-            title = parser.unescape(title).encode('cp932', 'ignore').decode('cp932')
-            list_article_infos.append(parser.unescape(title))
+                # タイトル部の取得
+                start_index_of_title = html.find('">', html.find('img', end_index_of_url+1))
+                end_index_of_title = html.find('</a', start_index_of_title+1)
+                title = html[start_index_of_title+2:end_index_of_title].strip()
 
-            # 日付部の取得
-            start_index_of_date = html.find('>', html.find('class="entry-contents-date"', end_index_of_title+1))
-            end_index_of_date = html.find('</', start_index_of_date+1)
-            date = html[start_index_of_date+1:end_index_of_date]
-            list_article_infos.append(date)
-
-            # APIからブックマーク数の取得
-            params = {'url' : url}
-            count_bookmark = self.get_html(url=self.HATENA_BOOKMARK_API, params=params, headers=self.DEF_USER_AGENT)
-            # ブックマーク数が0の場合はAPIが空を返すため値の変換処理を行う
-            count_bookmark = count_bookmark if count_bookmark else '0'
-            list_article_infos.append(count_bookmark)
-
-            # 後続ループ処理のためタグ部分のみを抽出
-            start_index_of_tag_element = html.find('<ul class="entrysearch-entry-tags">', end_index_of_date)
-            html_of_tags = html[start_index_of_tag_element:html.find('</div>', start_index_of_tag_element)]
-
-            # タグ格納用リスト
-            list_of_tags = []
-            # タグ部終了位置
-            end_index_of_tag = ''
-            # 最初のアンカータグ開始インデックス
-            start_index_of_anchor = html_of_tags.find('<a')
-
-            while start_index_of_anchor != -1:
-                # タグの取得
-                start_index_of_tag = html_of_tags.find('>', start_index_of_anchor+1)
-                end_index_of_tag = html_of_tags.find('</a', start_index_of_tag+1)
-                list_of_tags.append(html_of_tags[start_index_of_tag+1:end_index_of_tag])
-
-                # アンカータグの開始インデックスを更新
-                start_index_of_anchor = html_of_tags.find('<a', end_index_of_tag)
-            else:
-                # タグの取得処理完了後処理
-                tags = ','.join(list_of_tags).encode('cp932', 'ignore').decode('cp932')
+                # 取得したタイトルをパースしてリストに格納
+                parser = htmlparser.HTMLParser()
                 # UnicodeDecodeError回避のために変換処理を行う
-                tags = tags.encode('cp932', 'ignore').decode('cp932')
-                list_article_infos.append(tags)
+                title = parser.unescape(title).encode('cp932', 'ignore').decode('cp932')
+                list_article_infos.append(parser.unescape(title))
 
-            # 当該処理終了位置の取得と保存
-            last_index = html.find('class="bookmark-item', end_index_of_title)
-            list_article_infos.append(last_index)
+                # 日付部の取得
+                start_index_of_date = html.find('>', html.find('class="entry-contents-date"', end_index_of_title+1))
+                end_index_of_date = html.find('</', start_index_of_date+1)
+                date = html[start_index_of_date+1:end_index_of_date]
+                list_article_infos.append(date)
 
-            # デバッグログ
-            self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
-            self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
-            self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'title', title))
-            self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'date', date))
-            self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'tags', tags))
-            self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'count_bookmark', count_bookmark))
-            self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'last_index', last_index))
-            self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+                # APIからブックマーク数の取得
+                params = {'url' : url}
+                count_bookmark = self.get_html(url=self.HATENA_BOOKMARK_API, params=params, headers=self.DEF_USER_AGENT)
+                # ブックマーク数が0の場合はAPIが空を返すため値の変換処理を行う
+                count_bookmark = count_bookmark if count_bookmark else '0'
+                list_article_infos.append(count_bookmark)
 
-        else:
-            # デバッグログ
-            self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
-            self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
-            self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+                # 後続ループ処理のためタグ部分のみを抽出
+                start_index_of_tag_element = html.find('<ul class="entrysearch-entry-tags">', end_index_of_date)
+                html_of_tags = html[start_index_of_tag_element:html.find('</div>', start_index_of_tag_element)]
 
-            # 次処理の探索開始位置をリストで返す
-            return [html.find('class="bookmark-item', start_search_index)]
+                # タグ格納用リスト
+                list_of_tags = []
+                # タグ部終了位置
+                end_index_of_tag = ''
+                # 最初のアンカータグ開始インデックス
+                start_index_of_anchor = html_of_tags.find('<a')
+
+                while start_index_of_anchor != -1:
+                    # タグの取得
+                    start_index_of_tag = html_of_tags.find('>', start_index_of_anchor+1)
+                    end_index_of_tag = html_of_tags.find('</a', start_index_of_tag+1)
+                    list_of_tags.append(html_of_tags[start_index_of_tag+1:end_index_of_tag])
+
+                    # アンカータグの開始インデックスを更新
+                    start_index_of_anchor = html_of_tags.find('<a', end_index_of_tag)
+                else:
+                    # タグの取得処理完了後処理
+                    tags = ','.join(list_of_tags).encode('cp932', 'ignore').decode('cp932')
+                    # UnicodeDecodeError回避のために変換処理を行う
+                    tags = tags.encode('cp932', 'ignore').decode('cp932')
+                    list_article_infos.append(tags)
+
+                # 当該処理終了位置の取得と保存
+                last_index = html.find('class="bookmark-item', end_index_of_title)
+                list_article_infos.append(last_index)
+
+                # デバッグログ
+                self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
+                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'title', title))
+                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'date', date))
+                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'tags', tags))
+                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'count_bookmark', count_bookmark))
+                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'last_index', last_index))
+                self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+
+            else:
+                # デバッグログ
+                self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
+                self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+
+                # 次処理の探索開始位置をリストで返す
+                return [html.find('class="bookmark-item', start_search_index)]
+        except Exception as e:
+            self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, self.log.location(), self.log_msg.MSG_ERROR)
+            self.log.error(e)
+            return []
 
         return list_article_infos
 

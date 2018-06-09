@@ -26,6 +26,9 @@ class CommandBase:
     def __init__(self):
         '''基底クラスのコンストラクタ。'''
 
+        # 基底クラス名
+        self.BASE_CLASS_NAME = 'CommandBase'
+
         # 設定ファイルの読み込み
         config = read_config_file()
         # ログファイルを格納したファイルへのパス
@@ -40,11 +43,15 @@ class CommandBase:
         # readmeを定義したmdファイルへのURL
         self.URL_README = 'https://github.com/myConsciousness/metis/blob/master/README.md'
 
-        # 基底クラス名
-        self.BASE_CLASS_NAME = 'CommandBase'
+        # 現在のソート状態
+        self.current_state_sort = None
+        # ソート用検索ワード
+        self.search_word_for_sort = None
 
         # MANAGE_SERIAL.TBLのDAOクラス
         self.manage_serial_dao = ManageSerialDao()
+        # ARTICLE_INFO_HATENA.TBLのDAOクラス
+        self.article_info_hatena_dao = ArticleInfoHatenaDao()
 
     def open(self):
         '''openボタン押下時の処理を定義。'''
@@ -62,6 +69,10 @@ class CommandBase:
 
         # ツリービューの初期化
         self.tree.delete(*self.tree.get_children())
+        # ソート状態を初期化
+        self.current_state_sort = None
+        # ソート用検索ワードを初期化
+        self.search_word_for_sort = None
 
     def copy_url(self):
         '''URLをクリップボードに追加する処理を定義。'''
@@ -156,9 +167,8 @@ class CommandBase:
             self.log.normal(LogLevel.INFO.value, self.BASE_CLASS_NAME, \
                                     self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
 
-        # 実行コマンド
-        cmd = 'python {} {} {}'
         if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
+            cmd = 'python {} {} {}'
             subprocess.Popen(cmd.format(self.PATH_CRAWLER_MODULE, order, serial_number))
 
     def read_log(self):
@@ -189,7 +199,9 @@ class CommandBase:
             self.output_text_log.pack()
         else:
             # ログファイルが存在しなかった場合
-            messagebox.showerror('ERR_NO_FILE_FOUND', 'Failed to open log file.\r\nNo such file or directory.')
+            messagebox.showerror('ERR_NO_FILE_FOUND',
+                                    'Failed to open log file.\r\n' \
+                                    'No such file or directory.')
 
     def get_log_list(self):
         '''listボタン押下時の処理を定義'''
@@ -236,15 +248,12 @@ class Application(CommandBase):
         # 基底クラスのコンストラクタを実行
         super().__init__()
 
+        # クラス名
+        self.CLASS_NAME = 'Application'
+
         # ログ出力のためインスタンス生成
         self.log = Log()
         self.log_msg = LogMessage()
-
-        # クラス名
-        self.CLASS_NAME = self.__class__.__name__
-
-        # ARTICLE_INFO_HATENA.TBLのDAOクラス
-        self.article_info_hatena_dao = ArticleInfoHatenaDao()
 
     def execute_application(self):
         '''アプリケーションを実行するメソッド。'''
@@ -386,7 +395,7 @@ class Application(CommandBase):
         self.tree['show'] = 'headings'
         self.tree.heading(1, text='No.')
         self.tree.heading(2, text='Title')
-        self.tree.heading(3, text='Bookmarks')
+        self.tree.heading(3, text='Bookmarks', command=partial(self.__refresh_tree_view, True))
         self.tree.heading(4)
         self.tree.configure(style='my.Treeview', displaycolumns=(1,2,3), yscroll=self.scroll.set)
 
@@ -403,21 +412,48 @@ class Application(CommandBase):
 
         self.tree.pack(fill='x', padx=20, pady=30)
 
-    def __refresh_tree_view(self):
-        '''取得した記事情報からツリービューを生成するメソッド。'''
+    def __refresh_tree_view(self, is_sort=False):
+        '''取得した記事情報からツリービューを生成するメソッド。
 
-        # 検索ワードの取得
-        search_word = self.btn_search_terms.get()
-        if search_word:
+        :param bool is_sort: ソート可否フラグ (True/ False)。初期値はFalse。
+        '''
+
+        search_word = ''
+        if not is_sort:
+            # ソートを行わない場合に検索ワードを取得
+            search_word = self.btn_search_terms.get()
+
+        # 検索時とヘッダーのbookmarks押下によるソート時で処理が異なる
+        if search_word or (self.search_word_for_sort and is_sort):
             # ツリービューの初期化
             self.tree.delete(*self.tree.get_children())
 
             try:
+                # データベースへ接続
                 conn, cursor = connect_to_database()
+                # 記事情報
+                article_infos = None
 
-                article_infos = self.article_info_hatena_dao.select_infos_by_search_word(cursor, '%' + search_word + '%')
+                if is_sort:
+                    # ソートする場合
+                    if self.current_state_sort == 'ASC' or not self.current_state_sort:
+                        # 降順にソートしたレコードを取得
+                        article_infos = self.article_info_hatena_dao.select_order_by_bookmarks_desc(cursor, '%' + self.search_word_for_sort + '%')
+                        self.current_state_sort = 'DESC'
+                    else:
+                        # 昇順にソートしたレコードを取得
+                        article_infos = self.article_info_hatena_dao.select_order_by_bookmarks_asc(cursor, '%' + self.search_word_for_sort + '%')
+                        self.current_state_sort = 'ASC'
+                else:
+                    # ソートしない場合
+                    article_infos = self.article_info_hatena_dao.select_by_search_word(cursor, '%' + search_word + '%')
+                    # ソート状態を初期化
+                    self.current_state_sort = None
+                    # ソート用検索ワードを更新
+                    self.search_word_for_sort = search_word
+
                 if article_infos:
-                    # TreeViewの生成
+                    # TreeViewに記事情報を反映させる
                     for i, infos in enumerate(article_infos):
                         value = (str(i+1), infos[1], infos[3], infos[0])
                         self.tree.insert('', 'end', tags=i, values=value)
@@ -428,6 +464,9 @@ class Application(CommandBase):
 
                     self.tree.pack(fill='x', padx=20, pady=30)
                 else:
+                    # ソート用検索ワードを初期化
+                    self.search_word_for_sort = None
+
                     messagebox.showinfo('NO_RESULTS_FOUND',
                                             'Your search - ' \
                                             + search_word \
@@ -441,8 +480,15 @@ class Application(CommandBase):
                 self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
                                         self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
         else:
-            messagebox.showerror('ERR_EMPTY_REQUESTED', \
-                                    'This field must not be empty.')
+            if is_sort:
+                # ソート時
+                messagebox.showerror('ERR_NO_ITEM_FOUND', \
+                                        'Sorting is not available.\r\n' \
+                                        'There are no items in the tree view.')
+            else:
+                # 検索時
+                messagebox.showerror('ERR_EMPTY_REQUESTED', \
+                                        'This field must not be empty.')
 
     def __create_log_gui(self, parent: tkinter.Frame):
         '''Log検索画面の出力を定義するメソッド。

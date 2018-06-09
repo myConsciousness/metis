@@ -28,7 +28,8 @@ class MstParameterDao:
     '''MST_PARAMETER.TBLへのトランザクション処理を定義するDAOクラス。'''
 
     def select_params_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
-        '''主キーを用いてMST_PARAMETER.TBLから値を取得するクエリ。返り値はtuple型。
+        '''主キーを用いてMST_PARAMETER.TBLから値を取得するクエリ。
+        返り値はtuple型。
 
         :param sqlite3.Cursor cursor: カーソル。
         :param str primary_key: 検索ワード。
@@ -67,7 +68,8 @@ class ManageSerialDao:
                         ''',(serial_no,))
 
     def count_records_by_primary_key(self, cursor: sqlite3.Cursor, primary_key: str) -> tuple:
-        '''主キーを用いてMANAGE_SERIAL.TBLから値を取得するクエリ。返り値はtuple型。
+        '''主キーを用いてMANAGE_SERIAL.TBLから値を取得するクエリ。
+        返り値はtuple型。
 
         :param sqlite3.Cursor cursor: カーソル。
         :param str primary_key: 検索ワード。
@@ -117,8 +119,9 @@ class ManageSerialDao:
 class ArticleInfoHatenaDao:
     '''ARTICLE_INFO_HATENA.TBLへのトランザクション処理を定義するDAOクラス。'''
 
-    def select_by_primary_key(self, cursor: sqlite3.Cursor, search_word: str) -> tuple:
-        '''検索ワードを用いてARTICLE_INFO_HATENA.TBLから記事情報を取得するクエリ。返り値はtuple型。
+    def select_by_search_word(self, cursor: sqlite3.Cursor, search_word: str) -> tuple:
+        '''ARTICLE_INFO_HATENA.TBLから記事情報を取得するクエリ。
+        返り値はtuple型。
 
         :param sqlite3.Cursor cursor: カーソル。
         :param str search_word: 検索ワード。
@@ -139,13 +142,44 @@ class ArticleInfoHatenaDao:
                         FROM
                             ARTICLE_INFO_HATENA
                         WHERE
+                            TAG
+                        LIKE
+                            ?
+                        ''',(search_word,))
+
+        return cursor.fetchall()
+
+    def select_by_primary_key(self, cursor: sqlite3.Cursor, url: str) -> tuple:
+        '''主キーを用いてARTICLE_INFO_HATENA.TBLから記事情報を取得するクエリ。
+        返り値はtuple型。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        :param str url: 検索対象URL。
+        :rtype: tuple
+        :return: 検索結果。
+        '''
+
+        cursor.execute('''
+                        SELECT
+                            URL,
+                            TITLE,
+                            PUBLISHED_DATE,
+                            BOOKMARKS,
+                            TAG,
+                            REGISTER_DATE,
+                            UPDATED_DATE,
+                            RESERVED_DEL_DATE
+                        FROM
+                            ARTICLE_INFO_HATENA
+                        WHERE
                             URL = ?
-                        ''', (search_word,))
+                        ''', (url,))
 
         return cursor.fetchone()
 
     def select_all_url(self, cursor: sqlite3.Cursor) -> tuple:
-        '''ARTICLE_INFO_HATENA.TBLから全URLを取得するクエリ。返り値はtuple型。
+        '''ARTICLE_INFO_HATENA.TBLから全URLを取得するクエリ。
+        返り値はtuple型。
 
         :param sqlite3.Cursor cursor: カーソル。
         :rtype: tuple
@@ -161,8 +195,73 @@ class ArticleInfoHatenaDao:
 
         return cursor.fetchall()
 
+    def select_order_by_bookmarks_desc(self, cursor: sqlite3.Cursor, search_word: str) -> tuple:
+        '''ARTICLE_INFO_HATENA.TBLからブックマーク数を基準に降順でソートされたレコードを取得するクエリ。
+        返り値はtuple型。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        :param str search_word: 検索ワード。
+        :rtype: tuple
+        :return: ブックマーク数を基準に降順でソートされたレコード。
+        '''
+
+        cursor.execute('''
+                        SELECT
+                            URL,
+                            TITLE,
+                            PUBLISHED_DATE,
+                            BOOKMARKS,
+                            TAG,
+                            REGISTER_DATE,
+                            UPDATED_DATE,
+                            RESERVED_DEL_DATE
+                        FROM
+                            ARTICLE_INFO_HATENA
+                        WHERE
+                            TAG
+                        LIKE
+                            ?
+                        ORDER BY
+                            BOOKMARKS DESC
+                        ''', (search_word,))
+
+        return cursor.fetchall()
+
+    def select_order_by_bookmarks_asc(self, cursor: sqlite3.Cursor, search_word: str) -> tuple:
+        '''ARTICLE_INFO_HATENA.TBLからブックマーク数を基準に昇順でソートされたレコードを取得するクエリ。
+        返り値はtuple型。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        :param str search_word: 検索ワード。
+        :rtype: tuple
+        :return: ブックマーク数を基準に昇順でソートされたレコード。
+        '''
+
+        cursor.execute('''
+                        SELECT
+                            URL,
+                            TITLE,
+                            PUBLISHED_DATE,
+                            BOOKMARKS,
+                            TAG,
+                            REGISTER_DATE,
+                            UPDATED_DATE,
+                            RESERVED_DEL_DATE
+                        FROM
+                            ARTICLE_INFO_HATENA
+                        WHERE
+                            TAG
+                        LIKE
+                            ?
+                        ORDER BY
+                            BOOKMARKS ASC
+                        ''', (search_word,))
+
+        return cursor.fetchall()
+
     def update_bookmarks_by_primary_key(self, cursor: sqlite3.Cursor, bookmarks: str, primary_key: str):
-        '''主キーを用いてARTICLE_INFO_HATENA.TBLのブックマーク数を更新するクエリ。返り値はtuple型。
+        '''主キーを用いてARTICLE_INFO_HATENA.TBLのブックマーク数を更新するクエリ。
+        返り値はtuple型。
 
         :param sqlite3.Cursor cursor: カーソル。
         :param str bookmarks: ブックマーク数。
@@ -200,35 +299,6 @@ class ArticleInfoHatenaDao:
                             :RESERVED_DEL_DATE
                         )
                         ''',(article_infos))
-
-    def select_infos_by_search_word(self, cursor: sqlite3.Cursor, search_word: str) -> tuple:
-        '''ARTICLE_INFO_HATENA.TBLから記事情報を取得するクエリ。返り値はtuple型。
-
-        :param sqlite3.Cursor cursor: カーソル。
-        :param str search_word: 検索ワード。
-        :rtype: tuple
-        :return: 検索結果。
-        '''
-
-        cursor.execute('''
-                        SELECT
-                            URL,
-                            TITLE,
-                            PUBLISHED_DATE,
-                            BOOKMARKS,
-                            TAG,
-                            REGISTER_DATE,
-                            UPDATED_DATE,
-                            RESERVED_DEL_DATE
-                        FROM
-                            ARTICLE_INFO_HATENA
-                        WHERE
-                            TAG
-                        LIKE
-                            ?
-                        ''',(search_word,))
-
-        return cursor.fetchall()
 
     def transfer_article_info_from_work(self, cursor: sqlite3.Cursor):
         '''WORK_ARTICLE_INFO_HATENA.TBLからARTICLE_INFO_HATENA.TBLへ記事情報を移行させるクエリ。
