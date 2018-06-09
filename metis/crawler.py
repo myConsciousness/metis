@@ -58,11 +58,17 @@ class CrawlHandler:
         self.__handle_proc(args[0])
 
     def __handle_proc(self, args):
+        '''処理オーダ毎にプロセスの処理を制御するメソッド。
+
+        :param tuple args: コマンドライン引数。
+        '''
 
         if self.__order == '0':
+            # クローリングを行う
             crawler = CrawlingHatena(args)
             crawler.execute()
         elif self.__order == '1':
+            # ブックマークの更新処理を行う
             crawler = UpdateBookmarks(args)
             crawler.execute()
 
