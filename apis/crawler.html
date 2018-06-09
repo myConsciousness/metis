@@ -186,6 +186,20 @@ typically into a central local database or spreadsheet, for later retrieval or a
 </dd></dl>
 
 <dl class="method">
+<dt id="crawler.CommunicateBase._CommunicateBase__handling_url_exception">
+<code class="descname">_CommunicateBase__handling_url_exception</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CommunicateBase._CommunicateBase__handling_url_exception" title="Permalink to this definition">¶</a></dt>
+<dd><p>通信処理における例外を処理するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>e</strong> (<em>urllib.error.URLError</em>) – 通信処理において発生した例外情報。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="crawler.CommunicateBase.edit_html">
 <code class="descname">edit_html</code><span class="sig-paren">(</span><em>html: str</em>, <em>start_name: str</em>, <em>end_name: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#crawler.CommunicateBase.edit_html" title="Permalink to this definition">¶</a></dt>
 <dd><p>取得したHTMLをスクレイピング用に加工するメソッド。</p>
@@ -252,20 +266,6 @@ APIからプレーンテキストを取得する際に文字コードを取得�
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">対象URLにHTTP(s)通信を行い取得したHTMLソース。</p>
 </td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="crawler.CommunicateBase.handling_url_exception">
-<code class="descname">handling_url_exception</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CommunicateBase.handling_url_exception" title="Permalink to this definition">¶</a></dt>
-<dd><p>通信処理における例外を処理するメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>e</strong> (<em>urllib.error.URLError</em>) – 通信処理において発生した例外情報。</td>
 </tr>
 </tbody>
 </table>
@@ -421,7 +421,7 @@ URLを取得できなかった場合は、URL取得以降の処理を行わず�
 <dl class="method">
 <dt id="crawler.UpdateBookmarks._UpdateBookmarks__update_bookmarks">
 <code class="descname">_UpdateBookmarks__update_bookmarks</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarks._UpdateBookmarks__update_bookmarks" title="Permalink to this definition">¶</a></dt>
-<dd><p>ボックマーク数の更新処理を行うメソッド。</p>
+<dd><p>ブックマーク数の更新処理を行うメソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
