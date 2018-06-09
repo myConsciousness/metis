@@ -44,7 +44,7 @@ class CommandBase:
         self.URL_README = 'https://github.com/myConsciousness/metis/blob/master/README.md'
 
         # 現在のソート状態
-        self.current_state_sort = None
+        self.current_sort_state = None
         # ソート用検索ワード
         self.search_word_for_sort = None
 
@@ -70,7 +70,7 @@ class CommandBase:
         # ツリービューの初期化
         self.tree.delete(*self.tree.get_children())
         # ソート状態を初期化
-        self.current_state_sort = None
+        self.current_sort_state = None
         # ソート用検索ワードを初期化
         self.search_word_for_sort = None
 
@@ -436,19 +436,19 @@ class Application(CommandBase):
 
                 if is_sort:
                     # ソートする場合
-                    if self.current_state_sort == 'ASC' or not self.current_state_sort:
+                    if self.current_sort_state == 'ASC' or not self.current_sort_state:
                         # 降順にソートしたレコードを取得
                         article_infos = self.article_info_hatena_dao.select_order_by_bookmarks_desc(cursor, '%' + self.search_word_for_sort + '%')
-                        self.current_state_sort = 'DESC'
+                        self.current_sort_state = 'DESC'
                     else:
                         # 昇順にソートしたレコードを取得
                         article_infos = self.article_info_hatena_dao.select_order_by_bookmarks_asc(cursor, '%' + self.search_word_for_sort + '%')
-                        self.current_state_sort = 'ASC'
+                        self.current_sort_state = 'ASC'
                 else:
                     # ソートしない場合
                     article_infos = self.article_info_hatena_dao.select_by_search_word(cursor, '%' + search_word + '%')
                     # ソート状態を初期化
-                    self.current_state_sort = None
+                    self.current_sort_state = None
                     # ソート用検索ワードを更新
                     self.search_word_for_sort = search_word
 
