@@ -3,7 +3,7 @@
 '''
 
 Tkinter is a Python binding to the Tk GUI toolkit. It is the standard Python interface to the Tk GUI toolkit,
-and is Python's de facto standard GUI.
+and is de facto standard GUI of Python.
 Tkinter is included with the standard Microsoft Windows and Mac OS X install of Python.
 
 As with most other modern Tk bindings, Tkinter is implemented as a Python wrapper
@@ -470,7 +470,7 @@ class Application(MetisCommandBase):
         # セットアップ完了時間
         elapsed_time = time.time() - start
         # ステータスバーに反映
-        self.status['text'] = 'Setup elapsed time : {}'.format(elapsed_time) + ' [sec]'
+        self.status['text'] = 'Setup elapsed time : {} [sec]'.format(elapsed_time)
 
         self.master.mainloop()
 
@@ -679,10 +679,13 @@ class Application(MetisCommandBase):
 
                     self.tree.pack(fill=BOTH, expand=True)
 
+                    # 取得数
+                    count_records = len(article_infos)
                     # 処理完了時間
                     elapsed_time = time.time() - start
                     # ステータスバーに反映
-                    self.status['text'] = 'Search elapsed time : {}'.format(elapsed_time) + ' [sec]'
+                    self.status['text'] = 'Search elapsed time : {} [sec] | Found {} {}' \
+                                            .format(elapsed_time, count_records, 'records' if count_records > 1 else 'record')
                 else:
                     # ソート用検索ワードを初期化
                     self.search_word_for_sort = None
@@ -690,7 +693,7 @@ class Application(MetisCommandBase):
                     # 処理完了時間
                     elapsed_time = time.time() - start
                     # ステータスバーに反映
-                    self.status['text'] = 'Search elapsed time : {}'.format(elapsed_time) + ' [sec]'
+                    self.status['text'] = 'Search elapsed time : {} [sec]'.format(elapsed_time)
 
                     messagebox.showinfo('NO_RESULTS_FOUND',
                                             'Your search - ' \
@@ -708,7 +711,7 @@ class Application(MetisCommandBase):
             # 処理完了時間
             elapsed_time = time.time() - start
             # ステータスバーに反映
-            self.status['text'] = 'Search elapsed time : {}'.format(elapsed_time) + ' [sec]'
+            self.status['text'] = 'Search elapsed time : {} [sec]'.format(elapsed_time)
 
             if is_sort:
                 # ソート時
