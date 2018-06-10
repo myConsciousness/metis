@@ -227,14 +227,14 @@ class MetisBase:
         master.geometry('{}x{}+{}+{}'.format(width, height, x, y))
         master.deiconify()
 
-class CommandBase(MetisBase):
-    '''アプリケーションのコマンド処理を定義するコマンド基底クラス。'''
+class MetisCommandBase(MetisBase):
+    '''Metisのコマンド処理を定義する基底クラス。'''
 
     def __init__(self):
         '''コマンド基底クラスのコンストラクタ。'''
 
         # 基底クラス名
-        self.BASE_CLASS_NAME = 'CommandBase'
+        self.BASE_CLASS_NAME = 'MetisCommandBase'
 
         # 最基底クラスのコンストラクタを実行
         super().__init__()
@@ -425,7 +425,7 @@ class CommandBase(MetisBase):
         messagebox.showerror('ERR_BUTTON_LIMITED', \
                                 'Use Quit button or Esc key to close the window.')
 
-class Application(CommandBase):
+class Application(MetisCommandBase):
     '''GUIの出力処理を定義するクラス。'''
 
     def __init__(self, *args, **kwargs):
