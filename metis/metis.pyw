@@ -25,6 +25,7 @@ from datetime import datetime
 import os.path
 import sqlite3
 import time
+import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
 import tkinter.ttk as ttk
@@ -38,6 +39,36 @@ from sql import ManageSerialDao
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
+
+class MetisCustomText(Text):
+    '''Tkinterテキストウィジェットの拡張クラス。'''
+
+    def __init__(self, master, **kwargs):
+        '''コンストラクタ。'''
+
+        super().__init__(master, **kwargs)
+
+        # onchangeイベントを有効化する
+        self.tk.eval('''
+                    proc widget_proxy {widget widget_command args} {
+                        set result [uplevel [linsert $args 0 $widget_command]]
+                        if {([lrange $args 0 1] == {xview moveto}) ||
+                            ([lrange $args 0 1] == {xview scroll}) ||
+                            ([lrange $args 0 1] == {yview moveto}) ||
+                            ([lrange $args 0 1] == {yview scroll})} {
+                            event generate  $widget <<Scroll>> -when tail
+                        }
+                        if {([lindex $args 0] in {insert replace delete})} {
+                            event generate  $widget <<Change>> -when tail
+                        }
+                        # return the result from the real widget command
+                        return $result
+                    }
+                    ''')
+        self.tk.eval('''
+                        rename {widget} _{widget}
+                        interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
+                    '''.format(widget=str(self)))
 
 class MetisSearchForm(ttk.Frame):
     '''Metisにおけるテキストの検索フォームを定義するクラス。'''
@@ -166,17 +197,12 @@ class MetisBase:
         # readmeを定義したmdファイルへのURL
         self.URL_README = 'https://github.com/myConsciousness/metis/blob/master/README.md'
 
-        # 現在のソート状態
-        self.current_sort_state = None
-        # ソート用検索ワード
-        self.search_word_for_sort = None
-
         # MANAGE_SERIAL.TBLのDAOクラス
         self.manage_serial_dao = ManageSerialDao()
         # ARTICLE_INFO_HATENA.TBLのDAOクラス
         self.article_info_hatena_dao = ArticleInfoHatenaDao()
 
-    def set_window_basic_config(self, master: Tk, title='Metis', icon='../common/icon/python_icon.ico', expand=True, width=1200, height=710):
+    def set_window_basic_config(self, master, title='Metis', icon='../common/icon/python_icon.ico', expand=True, width=1200, height=710):
         '''ウィンドウにおける基本情報を設定するメソッド。
 
         :param tkinter.Tk master: 親画面のフレーム。
@@ -201,7 +227,7 @@ class MetisBase:
         # 初期表示位置をディスプレイの中央に設定（環境非依存）
         self.__center(master, width=width, height=height)
 
-    def __center(self, master: Tk, width: int, height: int):
+    def __center(self, master, width: int, height: int):
         '''初期表示時に画面を常に中央に表示するように設定するメソッド。
 
         :param tkinter.Tk master: 親画面のフレーム。
@@ -244,54 +270,74 @@ class MetisCommandBase(MetisBase):
         # クローラモジュールを格納したファイルへのパス
         self.PATH_CRAWLER_MODULE = self.config['path']['crawler_module']
 
-    def open(self):
-        '''openボタン押下時の処理を定義。'''
+        # 処理オーダ : クローリング
+        self.ORDER_CRAWLING = '0'
+        # 処理オーダ : ブックマーク更新
+        self.ORDER_UPDATE_BOOKMARKS = '1'
+
+    def open(self, treeview):
+        '''openボタン押下時の処理を定義。
+
+        :param tkinter.ttk.Treeview treeview: 情報取得元ツリービュー。
+        '''
 
         # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
+        item_dict = treeview.item(treeview.focus())
 
         if item_dict['values']:
             url = item_dict['values'][3]
 
             self.open_new_tab(url)
 
-    def flush(self):
-        '''flushボタン押下時の処理を定義。'''
+    def flush(self, treeview):
+        '''flushボタン押下時の処理を定義。
+
+        :param tkinter.ttk.Treeview treeview: 情報取得元ツリービュー。
+        '''
 
         # ツリービューの初期化
-        self.tree.delete(*self.tree.get_children())
+        treeview.delete(*treeview.get_children())
         # ソート状態を初期化
         self.current_sort_state = None
         # ソート用検索ワードを初期化
         self.search_word_for_sort = None
 
-    def copy_url(self):
-        '''URLをクリップボードに追加する処理を定義。'''
+    def copy_url(self, treeview):
+        '''URLをクリップボードに追加する処理を定義。
+
+        :param tkinter.ttk.Treeview treeview: 情報取得元ツリービュー。
+        '''
 
         # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
+        item_dict = treeview.item(treeview.focus())
 
         if item_dict['values']:
             url = item_dict['values'][3]
 
             pyperclip.copy(url)
 
-    def copy_title(self):
-        '''タイトルをクリップボードに追加する処理を定義。'''
+    def copy_title(self, treeview):
+        '''タイトルをクリップボードに追加する処理を定義。
+
+        :param tkinter.ttk.Treeview treeview: 情報取得元ツリービュー。
+        '''
 
         # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
+        item_dict = treeview.item(treeview.focus())
 
         if item_dict['values']:
             title = item_dict['values'][1]
 
             pyperclip.copy(title)
 
-    def copy_information(self):
-        '''タイトル、URL、ブックマーク数をコピーする処理を定義。'''
+    def copy_information(self, treeview):
+        '''タイトル、URL、ブックマーク数をコピーする処理を定義。
+
+        :param tkinter.ttk.Treeview treeview: 情報取得元ツリービュー。
+        '''
 
         # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
+        item_dict = treeview.item(treeview.focus())
 
         if item_dict['values']:
             url = item_dict['values'][3]
@@ -300,22 +346,28 @@ class MetisCommandBase(MetisBase):
 
             pyperclip.copy(' '.join([url, title, bookmarks]))
 
-    def open_by_double_click(self, event):
-        '''左ダブルクリック時に発生する処理を定義。'''
+    def open_by_double_click(self, treeview):
+        '''左ダブルクリック時に発生する処理を定義。
+
+        :param tkinter.ttk.Treeview treeview: 情報取得元ツリービュー。
+        '''
 
         # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
+        item_dict = treeview.item(treeview.focus())
 
         if item_dict['values']:
             url = item_dict['values'][3]
 
             self.open_new_tab(url)
 
-    def copy_by_right_click(self, event):
-        '''右クリック時に発生する処理を定義。'''
+    def copy_by_right_click(self, treeview):
+        '''右クリック時に発生する処理を定義。
+
+        :param tkinter.ttk.Treeview treeview: 情報取得元ツリービュー。
+        '''
 
         # フォーカス部分の要素を辞書として取得
-        item_dict = self.tree.item(self.tree.focus())
+        item_dict = treeview.item(treeview.focus())
 
         if item_dict['values']:
             url = item_dict['values'][3]
@@ -362,21 +414,44 @@ class MetisCommandBase(MetisBase):
             cmd = 'python {} {} {}'
             subprocess.Popen(cmd.format(self.PATH_CRAWLER_MODULE, order, serial_number))
 
-    def read_log(self):
-        '''readボタン押下時の処理を定義。'''
+    def create_search_form(self, master, textarea):
+        '''子画面として検索フォームを生成するメソッド。
 
-        if self.output_text_log.get('1.0',END):
+        :param tkinter.Tk master: 親画面のフレーム。
+        :param MetisCustomText textarea: 検索対象テキストエリア。
+        '''
+
+        search_form = Toplevel(master=master)
+
+        # ウィンドウの設定
+        self.set_window_basic_config(master=search_form, title='Metis - Search Form', expand=False, width=400, height=80)
+        search_form.transient(master)
+
+        # 検索フォームの生成
+        metis_search_form = MetisSearchForm(search_form, textarea)
+        metis_search_form.pack()
+
+    def read_log(self, text_form, textarea):
+        '''readボタン押下時の処理を定義。
+
+        :param tkinter.ttk.Entry text_form: 日付取得元テキストフォーム。
+        :param MetisCustomText textarea: 出力先テキストエリア。
+        '''
+
+        if textarea.get('1.0', END):
             # テキストフォームの初期化
-            self.output_text_log.delete('1.0', END)
+            textarea.delete('1.0', END)
+        # 入力された値の取得
+        input_date = text_form.get()
 
-        input_date = self.input_date.get()
+        split_words = '-/., '
         if '.log' in input_date:
             # ファイル名と拡張子を分割
             root, ext = os.path.splitext(input_date)
-            date = ''.join(split(root, '-/., '))
+            date = ''.join(split(root, split_words))
             path_name = self.PATH_DIR_LOG + date + '.log'
         else:
-            date = ''.join(split(input_date, '-/., '))
+            date = ''.join(split(input_date, split_words))
             path_name = self.PATH_DIR_LOG + date + '.log'
 
         if os.path.exists(path_name):
@@ -386,20 +461,53 @@ class MetisCommandBase(MetisBase):
 
             # 取得した行数分だけ処理
             for line in text_lines:
-                self.output_text_log.insert(END, line)
-            self.output_text_log.pack()
+                textarea.insert(END, line)
+            textarea.pack()
         else:
             # ログファイルが存在しなかった場合
             messagebox.showerror('ERR_NO_FILE_FOUND',
                                     'Failed to open log file.\r\n' \
                                     'No such file or directory.')
 
-    def get_log_list(self):
-        '''listボタン押下時の処理を定義'''
+    def update_line_numbers(self, canvas, textarea):
+        '''イベント発生時に行番号を更新しキャンバスを再描画するメソッド。
 
-        if self.output_text_log.get('1.0',END):
+        :param tkinter.Canvas canvas: 行番号描画用キャンバス。
+        :param MetisCustomText textarea: 座標取得元テキストエリア。
+        '''
+
+        # キャンバスの初期化
+        canvas.delete(ALL)
+
+        # 0,0座標が何行目かを取得
+        first_row = textarea.index('@0,0')
+        current_number = int(split(first_row, '.')[0])
+
+        while True:
+            # 行の位置と大きさを取得
+            dline = textarea.dlineinfo('{0}.0'.format(current_number))
+
+            if dline is None:
+                # 行が存在しない場合
+                # または行が見えない場合
+                break
+            else:
+                # y座標の取得
+                y = dline[1]
+
+            # 行番号をキャンバスへ描画する
+            canvas.create_text(3, y, anchor=NW, text=current_number)
+            current_number += 1
+
+    def get_log_list(self, textarea):
+        '''listボタン押下時の処理を定義
+
+        :param MetisCustomText textarea: 出力先テキストエリア。
+        '''
+
+        if textarea.get('1.0', END):
             # テキストフォームの初期化
-            self.output_text_log.delete('1.0', END)
+            textarea.delete('1.0', END)
 
         # logディレクトリ内のファイルを取得
         log_files = os.listdir(self.PATH_DIR_LOG)
@@ -407,17 +515,20 @@ class MetisCommandBase(MetisBase):
             # ファイル名と拡張子を分割
             _, ext = os.path.splitext(log)
             if ext == '.log':
-                self.output_text_log.insert(END, log + '\r\n')
-        self.output_text_log.pack()
+                textarea.insert(END, log + '\r\n')
+        textarea.pack()
 
-    def quit(self):
-        '''quitボタン押下時の処理を定義。'''
+    def quit(self, master):
+        '''quitボタン押下時の処理を定義。
+
+        :param tkinter.Tk master: 親画面のフレーム。
+        '''
 
         self.log.normal(LogLevel.INFO.value, self.BASE_CLASS_NAME, \
                                 self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
 
         # 処理終了
-        self.master.destroy()
+        master.destroy()
 
     def disable_close_button(self):
         '''windowのcloseボタンを無効化する'''
@@ -446,6 +557,11 @@ class Application(MetisCommandBase):
         self.log = Log()
         self.log_msg = LogMessage()
 
+        # 現在のソート状態
+        self.current_sort_state = None
+        # ソート用検索ワード
+        self.search_word_for_sort = None
+
     def execute_application(self):
         '''アプリケーションを実行するメソッド。'''
 
@@ -460,12 +576,12 @@ class Application(MetisCommandBase):
         # ウィンドウの閉じるボタンを無効化
         self.master.protocol('WM_DELETE_WINDOW', self.disable_close_button)
         # エスケープキーに画面を閉じる機能を割り当て
-        self.master.bind('<Escape>', lambda x: self.quit())
+        self.master.bind('<Escape>', lambda x: self.quit(self.master))
 
-        # メニューバーの生成
-        self.__create_menubar()
         # ウィンドウの構築
         self.__create_window()
+        # メニューバーの生成
+        self.__create_menubar()
 
         # セットアップ完了時間
         elapsed_time = time.time() - start
@@ -483,14 +599,14 @@ class Application(MetisCommandBase):
         file_menu = Menu(menubar, tearoff=0)
         file_menu.add_command(label='Parameters')
         file_menu.add_separator()
-        file_menu.add_command(label='Exit', command=self.quit)
+        file_menu.add_command(label='Exit', command=partial(self.quit, self.master))
         menubar.add_cascade(label='File', menu=file_menu)
 
         # 編集メニュー
         edit_menu = Menu(menubar, tearoff=0)
-        edit_menu.add_command(label='Copy Path', command=self.copy_url)
-        edit_menu.add_command(label='Copy Title', command=self.copy_title)
-        edit_menu.add_command(label='Copy Informations', command=self.copy_information)
+        edit_menu.add_command(label='Copy Path', command=partial(self.copy_url, self.treeview))
+        edit_menu.add_command(label='Copy Title', command=partial(self.copy_title, self.treeview))
+        edit_menu.add_command(label='Copy Informations', command=partial(self.copy_information, self.treeview))
         menubar.add_cascade(label='Edit', menu=edit_menu)
 
         # クローラメニュー
@@ -498,8 +614,8 @@ class Application(MetisCommandBase):
         start_crawling = Menu(menubar, tearoff=0)
         update_bookmarks = Menu(menubar, tearoff=0)
         crawler_menu.add_cascade(label='Hatena', menu=start_crawling)
-        start_crawling.add_command(label='Start Crawling', command=partial(self.execute_crawler, '0'))
-        start_crawling.add_command(label='Update Bookmarks', command=partial(self.execute_crawler, '1'))
+        start_crawling.add_command(label='Start Crawling', command=partial(self.execute_crawler, self.ORDER_CRAWLING))
+        start_crawling.add_command(label='Update Bookmarks', command=partial(self.execute_crawler, self.ORDER_UPDATE_BOOKMARKS))
         menubar.add_cascade(label='Crawler', menu=crawler_menu)
 
         # helpメニュー
@@ -517,9 +633,9 @@ class Application(MetisCommandBase):
 
         notebook = ttk.Notebook(self.master)
         # top画面用のフレーム
-        frame_update_articles = Frame(notebook, bd=2, relief='groove')
+        frame_update_articles = Frame(notebook, bd=2, relief=GROOVE)
         # log検索画面用のフレーム
-        frame_show_log = Frame(notebook, bd=2, relief='groove')
+        frame_show_log = Frame(notebook, bd=2, relief=GROOVE)
 
         # top画面用のタブ
         notebook.add(frame_update_articles, text='Top')
@@ -546,7 +662,7 @@ class Application(MetisCommandBase):
         '''
 
         # 検索フォームのフレーム
-        frame_search_terms = LabelFrame(parent, labelanchor='n', relief=FLAT, text="Enter search terms")
+        frame_search_terms = LabelFrame(parent, labelanchor='n', relief=FLAT, text='Enter search terms')
         frame_search_terms.pack(pady=20)
 
         # 最大表示件数入力フォームの設定
@@ -569,13 +685,13 @@ class Application(MetisCommandBase):
         frame_button.pack(side=BOTTOM, pady=30)
 
         # 開くボタン
-        open_button = ttk.Button(frame_button, text='Open', width=20, command=self.open)
+        open_button = ttk.Button(frame_button, text='Open', width=20, command=partial(self.open, self.treeview))
         open_button.pack(side=LEFT, padx=60)
         # 初期化ボタン
-        flush_button = ttk.Button(frame_button, text='Flush', width=20, command=self.flush)
+        flush_button = ttk.Button(frame_button, text='Flush', width=20, command=partial(self.flush, self.treeview))
         flush_button.pack(side=LEFT, padx=60)
         # 終了ボタン
-        quit_button = ttk.Button(frame_button, text='Quit', width=20, command=self.quit)
+        quit_button = ttk.Button(frame_button, text='Quit', width=20, command=partial(self.quit, self.master))
         quit_button.pack(side=LEFT, padx=60)
 
     def __create_tree_view(self, parent: Frame):
@@ -589,32 +705,32 @@ class Application(MetisCommandBase):
         frame_tree_view.pack(fill=BOTH, expand=True)
 
         # ツリービューのオブジェクトを生成
-        self.tree = ttk.Treeview(frame_tree_view)
+        self.treeview = ttk.Treeview(frame_tree_view)
 
         # スクロールバーの生成
-        scroll = Scrollbar(frame_tree_view, orient=VERTICAL, command=self.tree.yview)
-        self.tree.configure(yscrollcommand=scroll.set)
+        scroll = Scrollbar(frame_tree_view, orient=VERTICAL, command=self.treeview.yview)
+        self.treeview.configure(yscrollcommand=scroll.set)
         scroll.pack(side=RIGHT, fill=Y)
 
         # カラムの設定
-        self.tree['columns'] = (1, 2, 3, 4)
-        self.tree.column(1, width=50)
-        self.tree.column(2, width=1000)
-        self.tree.column(3, width=50)
-        self.tree.column(4)
+        self.treeview['columns'] = (1, 2, 3, 4)
+        self.treeview.column(1, width=50)
+        self.treeview.column(2, width=1000)
+        self.treeview.column(3, width=50)
+        self.treeview.column(4)
 
         # ヘッダの設定
-        self.tree['show'] = 'headings'
-        self.tree.heading(1, text='No.')
-        self.tree.heading(2, text='Title')
-        self.tree.heading(3, text='Bookmarks', command=partial(self.__refresh_tree_view, True))
-        self.tree.heading(4)
-        self.tree.configure(style='my.Treeview', displaycolumns=(1,2,3))
+        self.treeview['show'] = 'headings'
+        self.treeview.heading(1, text='No.')
+        self.treeview.heading(2, text='Title')
+        self.treeview.heading(3, text='Bookmarks', command=partial(self.__refresh_tree_view, True))
+        self.treeview.heading(4)
+        self.treeview.configure(style='my.Treeview', displaycolumns=(1,2,3))
 
         # ダブルクリックでページを開くように設定
-        self.tree.bind('<Double-1>', self.open_by_double_click)
+        self.treeview.bind('<Double-1>', lambda x: self.open_by_double_click(self.treeview))
         # 右クリックでURLをコピーするように設定
-        self.tree.bind('<ButtonRelease-3>', self.copy_by_right_click)
+        self.treeview.bind('<ButtonRelease-3>', lambda x: self.copy_by_right_click(self.treeview))
 
         # ツリービューのレイアウト設定
         style = ttk.Style(parent)
@@ -622,7 +738,7 @@ class Application(MetisCommandBase):
         style.configure('Treeview', font=('Consolas', 10))
         style.configure('Treeview.Heading', font=('Consolas', 10, 'bold'))
 
-        self.tree.pack(fill=BOTH, expand=True)
+        self.treeview.pack(fill=BOTH, expand=True)
 
     def __refresh_tree_view(self, is_sort=False):
         '''取得した記事情報からツリービューを生成するメソッド。
@@ -630,6 +746,8 @@ class Application(MetisCommandBase):
         :param bool is_sort: ソート可否フラグ (True/ False)。初期値はFalse。
         '''
 
+        # ステータスバーに反映する初期文言
+        status_msg = 'Elapsed time : {} [sec]'
         # 処理開始時間
         start = time.time()
 
@@ -641,7 +759,7 @@ class Application(MetisCommandBase):
         # 検索時とヘッダーのbookmarks押下によるソート時で処理が異なる
         if search_word or (self.search_word_for_sort and is_sort):
             # ツリービューの初期化
-            self.tree.delete(*self.tree.get_children())
+            self.treeview.delete(*self.treeview.get_children())
 
             try:
                 # データベースへ接続
@@ -653,15 +771,15 @@ class Application(MetisCommandBase):
                     # ソートする場合
                     if self.current_sort_state == 'ASC' or not self.current_sort_state:
                         # 降順にソートしたレコードを取得
-                        article_infos = self.article_info_hatena_dao.select_order_by_bookmarks_desc(cursor, '%' + self.search_word_for_sort + '%')
+                        article_infos = self.article_info_hatena_dao.select_order_by_bookmarks_desc(cursor, '%{}%'.format(self.search_word_for_sort))
                         self.current_sort_state = 'DESC'
                     else:
                         # 昇順にソートしたレコードを取得
-                        article_infos = self.article_info_hatena_dao.select_order_by_bookmarks_asc(cursor, '%' + self.search_word_for_sort + '%')
+                        article_infos = self.article_info_hatena_dao.select_order_by_bookmarks_asc(cursor, '%{}%'.format(self.search_word_for_sort))
                         self.current_sort_state = 'ASC'
                 else:
                     # ソートしない場合
-                    article_infos = self.article_info_hatena_dao.select_by_search_word(cursor, '%' + search_word + '%')
+                    article_infos = self.article_info_hatena_dao.select_by_search_word(cursor, '%{}%'.format(search_word))
                     # ソート状態を初期化
                     self.current_sort_state = None
                     # ソート用検索ワードを更新
@@ -671,21 +789,23 @@ class Application(MetisCommandBase):
                     # TreeViewに記事情報を反映させる
                     for i, infos in enumerate(article_infos):
                         value = (str(i+1), infos[1], infos[3], infos[0])
-                        self.tree.insert('', END, tags=i, values=value)
+                        self.treeview.insert('', END, tags=i, values=value)
 
                         if i & 1:
                             # 偶数行の背景色を変更
-                            self.tree.tag_configure(i, background='#CCFFFF')
+                            self.treeview.tag_configure(i, background='#CCFFFF')
 
-                    self.tree.pack(fill=BOTH, expand=True)
+                    self.treeview.pack(fill=BOTH, expand=True)
 
                     # 取得数
                     count_records = len(article_infos)
                     # 処理完了時間
                     elapsed_time = time.time() - start
-                    # ステータスバーに反映
-                    self.status['text'] = 'Search elapsed time : {} [sec] | Found {} {}' \
-                                            .format(elapsed_time, count_records, 'records' if count_records > 1 else 'record')
+                    # ステータスバーに反映する文言を更新
+                    status_msg = 'Sort elapsed time : {} [sec] | {} {}' if is_sort else 'Search elapsed time : {} [sec] | {} {}'
+
+                    # ソート時の処理時間をステータスバーに反映
+                    self.status['text'] = status_msg.format(elapsed_time, count_records, 'records' if count_records > 1 else 'record')
                 else:
                     # ソート用検索ワードを初期化
                     self.search_word_for_sort = None
@@ -693,7 +813,7 @@ class Application(MetisCommandBase):
                     # 処理完了時間
                     elapsed_time = time.time() - start
                     # ステータスバーに反映
-                    self.status['text'] = 'Search elapsed time : {} [sec]'.format(elapsed_time)
+                    self.status['text'] = status_msg.format(elapsed_time)
 
                     messagebox.showinfo('NO_RESULTS_FOUND',
                                             'Your search - ' \
@@ -711,7 +831,7 @@ class Application(MetisCommandBase):
             # 処理完了時間
             elapsed_time = time.time() - start
             # ステータスバーに反映
-            self.status['text'] = 'Search elapsed time : {} [sec]'.format(elapsed_time)
+            self.status['text'] = status_msg.format(elapsed_time)
 
             if is_sort:
                 # ソート時
@@ -728,52 +848,65 @@ class Application(MetisCommandBase):
         '''
 
         # 検索フォームのフレーム
-        frame_log_file = LabelFrame(parent, labelanchor='n', relief=FLAT,text="Enter the date")
+        frame_log_file = LabelFrame(parent, labelanchor='n', relief=FLAT, text='Enter the date')
         frame_log_file.pack(pady=20)
 
-        self.input_date = ttk.Entry(frame_log_file, font=('Consolas', 10), justify=CENTER, width=20)
-        self.input_date.insert(END, datetime.today().strftime('%Y/%m/%d'))
-        self.input_date.bind('<Leave>', lambda x: self.read_log())
-        self.input_date.focus_set()
-        self.input_date.pack(side=LEFT, padx=5)
+        # 日付入力フォームの生成
+        input_date = ttk.Entry(frame_log_file, font=('Consolas', 10), justify=CENTER, width=20)
+        input_date.insert(END, datetime.today().strftime('%Y/%m/%d'))
+        # マウスアウト時にファイルの読み込み処理を行う
+        input_date.bind('<Leave>', lambda x: self.read_log(input_date, self.output_text_log))
+        input_date.focus_set()
+        input_date.pack(side=LEFT, padx=5)
 
-        # 出力用フォームの設定
-        frame_text_log = Frame(parent, pady=10, bd=0)
-        frame_text_log.pack(fill=BOTH, expand=True)
-        self.output_text_log = tkst.ScrolledText(frame_text_log, font=('Consolas', 10))
-        # テキストエリア上でCtrl+F押下時に検索ボックスを開くように設定
-        self.output_text_log.bind('<Control-f>', lambda event: self.__create_search_form(self.output_text_log))
-        self.output_text_log.pack(fill=BOTH, expand=True)
+        # 出力用テキストエリアの生成
+        self.__create_custom_text_area(parent)
 
         # ボタンのフレーム
         frame_button = Frame(parent, relief=FLAT)
         frame_button.pack(side=BOTTOM, pady=30)
 
         # ファイルを読むボタン
-        read_button = ttk.Button(frame_button, text='Read', width=20, command=self.read_log)
+        read_button = ttk.Button(frame_button, text='Read', width=20, command=partial(self.read_log, input_date, self.output_text_log))
         read_button.pack(side=LEFT, padx=60)
         # ファイルのリストを取得するボタン
-        list_button = ttk.Button(frame_button, text='List', width=20, command=self.get_log_list)
+        list_button = ttk.Button(frame_button, text='List', width=20, command=partial(self.get_log_list, self.output_text_log))
         list_button.pack(side=LEFT, padx=60)
         # 終了ボタン
-        quit_button = ttk.Button(frame_button, text='Quit', width=20, command=self.quit)
+        quit_button = ttk.Button(frame_button, text='Quit', width=20, command=partial(self.quit, self.master))
         quit_button.pack(side=LEFT, padx=60)
 
-    def __create_search_form(self, text_form):
-        '''子画面として検索フォームを生成するメソッド。
+    def __create_custom_text_area(self, parent):
+        '''カスタムテキストエリアを生成するメソッド。
 
-        :param tkinter.scrolledtext.ScrolledText text_form: 検索対象テキストフォーム。
+        :param tkinter.Frame parent: 画面の親フレーム。
         '''
 
-        search_form = Toplevel(master=self.master)
+        # 出力用フォームの設定
+        frame_text_log = Frame(parent, pady=10, bd=0)
+        frame_text_log.pack(fill=BOTH, expand=True)
 
-        # ウィンドウの設定
-        self.set_window_basic_config(master=search_form, title='Metis - Search Form', expand=False, width=400, height=80)
-        search_form.transient(self.master)
+        # 行番号出力用キャンバス
+        line_numbers = Canvas(frame_text_log, width=30)
+        line_numbers.pack(side=LEFT, fill=BOTH)
 
-        # 検索フォームの生成
-        metis_search_form = MetisSearchForm(search_form, text_form)
-        metis_search_form.pack()
+        # 拡張テキストエリアの生成
+        self.output_text_log = MetisCustomText(frame_text_log, font=('Consolas', 10))
+
+        # テキストエリアの行番号描画イベントのバインド用リスト
+        list_events_textarea = ['<<Scroll>>', '<<Change>>', '<Configure>', '<FocusIn>']
+        for event in list_events_textarea:
+            # on_changeイベントとイベント発生時処理の紐付け
+            self.output_text_log.bind(event, lambda x: self.update_line_numbers(canvas=line_numbers, textarea=self.output_text_log))
+
+        # スクロールバーの生成
+        ysb = ttk.Scrollbar(frame_text_log, orient=VERTICAL, command=self.output_text_log.yview)
+        self.output_text_log.configure(yscrollcommand=ysb.set)
+        ysb.pack(side=RIGHT, fill=BOTH)
+
+        # テキストエリア上でCtrl+F押下時に検索ボックスを開くように設定
+        self.output_text_log.bind('<Control-f>', lambda x: self.create_search_form(self.master, self.output_text_log))
+        self.output_text_log.pack(side=LEFT, fill=BOTH, expand=True)
 
 if __name__ == '__main__':
     app = Application()
