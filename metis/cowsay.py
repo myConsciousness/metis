@@ -7,6 +7,8 @@ and as such are easily adaptable to system tasks in Unix.
 They can perform functions such as telling users their home directories are full,
 that they have new mail, etc.
 
+:copyright: (c) 2018 by Kato Shinya.
+:license: MIT, see LICENSE for more details.
 '''
 
 import re

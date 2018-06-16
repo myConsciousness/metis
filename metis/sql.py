@@ -17,6 +17,8 @@ and embedded systems (such as mobile phones), among others.
 
 SQLite has bindings to many programming languages.
 
+:copyright: (c) 2018 by Kato Shinya.
+:license: MIT, see LICENSE for more details.
 '''
 
 import sqlite3

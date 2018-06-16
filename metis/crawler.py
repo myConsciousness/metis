@@ -18,6 +18,8 @@ the term typically refers to automated processes implemented using a bot or web 
 It is a form of copying, in which specific data is gathered and copied from the web,
 typically into a central local database or spreadsheet, for later retrieval or analysis.
 
+:copyright: (c) 2018 by Kato Shinya.
+:license: MIT, see LICENSE for more details.
 '''
 
 from urllib.request import Request, urlopen

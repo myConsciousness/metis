@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+'''
+:copyright: (c) 2018 by Kato Shinya.
+:license: MIT, see LICENSE for more details.
+'''
+
 from logging import getLogger
 from logging import FileHandler
 from logging import StreamHandler

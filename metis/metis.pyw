@@ -17,6 +17,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).
 
 Tkinter is free software released under a Python license.
 
+:copyright: (c) 2018 by Kato Shinya.
+:license: MIT, see LICENSE for more details.
 '''
 
 import webbrowser
@@ -275,7 +277,11 @@ class MetisCommandBase(MetisBase):
         :param inferred-type widget: 機能付加対象ウィジェット。
         '''
 
-        widget.edit_undo()
+        try:
+            widget.edit_undo()
+        except TclError:
+            # 取り消す対象がない場合
+            pass
 
     def redo(self, widget):
         '''やり直すメソッドの実装メソッド。
@@ -283,7 +289,11 @@ class MetisCommandBase(MetisBase):
         :param inferred-type widget: 機能付加対象ウィジェット。
         '''
 
-        widget.edit_redo()
+        try:
+            widget.edit_redo()
+        except TclError:
+            # やり直す対象がない場合
+            pass
 
     def copy(self, menu, label, widget):
         '''コピー機能の実装メソッド。
