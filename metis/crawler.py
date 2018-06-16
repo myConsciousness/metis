@@ -79,7 +79,7 @@ class CrawlHandler:
             crawler.execute()
         elif self.__order == '1':
             # ブックマークの更新処理を行う
-            crawler = UpdateBookmarks(args)
+            crawler = UpdateBookmarksHatena(args)
             crawler.execute()
 
 class CommunicateBase:
@@ -596,8 +596,8 @@ class CrawlingHatena(CommunicateBase):
         # 移行処理終了
         conn.commit()
 
-class UpdateBookmarks(CommunicateBase):
-    '''クローリング済みブックマーク数の更新処理を定義するクラス。'''
+class UpdateBookmarksHatena(CommunicateBase):
+    '''Hatenaのクローリング済みブックマーク数を更新するクラス。'''
 
     def __init__(self, *args, **kwargs):
         '''コンストラクタ。

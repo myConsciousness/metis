@@ -34,7 +34,7 @@ class Log:
         config = read_config_file()
         self.PATH_DIR_LOG = config['path']['dir_log']
 
-        PATH_TO_LOG_FILE = self.PATH_DIR_LOG + datetime.today().strftime('%Y%m%d') + '.log'
+        PATH_TO_LOG_FILE = self.PATH_DIR_LOG + datetime.today().strftime('%Y%m%d') + '.mlog'
         # ログファイルの有効性チェック
         self.__check_status_of_log_file(PATH_TO_LOG_FILE)
 
