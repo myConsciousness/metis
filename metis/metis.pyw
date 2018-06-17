@@ -35,6 +35,7 @@ from log import LogLevel, Log
 import subprocess
 from functools import partial
 from common import *
+from message import ShowMessages
 from sql import ArticleInfoHatenaDao
 from sql import ManageSerialDao
 
@@ -191,6 +192,8 @@ class MetisBase:
 
         # ログ出力のためインスタンス生成
         self.log = Log()
+        # メッセージ出力のためのインスタンス生成
+        self.message = ShowMessages()
 
         # 設定ファイルの読み込み
         self.config = read_config_file()
@@ -335,9 +338,7 @@ class MetisCommandBase(MetisBase):
             widget.insert('insert', text)
         else:
             # ログファイルが存在しなかった場合
-            messagebox.showerror('ERR_NO_FILE_FOUND',
-                                    'Failed to open log file.\r\n' \
-                                    'No such file or directory.')
+            self.message.showerror('MERR0006')
 
     def open_new_tab(self, url):
         '''引数で渡されたURLを新しいタブで開く。
@@ -361,8 +362,7 @@ class MetisCommandBase(MetisBase):
     def disable_close_button(self):
         '''windowのcloseボタンを無効化する'''
 
-        messagebox.showerror('ERR_BUTTON_LIMITED', \
-                                'Use Quit button or Esc key to close the window.')
+        self.message.showerror('MERR0005')
 
     def open_popup(self, event, popup):
         '''ポップアップメニューを表示するメソッド。
@@ -555,9 +555,7 @@ class Command(MetisCommandBase):
             textarea.pack()
         else:
             # ログファイルが存在しなかった場合
-            messagebox.showerror('ERR_NO_FILE_FOUND',
-                                    'Failed to open log file.\r\n' \
-                                    'No such file or directory.')
+            self.message.showerror('MERR0006')
 
     def get_log_list(self, textarea):
         '''listボタン押下時の処理を定義
@@ -605,7 +603,7 @@ class Command(MetisCommandBase):
             conn.close()
             self.log.normal(LogLevel.INFO.value, 'LINF0005', self.CLASS_NAME_COMMAND, self.log.location())
 
-        if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
+        if self.message.askyesno('MINF0001'):
             cmd = 'python {} {} {}'
             subprocess.Popen(cmd.format(self.PATH_CRAWLER_MODULE, order, serial_number))
 
@@ -966,10 +964,8 @@ class Application(Command):
                     # ステータスバーに反映
                     self.status['text'] = status_msg.format(elapsed_time)
 
-                    messagebox.showinfo('NO_RESULTS_FOUND',
-                                            'Your search - ' \
-                                            + search_word \
-                                            + ' - did not match any documents.')
+                    self.message.showinfo('MINF0002', search_word)
+
             except sqlite3.Error as e:
                 self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.CLASS_NAME, self.log.location())
                 self.log.error(e)
@@ -984,11 +980,10 @@ class Application(Command):
 
             if is_sort:
                 # ソート時
-                messagebox.showerror('ERR_NO_ITEM_FOUND', 'Sorting is not available.\r\n' \
-                                                            'There are no items in the tree view.')
+                self.message.showerror('MERR0007')
             else:
                 # 検索時
-                messagebox.showerror('ERR_EMPTY_REQUESTED', 'This field must not be empty.')
+                self.message.showerror('MERR0008')
 
     def __create_log_gui(self, parent: Frame):
         '''Log検索画面の出力を定義するメソッド。

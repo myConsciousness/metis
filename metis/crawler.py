@@ -36,6 +36,7 @@ from tqdm import tqdm
 from log import LogLevel, Log
 from cowsay import Cowsay
 from common import *
+from message import ShowMessages
 from sql import MstParameterDao
 from sql import ArticleInfoHatenaDao
 from sql import WorkArticleInfoHatenaDao
@@ -56,10 +57,8 @@ class CrawlHandler:
 
         if len(args[0]) < 3:
             # コマンドライン引数が指定数未満の場合
-            root = tkinter.Tk()
-            root.withdraw()
-            root.iconbitmap('../common/icon/python_icon.ico')
-            messagebox.showerror('ERR_INVALID_STARTUP', 'The application was unable to start correctly.')
+            message = ShowMessages()
+            message.showerror('MERR0001')
 
             # 不正な起動のためプロセス終了
             sys.exit()
@@ -100,6 +99,8 @@ class CommunicateBase:
 
         # ログ出力のためインスタンス生成
         self.log = Log(child=True)
+        # メッセージ出力のためインスタンス生成
+        self.message = ShowMessages()
 
         # インターネットとの疎通確認を行う
         self.__check_internet_connection()
@@ -198,14 +199,7 @@ class CommunicateBase:
             with urlopen('http://info.cern.ch/'):
                 pass
         except URLError as e:
-            root = tkinter.Tk()
-            root.withdraw()
-            root.iconbitmap('../common/icon/python_icon.ico')
-            messagebox.showerror('ERR_INTERNET_DISCONNECTED', \
-                                    'There is no Internet connection.\r\n\r\n' \
-                                    'Try:\r\n' \
-                                    '■Checking the network cables, modem, and router\r\n' \
-                                    '■Reconnecting to Wi-Fi')
+            self.message.showerror('MERR0002')
 
             self.__handling_url_exception(e)
             # 後続処理継続不可のためプロセス終了
@@ -225,10 +219,7 @@ class CommunicateBase:
 
             if count_record == 0:
                 # 不正なシリアル番号の場合
-                root = tkinter.Tk()
-                root.withdraw()
-                root.iconbitmap('../common/icon/python_icon.ico')
-                messagebox.showerror('ERR_INVALID_SERIAL_NUMBER', 'The serial number is not valid for start up this module.')
+                self.message.showerror('MERR0003')
 
                 # 管理テーブルからシリアル番号を消去
                 self.flush_serial_number(conn, cursor)
@@ -282,13 +273,13 @@ class CrawlingHatena(CommunicateBase):
             # 前回処理が異常終了したとみなしバックアップ情報の移行処理を行う
             count_records = self.work_article_info_hatena_dao.count_records(cursor)[0]
             if count_records > 0:
-                print('Detected an abnormal termination last time a program was run.')
-                print('Start the backup operation.............')
+                print(self.message.get_echo('MECH0001'))
+                print(self.message.get_echo('MECH0002'))
 
                 # ワークテーブルからバックアップ情報を移行させる
                 self.__migrate_article_info_from_work(conn, cursor)
 
-                print('{} {} were added!'.format(count_records, 'records' if count_records else 'record'))
+                print(self.message.get_echo('MECH0009', count_records, 'records' if count_records else 'record'))
 
             # hatenaへのクローリング処理を開始
             self.__crawl_hatena(conn, cursor)
@@ -316,16 +307,8 @@ class CrawlingHatena(CommunicateBase):
         self.log.normal(LogLevel.INFO.value, 'LINF0002', self.CLASS_NAME, self.log.location())
 
         cowsay = Cowsay()
-        cowquote =  'Dog goes woof\n' \
-                    'Cat goes meow\n' \
-                    'Bird goes tweet\n' \
-                    'And mouse goes squeek\n' \
-                    'Cow goes moo\n' \
-                    'Duck goes quack\n' \
-                    'And the solution will go to you'
-
         # 処理開始メッセージ
-        print(cowsay.cowsay(cowquote))
+        print(cowsay.cowsay(self.message.get_echo('MECH0004')))
 
         # DBから検索ワードの取得
         search_word = split(''.join(list(self.mst_parameter_dao.select_params_by_primary_key(cursor, 'SEARCH_WORDS_4_HATENA'))), ',')
@@ -363,9 +346,8 @@ class CrawlingHatena(CommunicateBase):
             # ワークテーブルから記事情報を移行させる
             self.__migrate_article_info_from_work(conn, cursor)
 
-            print(cowsay.cowsay('Search word is {}.\n{} {} were addded!' \
-                                    .format(word, count_inserted, 'records' if count_inserted > 1 else 'record')))
-        print(cowsay.cowsay('The crawling has been completed!'))
+            print(cowsay.cowsay(self.message.get_echo('MECH0005', word, count_inserted, 'records' if count_inserted > 1 else 'record')))
+        print(cowsay.cowsay(self.message.get_echo('MECH0006')))
 
         self.log.normal(LogLevel.INFO.value, 'LINF0006', self.CLASS_NAME, self.log.location())
 
@@ -639,12 +621,11 @@ class UpdateBookmarksHatena(CommunicateBase):
         urls = [url for tuple_url in urls for url in tuple_url]
 
         if urls:
-
             # デバッグ開始
             self.log.normal(LogLevel.DEBUG.value, 'LDEB0001', self.CLASS_NAME, self.log.location())
 
             cowsay = Cowsay()
-            print(cowsay.cowsay('Updating {} {}.' .format(len(urls), 'records' if len(urls) > 1 else 'record')))
+            print(cowsay.cowsay(self.message.get_echo('MECH0007', len(urls), 'records' if len(urls) > 1 else 'record')))
 
             for url in tqdm(urls, ncols=60, leave=False, ascii=True, desc='Updating...'):
                 # APIからブックマーク数の取得
@@ -660,15 +641,12 @@ class UpdateBookmarksHatena(CommunicateBase):
                 self.log.debug('LDEB0002', 'count_bookmark', count_bookmark, self.log.get_lineno())
 
             conn.commit()
-            print(cowsay.cowsay('The update has been completed!'))
+            print(cowsay.cowsay(self.message.get_echo('MECH0008')))
 
             # デバッグ終了
             self.log.normal(LogLevel.DEBUG.value, 'LDEB0003', self.CLASS_NAME, self.log.location())
         else:
-            root = tkinter.Tk()
-            root.withdraw()
-            root.iconbitmap('../common/icon/python_icon.ico')
-            messagebox.showerror('ERR_NO_RECORD_FOUND', 'There is no record in the database.')
+            self.message.showerror('MERR0004')
 
 if __name__ == '__main__':
     CrawlHandler(sys.argv)

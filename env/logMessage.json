@@ -16,7 +16,7 @@
               "LINF0001" : "[{}]: [ START ] The process has been started in {} method, {} class.",
               "LINF0002" : "[{}]: [ START ] The crawling has been started in {} method, {} class.",
               "LINF0003" : "[{}]: [ START ] The scraping has been started in {} method, {} class.",
-              "LINF0004" : "[{}]: [ INFO ] The database has been rollbacked in {}method, {} class.",
+              "LINF0004" : "[{}]: [ INFO ] The database has been rollbacked in {} method, {} class.",
               "LINF0005" : "[{}]: [ INFO ] The database has been closed in {} method, {} class.",
               "LINF0006" : "[{}]: [ END ] The crawling has been completed in {} method, {} class.",
               "LINF0007" : "[{}]: [ END ] The scraping has been completed in {} method, {} class.",

@@ -36,6 +36,17 @@ def read_log_message_file():
     with open('../env/logMessage.json', 'r') as f:
         return json.load(f)
 
+def read_message_file():
+    '''メッセージ管理ファイルを読み込む関数。
+
+    :rtype: dict
+    :return: メッセージ情報を格納した辞書。
+    '''
+
+    # メッセージ管理ファイルの読み込み
+    with open('../env/message.json', 'r') as f:
+        return json.load(f)
+
 def create_serial_number():
     '''シリアル番号を生成する関数。
 

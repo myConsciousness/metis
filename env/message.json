@@ -1,0 +1,60 @@
+{
+    "information" : { "fileName" : "message.json",
+                      "summary" : "A json file that manages messages.",
+                      "author" : "Kato Shinya",
+                      "date" : "2018/06/17",
+                      "lastUpdate" : "2018/06/17"
+                    },
+
+    "title" : {
+          "info" : {
+                      "_comment" : "Define info titles.",
+                      "MINF0001" : "CONFIRMATION",
+                      "MINF0002" : "NO_RESULTS_FOUND"
+                    },
+
+          "error" : {
+                      "_comment" : "Define error titles.",
+                      "MERR0001" : "ERR_INVALID_STARTUP",
+                      "MERR0002" : "ERR_INTERNET_DISCONNECTED",
+                      "MERR0003" : "ERR_INVALID_SERIAL_NUMBER",
+                      "MERR0004" : "ERR_NO_RECORD_FOUND",
+                      "MERR0005" : "ERR_BUTTON_LIMITED",
+                      "MERR0006" : "ERR_NO_FILE_FOUND",
+                      "MERR0007" : "ERR_NO_ITEM_FOUND",
+                      "MERR0008" : "ERR_EMPTY_REQUESTED"
+                    }
+              },
+
+      "message" : {
+              "info" : {
+                          "_comment" : "Define info messages.",
+                          "MINF0001" : "Are you sure you want to run?",
+                          "MINF0002" : "Your search - {0[0]} - did not match any documents."
+                        },
+
+              "error" : {
+                          "_comment" : "Define error messages.",
+                          "MERR0001" : "The application was unable to start correctly.",
+                          "MERR0002" : "There is no Internet connection.\r\n\r\nTry:\r\n■Checking the network cables, modem, and router\r\n■Reconnecting to Wi-Fi",
+                          "MERR0003" : "The serial number is not valid for start up this module.",
+                          "MERR0004" : "There is no record in the database.",
+                          "MERR0005" : "Use Quit button or Esc key to close the window.",
+                          "MERR0006" : "Failed to open log file.\r\nNo such file or directory.",
+                          "MERR0007" : "Sorting is not available.\r\nThere are no items in the tree view.",
+                          "MERR0008" : "This field must not be empty."
+                        }
+
+                  },
+
+    "echo" : {  "_comment" : "Define echo messages.",
+                "MECH0001" : "Detected an abnormal termination last time a program was run.",
+                "MECH0002" : "Start the backup operation.............",
+                "MECH0004" : "Dog goes woof\nCat goes meow\nBird goes tweet\nAnd mouse goes squeek\nCow goes moo\nDuck goes quack\nAnd the solution will go to you",
+                "MECH0005" : "Search word is {0[0]}.\n{0[1]} {0[2]} were addded!",
+                "MECH0006" : "The crawling has been completed!",
+                "MECH0007" : "Updating {0[0]} {0[1]}.",
+                "MECH0008" : "The update has been completed!",
+                "MECH0009" : "{0[0]} {0[1]} were added!"
+            }
+}
