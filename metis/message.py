@@ -40,7 +40,7 @@ class ShowMessages:
     def showinfo(self, id: str, *option_words: tuple):
         '''infoダイアログを出力するメソッド。
 
-        :param id str: タイトル / メッセージ管理番号。
+        :param str id: タイトル / メッセージ管理番号。
         :param tuple option_words: メッセージ中にバインドする単語を含むタプル。
         '''
 
@@ -52,7 +52,7 @@ class ShowMessages:
     def showerror(self, id: str):
         '''errorダイアログを出力するメソッド。
 
-        :param id str: タイトル / メッセージ管理番号。
+        :param str id: タイトル / メッセージ管理番号。
         '''
 
         messagebox.showerror(self.message[self.KEY_TITLE][self.KEY_ERROR][id], self.message[self.KEY_MESSAGE ][self.KEY_ERROR][id])
@@ -60,7 +60,7 @@ class ShowMessages:
     def askyesno(self, id: str):
         '''質問ダイアログを出力するメソッド。
 
-        :param id str: タイトル / メッセージ管理番号。
+        :param str id: タイトル / メッセージ管理番号。
         :rtype: bool
         :return: True / False
         '''
@@ -70,7 +70,7 @@ class ShowMessages:
     def get_echo(self, id: str, *option_words: tuple):
         '''エコーメッセージを取得するメソッド。
 
-        :param id str: タイトル / メッセージ管理番号。
+        :param str id: タイトル / メッセージ管理番号。
         :param tuple option_words: メッセージ中にバインドする単語を含むタプル。
         :rtype: str
         :return: エコーメッセージ。
