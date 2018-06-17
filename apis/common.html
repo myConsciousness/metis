@@ -146,6 +146,20 @@
             
   <div class="section" id="module-common">
 <span id="common-module"></span><h1>common module<a class="headerlink" href="#module-common" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">copyright:</th><td class="field-body"><ol class="first loweralpha simple" start="3">
+<li>2018 by Kato Shinya.</li>
+</ol>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">license:</th><td class="field-body"><p class="first last">MIT, see LICENSE for more details.</p>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="function">
 <dt id="common.connect_to_database">
 <code class="descclassname">common.</code><code class="descname">connect_to_database</code><span class="sig-paren">(</span><em>isolation_level='EXCLUSIVE'</em><span class="sig-paren">)</span><a class="headerlink" href="#common.connect_to_database" title="Permalink to this definition">¶</a></dt>
@@ -224,14 +238,46 @@
 <dl class="function">
 <dt id="common.read_config_file">
 <code class="descclassname">common.</code><code class="descname">read_config_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.read_config_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>configファイルを読み込む関数。</p>
+<dd><p>構成管理ファイルを読み込む関数。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">configparser.ConfigParser</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">configファイル。</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">構成情報を格納した辞書。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="common.read_log_message_file">
+<code class="descclassname">common.</code><code class="descname">read_log_message_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.read_log_message_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>ログメッセージ管理ファイルを読み込む関数。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">ログメッセージ情報を格納した辞書。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="common.read_message_file">
+<code class="descclassname">common.</code><code class="descname">read_message_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.read_message_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>メッセージ管理ファイルを読み込む関数。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">メッセージ情報を格納した辞書。</td>
 </tr>
 </tbody>
 </table>

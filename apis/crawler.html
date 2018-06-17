@@ -159,6 +159,20 @@ While web scraping can be done manually by a software user,
 the term typically refers to automated processes implemented using a bot or web crawler.
 It is a form of copying, in which specific data is gathered and copied from the web,
 typically into a central local database or spreadsheet, for later retrieval or analysis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">copyright:</th><td class="field-body"><ol class="first loweralpha simple" start="3">
+<li>2018 by Kato Shinya.</li>
+</ol>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">license:</th><td class="field-body"><p class="first last">MIT, see LICENSE for more details.</p>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="class">
 <dt id="crawler.CommunicateBase">
 <em class="property">class </em><code class="descclassname">crawler.</code><code class="descname">CommunicateBase</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.CommunicateBase" title="Permalink to this definition">¶</a></dt>
@@ -414,13 +428,13 @@ URLを取得できなかった場合は、URL取得以降の処理を行わず�
 </dd></dl>
 
 <dl class="class">
-<dt id="crawler.UpdateBookmarks">
-<em class="property">class </em><code class="descclassname">crawler.</code><code class="descname">UpdateBookmarks</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarks" title="Permalink to this definition">¶</a></dt>
+<dt id="crawler.UpdateBookmarksHatena">
+<em class="property">class </em><code class="descclassname">crawler.</code><code class="descname">UpdateBookmarksHatena</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarksHatena" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#crawler.CommunicateBase" title="crawler.CommunicateBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">crawler.CommunicateBase</span></code></a></p>
-<p>クローリング済みブックマーク数の更新処理を定義するクラス。</p>
+<p>Hatenaのクローリング済みブックマーク数を更新するクラス。</p>
 <dl class="method">
-<dt id="crawler.UpdateBookmarks._UpdateBookmarks__update_bookmarks">
-<code class="descname">_UpdateBookmarks__update_bookmarks</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarks._UpdateBookmarks__update_bookmarks" title="Permalink to this definition">¶</a></dt>
+<dt id="crawler.UpdateBookmarksHatena._UpdateBookmarksHatena__update_bookmarks">
+<code class="descname">_UpdateBookmarksHatena__update_bookmarks</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarksHatena._UpdateBookmarksHatena__update_bookmarks" title="Permalink to this definition">¶</a></dt>
 <dd><p>ブックマーク数の更新処理を行うメソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -437,8 +451,8 @@ URLを取得できなかった場合は、URL取得以降の処理を行わず�
 </dd></dl>
 
 <dl class="method">
-<dt id="crawler.UpdateBookmarks.execute">
-<code class="descname">execute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarks.execute" title="Permalink to this definition">¶</a></dt>
+<dt id="crawler.UpdateBookmarksHatena.execute">
+<code class="descname">execute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#crawler.UpdateBookmarksHatena.execute" title="Permalink to this definition">¶</a></dt>
 <dd><p>ブックマーク数の更新処理を実行するメソッド。</p>
 </dd></dl>
 
