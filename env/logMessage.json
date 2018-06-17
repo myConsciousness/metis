@@ -1,0 +1,34 @@
+{
+    "information" : { "fileName" : "logMessage.json",
+                      "summary" : "A json file that manages log messages.",
+                      "author" : "Kato Shinya",
+                      "date" : "2018/06/17",
+                      "lastUpdate" : "2018/06/17"
+                    },
+
+    "10" : {  "_comment" : "Define debug messages.",
+              "LDEB0001" : "[{}]: [ DEBUG START ] The debug has been started in {} method, {} class.",
+              "LDEB0002" : "[{}]: [ DEBUG VALUE ] A variable '{}' has a value '{}'.",
+              "LDEB0003" : "[{}]: [ DEBUG END ] The debug has been completed in {} method, {} class."
+          },
+
+    "20" : {  "_comment" : "Define info messages.",
+              "LINF0001" : "[{}]: [ START ] The process has been started in {} method, {} class.",
+              "LINF0002" : "[{}]: [ START ] The crawling has been started in {} method, {} class.",
+              "LINF0003" : "[{}]: [ START ] The scraping has been started in {} method, {} class.",
+              "LINF0004" : "[{}]: [ INFO ] The database has been rollbacked in {}method, {} class.",
+              "LINF0005" : "[{}]: [ INFO ] The database has been closed in {} method, {} class.",
+              "LINF0006" : "[{}]: [ END ] The crawling has been completed in {} method, {} class.",
+              "LINF0007" : "[{}]: [ END ] The scraping has been completed in {} method, {} class.",
+              "LINF0008" : "[{}]: [ END ] The process has been completed in {} method, {} class."
+            },
+
+    "40" : {  "_comment" : "Define error messages.",
+              "LERR0001" : "[{}] [ ERROR ] The error has been occurred in {} method, {} class."
+            },
+
+    "50" : {  "_comment" : "Define critical messages.",
+              "LCRT0001" : "[{}]: [ CRITICAL ] Failed to reach a server. It has been occurred in {} method, {} class.",
+              "LCRT0002" : "[{}]: [ CRITICAL ] The server could not fulfill the request. It has been occurred in {} method, {} class."
+            }
+}

@@ -1,0 +1,18 @@
+{
+  "information" : { "fileName" : "userConfig.json",
+                    "summary" : "A json file that manages user configuration.",
+                    "author" : "Kato Shinya",
+                    "date" : "2018/06/17",
+                    "lastUpdate" : "2018/06/17"
+                  },
+
+  "general" : { "_comment" : "Define general configuration.",
+                "log_level" : 20
+              },
+
+  "path" : {  "_comment" : "Define path configuration.",
+              "database" : "../common/db/USER01.db",
+              "dir_log" : "../log/",
+              "crawler_module" : "./crawler.py"
+            }
+}

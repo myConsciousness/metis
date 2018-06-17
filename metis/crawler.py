@@ -33,7 +33,7 @@ from tkinter import messagebox
 from datetime import date, timedelta
 import sqlite3
 from tqdm import tqdm
-from log import LogLevel, Log, LogMessage
+from log import LogLevel, Log
 from cowsay import Cowsay
 from common import *
 from sql import MstParameterDao
@@ -100,7 +100,6 @@ class CommunicateBase:
 
         # ログ出力のためインスタンス生成
         self.log = Log(child=True)
-        self.log_msg = LogMessage()
 
         # インターネットとの疎通確認を行う
         self.__check_internet_connection()
@@ -140,9 +139,9 @@ class CommunicateBase:
         url = '{}?{}'.format(url, urlencode(params))
 
         # デバッグログ
-        self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.BASE_CLASS_NAME ))
-        self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
-        self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.BASE_CLASS_NAME))
+        self.log.normal(LogLevel.DEBUG.value, 'LDEB0001', self.BASE_CLASS_NAME, self.log.location())
+        self.log.debug('LDEB0002', 'url', url, self.log.get_lineno())
+        self.log.normal(LogLevel.DEBUG.value, 'LDEB0003', self.BASE_CLASS_NAME, self.log.location())
 
         try:
             with urlopen(Request(url=url, headers=headers)) as source:
@@ -170,7 +169,7 @@ class CommunicateBase:
             start_idx = html.find(start_name)
             end_idx = html.find(end_name, start_idx)
         except Exception as e:
-            self.log.normal(LogLevel.ERROR.value, self.BASE_CLASS_NAME, self.log.location(), self.log_msg.MSG_ERROR)
+            self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.BASE_CLASS_NAME, self.log.location())
             self.log.error(e)
             return ''
 
@@ -183,12 +182,10 @@ class CommunicateBase:
         '''
 
         if hasattr(e, 'reason'):
-            self.log.normal(LogLevel.CRITICAL.value, self.BASE_CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_NO_SERVER_FOUND)
+            self.log.normal(LogLevel.CRITICAL.value, 'LCRT0001', self.BASE_CLASS_NAME, self.log.location())
             self.log.error(e.reason)
         elif hasattr(e, 'code'):
-            self.log.normal(LogLevel.CRITICAL.value, self.BASE_CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_NO_RESPONSE)
+            self.log.normal(LogLevel.CRITICAL.value, 'LCRT0002', self.BASE_CLASS_NAME, self.log.location())
             self.log.error(e.code)
 
     def __check_internet_connection(self):
@@ -239,13 +236,11 @@ class CommunicateBase:
                 sys.exit()
 
         except sqlite3.Error as e:
-            self.log.normal(LogLevel.ERROR.value, self.BASE_CLASS_NAME, \
-                                    self.log.location(),self.log_msg.MSG_ERROR)
+            self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.BASE_CLASS_NAME, self.log.location())
             self.log.error(e)
         finally:
             conn.close()
-            self.log.normal(LogLevel.INFO.value, self.BASE_CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
+            self.log.normal(LogLevel.INFO.value, 'LINF0005', self.BASE_CLASS_NAME, self.log.location())
 
     def flush_serial_number(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
         '''シリアル番号管理テーブルから使用済みシリアル番号を削除するメソッド。
@@ -278,8 +273,7 @@ class CrawlingHatena(CommunicateBase):
     def execute(self):
         '''クローリング処理を実行するメソッド。'''
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
+        self.log.normal(LogLevel.INFO.value, 'LINF0001', self.CLASS_NAME, self.log.location())
 
         try:
             conn, cursor = connect_to_database()
@@ -300,19 +294,16 @@ class CrawlingHatena(CommunicateBase):
             self.__crawl_hatena(conn, cursor)
             # 管理テーブルからシリアル番号を消去
             self.flush_serial_number(conn, cursor)
+
         except sqlite3.Error as e:
             conn.rollback()
-            self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_ERROR)
-            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_ROLLBACK_COMPLETED)
+            self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.CLASS_NAME, self.log.location())
+            self.log.normal(LogLevel.INFO.value, 'LINF0004', self.CLASS_NAME, self.log.location())
             self.log.error(e)
         finally:
             conn.close()
-            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
-            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
+            self.log.normal(LogLevel.INFO.value, 'LINF0005', self.CLASS_NAME, self.log.location())
+            self.log.normal(LogLevel.INFO.value, 'LINF0008', self.CLASS_NAME, self.log.location())
             time.sleep(3)
 
     def __crawl_hatena(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
@@ -322,8 +313,7 @@ class CrawlingHatena(CommunicateBase):
         :param sqlite3.Cursor cursor: カーソル。
         '''
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log_msg.MSG_CRAWLING_STARTED)
+        self.log.normal(LogLevel.INFO.value, 'LINF0002', self.CLASS_NAME, self.log.location())
 
         cowsay = Cowsay()
         cowquote =  'Dog goes woof\n' \
@@ -344,10 +334,10 @@ class CrawlingHatena(CommunicateBase):
             for page in tqdm(range(1, 6), ncols=60, leave=False, ascii=True, desc='Sub process'):
 
                 # デバッグログ
-                self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
-                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'word', word))
-                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'page', page))
-                self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+                self.log.normal(LogLevel.DEBUG.value, 'LDEB0001', self.CLASS_NAME, self.log.location())
+                self.log.debug('LDEB0002', 'word', word, self.log.get_lineno())
+                self.log.debug('LDEB0002', 'page', page, self.log.get_lineno())
+                self.log.normal(LogLevel.DEBUG.value, 'LDEB0003', self.CLASS_NAME, self.log.location())
 
                 # パラメータ生成用辞書
                 params = {
@@ -377,8 +367,7 @@ class CrawlingHatena(CommunicateBase):
                                     .format(word, count_inserted, 'records' if count_inserted > 1 else 'record')))
         print(cowsay.cowsay('The crawling has been completed!'))
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log_msg.MSG_CRAWLING_COMPLETED)
+        self.log.normal(LogLevel.INFO.value, 'LINF0006', self.CLASS_NAME, self.log.location())
 
     def __scrape_info_of_hatena(self, html: str) -> list:
         '''HTMLソースに対してスクレイピング処理を行うメソッド。
@@ -391,8 +380,7 @@ class CrawlingHatena(CommunicateBase):
         >>> [[URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG], [URL, TITLE, PUBILISHED_DATE, BOOKMARKS, TAG],...]
         '''
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log_msg.MSG_SCRAPING_STARTED)
+        self.log.normal(LogLevel.INFO.value, 'LINF0003', self.CLASS_NAME, self.log.location())
 
         if not html:
             return []
@@ -426,8 +414,7 @@ class CrawlingHatena(CommunicateBase):
                     # ページ内の全情報を取得し終えた場合
                     break
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log_msg.MSG_SCRAPING_COMPLETED)
+        self.log.normal(LogLevel.INFO.value, 'LINF0007', self.CLASS_NAME, self.log.location())
 
         return list_infos
 
@@ -514,25 +501,26 @@ class CrawlingHatena(CommunicateBase):
                 list_article_infos.append(last_index)
 
                 # デバッグログ
-                self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
-                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
-                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'title', title))
-                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'date', date))
-                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'tags', tags))
-                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'count_bookmark', count_bookmark))
-                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'last_index', last_index))
-                self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+                self.log.normal(LogLevel.DEBUG.value, 'LDEB0001', self.CLASS_NAME, self.log.location())
+                self.log.debug('LDEB0002', 'url', url, self.log.get_lineno())
+                self.log.debug('LDEB0002', 'title', title, self.log.get_lineno())
+                self.log.debug('LDEB0002', 'date', date, self.log.get_lineno())
+                self.log.debug('LDEB0002', 'tags', tags, self.log.get_lineno())
+                self.log.debug('LDEB0002', 'count_bookmark', count_bookmark, self.log.get_lineno())
+                self.log.debug('LDEB0002', 'last_index', last_index, self.log.get_lineno())
+                self.log.normal(LogLevel.DEBUG.value, 'LDEB0003', self.CLASS_NAME, self.log.location())
 
             else:
                 # デバッグログ
-                self.log.debug(self.log_msg.MSG_DEBUG_START.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
-                self.log.debug(self.log_msg.MSG_DEBUG_VALUE.format(self.log.get_lineno(), 'url', url))
-                self.log.debug(self.log_msg.MSG_DEBUG_COMPLETED.format(self.log.get_lineno(), self.log.get_method_name(), self.CLASS_NAME))
+                self.log.normal(LogLevel.DEBUG.value, 'LDEB0001', self.CLASS_NAME, self.log.location())
+                self.log.debug('LDEB0002', 'url', url, self.log.get_lineno())
+                self.log.normal(LogLevel.DEBUG.value, 'LDEB0003', self.CLASS_NAME, self.log.location())
 
                 # 次処理の探索開始位置をリストで返す
                 return [html.find('class="bookmark-item', start_search_index)]
+
         except Exception as e:
-            self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, self.log.location(), self.log_msg.MSG_ERROR)
+            self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.CLASS_NAME, self.log.location())
             self.log.error(e)
             return []
 
@@ -618,8 +606,7 @@ class UpdateBookmarksHatena(CommunicateBase):
     def execute(self):
         '''ブックマーク数の更新処理を実行するメソッド。'''
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
+        self.log.normal(LogLevel.INFO.value, 'LINF0001', self.CLASS_NAME, self.log.location())
 
         try:
             conn, cursor = connect_to_database()
@@ -630,17 +617,13 @@ class UpdateBookmarksHatena(CommunicateBase):
             self.flush_serial_number(conn, cursor)
         except sqlite3.Error as e:
             conn.rollback()
-            self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_ERROR)
-            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_ROLLBACK_COMPLETED)
+            self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.CLASS_NAME, self.log.location())
+            self.log.normal(LogLevel.INFO.value, 'LINF0004', self.CLASS_NAME, self.log.location())
             self.log.error(e)
         finally:
             conn.close()
-            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
-            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                    self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
+            self.log.normal(LogLevel.INFO.value, 'LINF0005', self.CLASS_NAME, self.log.location())
+            self.log.normal(LogLevel.INFO.value, 'LINF0008', self.CLASS_NAME, self.log.location())
             time.sleep(3)
 
     def __update_bookmarks(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
@@ -656,9 +639,12 @@ class UpdateBookmarksHatena(CommunicateBase):
         urls = [url for tuple_url in urls for url in tuple_url]
 
         if urls:
+
+            # デバッグ開始
+            self.log.normal(LogLevel.DEBUG.value, 'LDEB0001', self.CLASS_NAME, self.log.location())
+
             cowsay = Cowsay()
-            print(cowsay.cowsay('Updating {} {}.' \
-                                    .format(len(urls), 'records' if len(urls) > 1 else 'record')))
+            print(cowsay.cowsay('Updating {} {}.' .format(len(urls), 'records' if len(urls) > 1 else 'record')))
 
             for url in tqdm(urls, ncols=60, leave=False, ascii=True, desc='Updating...'):
                 # APIからブックマーク数の取得
@@ -670,8 +656,14 @@ class UpdateBookmarksHatena(CommunicateBase):
                 # 更新処理
                 self.article_info_hatena_dao.update_bookmarks_by_primary_key(cursor, count_bookmark, url)
 
+                self.log.debug('LDEB0002', 'url', url, self.log.get_lineno())
+                self.log.debug('LDEB0002', 'count_bookmark', count_bookmark, self.log.get_lineno())
+
             conn.commit()
             print(cowsay.cowsay('The update has been completed!'))
+
+            # デバッグ終了
+            self.log.normal(LogLevel.DEBUG.value, 'LDEB0003', self.CLASS_NAME, self.log.location())
         else:
             root = tkinter.Tk()
             root.withdraw()

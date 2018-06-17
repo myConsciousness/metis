@@ -31,7 +31,7 @@ import tkinter as tk
 from tkinter import *
 from tkinter import messagebox, filedialog
 import tkinter.ttk as ttk
-from log import LogLevel, Log, LogMessage
+from log import LogLevel, Log
 import subprocess
 from functools import partial
 from common import *
@@ -191,7 +191,6 @@ class MetisBase:
 
         # ログ出力のためインスタンス生成
         self.log = Log()
-        self.log_msg = LogMessage()
 
         # 設定ファイルの読み込み
         self.config = read_config_file()
@@ -211,7 +210,7 @@ class MetisBase:
     def set_window_basic_config(self, master, title='Metis', icon='../common/icon/python_icon.ico', expand=True, width=1200, height=710):
         '''ウィンドウにおける基本情報を設定するメソッド。
 
-        :param tkinter.Tk master: 親画面のフレーム。
+        :param tkinter.Tk master: 画面のフレーム。
         :param str title: 画面タイトル。
         :param str icon: 画面左上に表示するアイコンへのパス。
         :param bool expand: 画面の拡張 / 縮小可否。
@@ -236,7 +235,7 @@ class MetisBase:
     def __center(self, master, width: int, height: int):
         '''初期表示時に画面を常に中央に表示するように設定するメソッド。
 
-        :param tkinter.Tk master: 親画面のフレーム。
+        :param tkinter.Tk master: 画面のフレーム。
         :param int width: 初期表示時の画面の幅。
         :param int height: 初期表示時の画面の高さ。
         '''
@@ -351,11 +350,10 @@ class MetisCommandBase(MetisBase):
     def quit(self, master):
         '''quitボタン押下時の処理を定義。
 
-        :param tkinter.Tk master: 親画面のフレーム。
+        :param tkinter.Tk master: 画面のフレーム。
         '''
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME_COMMAND_BASE, \
-                                self.log.location(), self.log_msg.MSG_PROCESS_COMPLETED)
+        self.log.normal(LogLevel.INFO.value, 'LINF0008', self.CLASS_NAME_COMMAND_BASE, self.log.location())
 
         # 処理終了
         master.destroy()
@@ -394,6 +392,22 @@ class MetisCommandBase(MetisBase):
         popup.add_command(label='Cut', command=partial(self.cut, popup, 'Cut', widget))
         popup.add_command(label='Copy', command=partial(self.copy, popup, 'Copy', widget))
         popup.add_command(label='Paste', command=partial(self.paste, popup, 'Paste', widget))
+
+    def create_xy_scrollbar(self, master, widget):
+        '''XY軸のスクロールバーを生成するメソッド。
+
+        :param tkinter.Tk master: 画面のフレーム。
+        :param inferred-type widget: 機能付加対象ウィジェット。
+        '''
+
+        xsb = Scrollbar(master, orient=HORIZONTAL, command=widget.xview)
+        ysb = Scrollbar(master, orient=VERTICAL, command=widget.yview)
+
+        widget.configure(xscrollcommand=xsb.set)
+        widget.configure(yscrollcommand=ysb.set)
+
+        xsb.pack(side=BOTTOM, fill=X)
+        ysb.pack(side=RIGHT, fill=Y)
 
 class Command(MetisCommandBase):
     '''アプリケーションのコマンド処理を定義するクラス。'''
@@ -583,14 +597,13 @@ class Command(MetisCommandBase):
             # クローラ起動のためのシリアル番号を管理テーブルに登録する
             self.manage_serial_dao.insert_serial_no(cursor, serial_number)
             conn.commit()
+
         except sqlite3.Error as e:
-            self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME_COMMAND, \
-                                    self.log.location(),self.log_msg.MSG_ERROR)
+            self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.CLASS_NAME_COMMAND, self.log.location())
             self.log.error(e)
         finally:
             conn.close()
-            self.log.normal(LogLevel.INFO.value, self.CLASS_NAME_COMMAND, \
-                                    self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
+            self.log.normal(LogLevel.INFO.value, 'LINF0005', self.CLASS_NAME_COMMAND, self.log.location())
 
         if messagebox.askyesno('CONFIRMATION', 'Are you sure you want to run?'):
             cmd = 'python {} {} {}'
@@ -599,7 +612,7 @@ class Command(MetisCommandBase):
     def create_search_form(self, master, textarea):
         '''子画面として検索フォームを生成するメソッド。
 
-        :param tkinter.Tk master: 親画面のフレーム。
+        :param tkinter.Tk master: 画面のフレーム。
         :param MetisCustomText textarea: 検索対象テキストエリア。
         '''
 
@@ -679,8 +692,7 @@ class Application(Command):
     def execute_application(self):
         '''アプリケーションを実行するメソッド。'''
 
-        self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                self.log.location(), self.log_msg.MSG_PROCESS_STARTED)
+        self.log.normal(LogLevel.INFO.value, 'LINF0001', self.CLASS_NAME, self.log.location())
 
         # セットアップ開始時間
         start = time.time()
@@ -747,11 +759,6 @@ class Application(Command):
         start_crawling.add_command(label='Start Crawling', command=partial(self.execute_crawler, self.ORDER_CRAWLING))
         start_crawling.add_command(label='Update Bookmarks', command=partial(self.execute_crawler, self.ORDER_UPDATE_BOOKMARKS))
         menubar.add_cascade(label='Crawler', menu=crawler_menu)
-
-        # 設定メニュー
-        setting_menu = Menu(menubar, tearoff=0)
-        setting_menu.add_command(label='Parameters')
-        menubar.add_cascade(label='Setting', menu=setting_menu)
 
         # helpメニュー
         help_menu = Menu(menubar, tearoff=0)
@@ -850,12 +857,7 @@ class Application(Command):
         self.treeview = ttk.Treeview(frame_tree_view)
 
         # スクロールバーの生成
-        yscroll = Scrollbar(frame_tree_view, orient=VERTICAL, command=self.treeview.yview)
-        xscroll = Scrollbar(frame_tree_view, orient=HORIZONTAL, command=self.treeview.xview)
-        self.treeview.configure(yscrollcommand=yscroll.set)
-        self.treeview.configure(xscrollcommand=xscroll.set)
-        yscroll.pack(side=RIGHT, fill=Y)
-        xscroll.pack(side=BOTTOM, fill=X)
+        self.create_xy_scrollbar(frame_tree_view, self.treeview)
 
         # カラムの設定
         self.treeview['columns'] = (1, 2, 3, 4)
@@ -969,13 +971,11 @@ class Application(Command):
                                             + search_word \
                                             + ' - did not match any documents.')
             except sqlite3.Error as e:
-                self.log.normal(LogLevel.ERROR.value, self.CLASS_NAME, \
-                                        self.log.location(),self.log_msg.MSG_ERROR)
+                self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.CLASS_NAME, self.log.location())
                 self.log.error(e)
             finally:
                 conn.close()
-                self.log.normal(LogLevel.INFO.value, self.CLASS_NAME, \
-                                        self.log.location(), self.log_msg.MSG_CLOSE_COMPLETED)
+                self.log.normal(LogLevel.INFO.value, 'LINF0005', self.CLASS_NAME, self.log.location())
         else:
             # 処理完了時間
             elapsed_time = time.time() - start
@@ -1065,9 +1065,7 @@ class Application(Command):
             self.output_text_log.bind(event, lambda x: self.update_line_numbers(canvas=line_numbers, textarea=self.output_text_log))
 
         # スクロールバーの生成
-        ysb = ttk.Scrollbar(frame_text_log, orient=VERTICAL, command=self.output_text_log.yview)
-        self.output_text_log.configure(yscrollcommand=ysb.set)
-        ysb.pack(side=RIGHT, fill=BOTH)
+        self.create_xy_scrollbar(frame_text_log, self.output_text_log)
 
         # テキストエリア上でCtrl+F押下時に検索ボックスを開くように設定
         self.output_text_log.bind('<Control-f>', lambda x: self.create_search_form(self.master, self.output_text_log))

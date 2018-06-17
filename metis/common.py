@@ -6,7 +6,7 @@
 '''
 
 import sqlite3
-import configparser
+import json
 import string
 import random
 import hashlib
@@ -15,17 +15,26 @@ __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
 
 def read_config_file():
-    '''configファイルを読み込む関数。
+    '''構成管理ファイルを読み込む関数。
 
-    :rtype: configparser.ConfigParser
-    :return: configファイル。
+    :rtype: dict
+    :return: 構成情報を格納した辞書。
     '''
 
-    # 設定ファイルの読み込み
-    config = configparser.ConfigParser()
-    config.read('../env/config.ini')
+    # 構成管理ファイルの読み込み
+    with open('../env/userConfig.json', 'r') as f:
+        return json.load(f)
 
-    return config
+def read_log_message_file():
+    '''ログメッセージ管理ファイルを読み込む関数。
+
+    :rtype: dict
+    :return: ログメッセージ情報を格納した辞書。
+    '''
+
+    # ログメッセージ管理ファイルの読み込み
+    with open('../env/logMessage.json', 'r') as f:
+        return json.load(f)
 
 def create_serial_number():
     '''シリアル番号を生成する関数。
