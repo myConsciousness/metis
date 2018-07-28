@@ -88,7 +88,7 @@ class MetisSearchForm(ttk.Frame):
         # 検索フォームを生成
         self.__create_search_form()
         # 検索フォームの入力欄にフォーカスを設定する
-        self.target_text.focus()
+        self.search_form.focus()
 
     def __create_search_form(self):
         '''検索フォームを生成するメソッド。'''
@@ -393,21 +393,24 @@ class MetisCommandBase(MetisBase):
         popup.add_command(label='Copy', command=partial(self.copy, popup, 'Copy', widget))
         popup.add_command(label='Paste', command=partial(self.paste, popup, 'Paste', widget))
 
-    def create_xy_scrollbar(self, master, widget):
+    def attach_scrollbar(self, master, widget, x_axis=True, y_axis=True):
         '''XY軸のスクロールバーを生成するメソッド。
 
         :param tkinter.Tk master: 画面のフレーム。
         :param inferred-type widget: 機能付加対象ウィジェット。
+        :param bool x-axis: x軸スクロールバーの付加可否。初期値はTrue。
+        :param bool y-axis: y軸スクロールバーの付加可否。初期値はTrue。
         '''
 
-        xsb = Scrollbar(master, orient=HORIZONTAL, command=widget.xview)
-        ysb = Scrollbar(master, orient=VERTICAL, command=widget.yview)
+        if x_axis:
+            xsb = Scrollbar(master, orient=HORIZONTAL, command=widget.xview)
+            widget.configure(xscrollcommand=xsb.set)
+            xsb.pack(side=BOTTOM, fill=X)
 
-        widget.configure(xscrollcommand=xsb.set)
-        widget.configure(yscrollcommand=ysb.set)
-
-        xsb.pack(side=BOTTOM, fill=X)
-        ysb.pack(side=RIGHT, fill=Y)
+        if y_axis:
+            ysb = Scrollbar(master, orient=VERTICAL, command=widget.yview)
+            widget.configure(yscrollcommand=ysb.set)
+            ysb.pack(side=RIGHT, fill=Y)
 
 class Command(MetisCommandBase):
     '''アプリケーションのコマンド処理を定義するクラス。'''
@@ -617,7 +620,7 @@ class Command(MetisCommandBase):
         search_form = Toplevel(master=master)
 
         # ウィンドウの設定
-        self.set_window_basic_config(master=search_form, title='Metis - Search Form', expand=False, width=400, height=80)
+        self.set_window_basic_config(master=search_form, title='Search Form', expand=False, width=400, height=80)
         search_form.transient(master)
 
         # 検索フォームの生成
@@ -751,11 +754,10 @@ class Application(Command):
 
         # クローラメニュー
         crawler_menu = Menu(menubar, tearoff=0)
-        start_crawling = Menu(menubar, tearoff=0)
-        update_bookmarks = Menu(menubar, tearoff=0)
-        crawler_menu.add_cascade(label='Hatena', menu=start_crawling)
-        start_crawling.add_command(label='Start Crawling', command=partial(self.execute_crawler, self.ORDER_CRAWLING))
-        start_crawling.add_command(label='Update Bookmarks', command=partial(self.execute_crawler, self.ORDER_UPDATE_BOOKMARKS))
+        crawler_menu.add_command(label='Start Crawling', command=partial(self.execute_crawler, self.ORDER_CRAWLING))
+        crawler_menu.add_command(label='Update Bookmarks', command=partial(self.execute_crawler, self.ORDER_UPDATE_BOOKMARKS))
+        crawler_menu.add_separator()
+        crawler_menu.add_command(label='Settings', command=self.__create_params_window)
         menubar.add_cascade(label='Crawler', menu=crawler_menu)
 
         # helpメニュー
@@ -855,7 +857,7 @@ class Application(Command):
         self.treeview = ttk.Treeview(frame_tree_view)
 
         # スクロールバーの生成
-        self.create_xy_scrollbar(frame_tree_view, self.treeview)
+        self.attach_scrollbar(frame_tree_view, self.treeview)
 
         # カラムの設定
         self.treeview['columns'] = (1, 2, 3, 4)
@@ -1040,7 +1042,7 @@ class Application(Command):
         line_numbers.pack(side=LEFT, fill=BOTH)
 
         # 拡張テキストエリアの生成
-        self.output_text_log = MetisCustomText(frame_text_log, font=('Consolas', 10))
+        self.output_text_log = MetisCustomText(frame_text_log, font=('Consolas', 10), wrap=NONE)
 
         # ポップアップメニューの設定
         popup_text_log = Menu(parent, tearoff=0)
@@ -1060,7 +1062,7 @@ class Application(Command):
             self.output_text_log.bind(event, lambda x: self.update_line_numbers(canvas=line_numbers, textarea=self.output_text_log))
 
         # スクロールバーの生成
-        self.create_xy_scrollbar(frame_text_log, self.output_text_log)
+        self.attach_scrollbar(frame_text_log, self.output_text_log)
 
         # テキストエリア上でCtrl+F押下時に検索ボックスを開くように設定
         self.output_text_log.bind('<Control-f>', lambda x: self.create_search_form(self.master, self.output_text_log))
@@ -1075,6 +1077,23 @@ class Application(Command):
         # ソート順を設定しツリービューを再表示する
         self.current_sort_state = order
         self.__refresh_tree_view(True)
+
+    def __create_params_window(self):
+
+        # パラメータ設定画面を生成
+        params_window = Toplevel(master=self.master)
+
+        params_frame = LabelFrame(params_window, bd=2, labelanchor=N, relief=RIDGE, text='General')
+        params_frame.pack(padx=5, pady=5, fill=X)
+
+        button1 = ttk.Entry(params_frame, justify=CENTER, width=40)
+        button1.pack()
+
+        # ウィンドウの設定
+        self.set_window_basic_config(master=params_window, title='Settings', width=400, height=200)
+        params_window.focus_set()
+        params_window.transient(self.master)
+        params_window.grab_set()
 
 if __name__ == '__main__':
     app = Application()

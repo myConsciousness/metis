@@ -22,7 +22,8 @@
                       "MERR0005" : "ERR_BUTTON_LIMITED",
                       "MERR0006" : "ERR_NO_FILE_FOUND",
                       "MERR0007" : "ERR_NO_ITEM_FOUND",
-                      "MERR0008" : "ERR_EMPTY_REQUESTED"
+                      "MERR0008" : "ERR_EMPTY_REQUESTED",
+                      "MERR0009" : "ERR_INVALID_ORDER"
                     }
               },
 
@@ -42,7 +43,8 @@
                           "MERR0005" : "Use Quit button or Esc key to close the window.",
                           "MERR0006" : "Failed to open log file.\r\nNo such file or directory.",
                           "MERR0007" : "Sorting is not available.\r\nThere are no items in the tree view.",
-                          "MERR0008" : "This field must not be empty."
+                          "MERR0008" : "This field must not be empty.",
+                          "MERR0009" : "The application was unable to start correctly due to invalid order."
                         }
 
                   },

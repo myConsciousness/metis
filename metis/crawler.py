@@ -26,6 +26,7 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 from urllib.parse import urlencode
 import html.parser as htmlparser
+import warnings
 import time
 import sys
 import tkinter
@@ -41,6 +42,8 @@ from sql import MstParameterDao
 from sql import ArticleInfoHatenaDao
 from sql import WorkArticleInfoHatenaDao
 from sql import ManageSerialDao
+
+warnings.filterwarnings('ignore')
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
@@ -82,6 +85,13 @@ class CrawlHandler:
             # ブックマークの更新処理を行う
             crawler = UpdateBookmarksHatena(args)
             crawler.execute()
+        else:
+            message = ShowMessages()
+            message.showerror('MERR0009')
+
+            # 不正な起動のためプロセス終了
+            sys.exit()
+
 
 class CommunicateBase:
     '''通信処理を定義する基底クラス。'''
@@ -437,7 +447,7 @@ class CrawlingHatena(CommunicateBase):
                 parser = htmlparser.HTMLParser()
                 # UnicodeDecodeError回避のために変換処理を行う
                 title = parser.unescape(title).encode('cp932', 'ignore').decode('cp932')
-                list_article_infos.append(parser.unescape(title))
+                list_article_infos.append(title)
 
                 # 日付部の取得
                 start_index_of_date = html.find('>', html.find('class="entry-contents-date"', end_index_of_title+1))
