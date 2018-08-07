@@ -46,7 +46,6 @@
                           "MERR0008" : "This field must not be empty.",
                           "MERR0009" : "The application was unable to start correctly due to invalid order."
                         }
-
                   },
 
     "echo" : {  "_comment" : "Define echo messages.",

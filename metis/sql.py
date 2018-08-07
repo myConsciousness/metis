@@ -50,6 +50,23 @@ class MstParameterDao:
 
         return cursor.fetchone()
 
+    def update_params_by_primary_key(self, cursor: sqlite3.Cursor, update_value: str, primary_key: str):
+        '''主キーを用いてMST_PARAMETER.TBLの値を更新するクエリ。
+
+        :param sqlite3.Cursor cursor: カーソル。
+        :param str update_value: 更新値。
+        :param str primary_key: プライマリーキー。
+        '''
+
+        cursor.execute('''
+                        UPDATE
+                            MST_PARAMETER
+                        SET
+                            VALUE = ?
+                        WHERE
+                            PARAM_NAME = ?
+                        ''', (update_value, primary_key,))
+
 class ManageSerialDao:
     '''MANAGE_SERIAL.TBLへのトランザクション処理を定義するDAOクラス。'''
 

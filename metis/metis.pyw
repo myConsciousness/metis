@@ -11,7 +11,7 @@ around a complete Tcl interpreter embedded in the Python interpreter.
 Tkinter calls are translated into Tcl commands which are fed to this embedded interpreter,
 thus making it possible to mix Python and Tcl in a single application.
 
-Python 2.7 and Python 3.1 incorporate the "themed Tk" ("ttk") functionality of Tk 8.5.
+Python 2.7 and Python 3.1 incorporate the 'themed Tk' ('ttk') functionality of Tk 8.5.
 This allows Tk widgets to be easily themed to look like the native desktop environment in which the application is running,
 thereby addressing a long-standing criticism of Tk (and hence of Tkinter).
 
@@ -24,6 +24,8 @@ Tkinter is free software released under a Python license.
 import webbrowser
 import pyperclip
 from datetime import datetime
+import re
+import os
 import os.path
 import sqlite3
 import time
@@ -36,6 +38,7 @@ import subprocess
 from functools import partial
 from common import *
 from message import ShowMessages
+from sql import MstParameterDao
 from sql import ArticleInfoHatenaDao
 from sql import ManageSerialDao
 
@@ -189,6 +192,8 @@ class MetisBase:
         '''コンストラクタ。'''
 
         self.master = Tk()
+        # 高DPIに対応させる
+        self.make_tk_dpi_aware(self.master)
 
         # ログ出力のためインスタンス生成
         self.log = Log()
@@ -205,6 +210,8 @@ class MetisBase:
         # readmeを定義したmdファイルへのURL
         self.URL_README = 'https://github.com/myConsciousness/metis/blob/master/README.md'
 
+        # MST_PARAMETER.TBLのDAOクラス
+        self.mst_parameter_dao = MstParameterDao()
         # MANAGE_SERIAL.TBLのDAOクラス
         self.manage_serial_dao = ManageSerialDao()
         # ARTICLE_INFO_HATENA.TBLのDAOクラス
@@ -260,6 +267,58 @@ class MetisBase:
 
         master.geometry('{}x{}+{}+{}'.format(width, height, x, y))
         master.deiconify()
+
+    def __get_hwnd_dpi(self, window_handle):
+        '''Tkinterを高DPIのディスプレイに対応させるため、DPIとスケーリングを再計算するメソッド。'''
+
+        if os.name == 'nt':
+            from ctypes import windll, pointer, wintypes
+            try:
+                windll.shcore.SetProcessDpiAwareness(1)
+            except Exception:
+                # Windows serverやバージョンの低いWindowsでは失敗する
+                pass
+
+            # 拡大率を100%に設定
+            DPI100pc = 96
+            # MDT_EFFECTIVE_DPI = 0, MDT_ANGULAR_DPI = 1, MDT_RAW_DPI = 2
+            DPI_type = 0
+
+            winH = wintypes.HWND(window_handle)
+            monitorhandle = windll.user32.MonitorFromWindow(winH, wintypes.DWORD(2))
+
+            X = wintypes.UINT()
+            Y = wintypes.UINT()
+
+            try:
+                windll.shcore.GetDpiForMonitor(monitorhandle, DPI_type, pointer(X), pointer(Y))
+                return X.value, Y.value, (X.value + Y.value) / (2 * DPI100pc)
+            except Exception:
+                # Windows標準のDPIとスケーリング
+                return 96, 96, 1
+        else:
+            return None, None, 1
+
+    def __tkGeometry_scale(self, s, cvtfunc):
+        '''座標の再設定を行うメソッド。'''
+
+        # 形式 'WxH+X+Y'
+        regex = r'(?P<W>\d+)x(?P<H>\d+)\+(?P<X>\d+)\+(?P<Y>\d+)'
+        R = re.compile(regex).search(s)
+
+        G = str(cvtfunc(R.group('W'))) + 'x'
+        G += str(cvtfunc(R.group('H'))) + '+'
+        G += str(cvtfunc(R.group('X'))) + '+'
+        G += str(cvtfunc(R.group('Y')))
+
+        return G
+
+    def make_tk_dpi_aware(self, master):
+        '''Tkinterを高DPIに対応させるメソッド。'''
+
+        master.DPI_X, master.DPI_Y, master.DPI_scaling = self.__get_hwnd_dpi(master.winfo_id())
+        master.TkScale = lambda v: int(float(v) * master.DPI_scaling)
+        master.TkGeometryScale = lambda s: self.__tkGeometry_scale(s, master.TkScale)
 
 class MetisCommandBase(MetisBase):
     '''Metisにおける基本コマンド処理を定義する基底クラス。'''
@@ -535,16 +594,16 @@ class Command(MetisCommandBase):
             # テキストフォームの初期化
             textarea.delete('1.0', END)
         # 入力された値の取得
-        input_date = text_form.get()
+        frm_input_date = text_form.get()
 
         split_words = '-/., '
-        if '.mlog' in input_date:
+        if '.mlog' in frm_input_date:
             # ファイル名と拡張子を分割
-            root, ext = os.path.splitext(input_date)
+            root, ext = os.path.splitext(frm_input_date)
             date = ''.join(split(root, split_words))
             path_name = self.PATH_DIR_LOG + date + '.mlog'
         else:
-            date = ''.join(split(input_date, split_words))
+            date = ''.join(split(frm_input_date, split_words))
             path_name = self.PATH_DIR_LOG + date + '.mlog'
 
         if os.path.exists(path_name):
@@ -658,7 +717,7 @@ class Command(MetisCommandBase):
             canvas.create_text(3, y, anchor=NW, text=current_number)
             current_number += 1
 
-    def create_treeview_menu(self, popup, treeview):
+    def create_main_treeview_menu(self, popup, treeview):
         '''ツリービュー系統のメニューを作成するメソッド。
 
         :param tkinter.Menu popup: メニューオブジェクト。
@@ -732,8 +791,8 @@ class Application(Command):
         sort_treeview_menu = Menu(menubar, tearoff=0)
         edit_top_menu.add_cascade(label='Search Form', menu=search_form_menu)
         edit_top_menu.add_cascade(label='Treeview', menu=treeview_menu)
-        self.create_basic_menu(search_form_menu, self.btn_search_terms)
-        self.create_treeview_menu(treeview_menu, self.btn_search_terms)
+        self.create_basic_menu(search_form_menu, self.frm_search_terms)
+        self.create_main_treeview_menu(treeview_menu, self.frm_search_terms)
         treeview_menu.add_separator()
         treeview_menu.add_cascade(label='Sort', menu=sort_treeview_menu)
         sort_treeview_menu.add_command(label='Ascending', command=partial(self.__handle_sort_treeview, self.SORT_ASC))
@@ -746,7 +805,7 @@ class Application(Command):
         text_area_menu = Menu(menubar, tearoff=0)
         edit_log_menu.add_cascade(label='Date Search Form', menu=date_search_form_menu)
         edit_log_menu.add_cascade(label='Textarea', menu=text_area_menu)
-        self.create_basic_menu(date_search_form_menu, self.input_date)
+        self.create_basic_menu(date_search_form_menu, self.frm_input_date)
         self.create_cancel_menu(text_area_menu, self.output_text_log)
         text_area_menu.add_separator()
         self.create_basic_menu(text_area_menu, self.output_text_log)
@@ -807,27 +866,27 @@ class Application(Command):
         frame_search_terms = LabelFrame(parent, labelanchor=N, relief=FLAT, text='Enter search terms')
         frame_search_terms.pack(pady=20)
 
-        # 最大表示件数入力フォームの設定
-        self.btn_search_terms = ttk.Entry(frame_search_terms, justify=CENTER, width=40)
+        # 入力フォームの設定
+        self.frm_search_terms = ttk.Entry(frame_search_terms, justify=CENTER, width=40)
         # リターンキー押下で検索を開始するように設定
-        self.btn_search_terms.bind('<Return>', lambda x: self.__refresh_tree_view())
+        self.frm_search_terms.bind('<Return>', lambda x: self.__refresh_tree_view())
         # 画面開設時のフォーカスを入力欄に設定する
-        self.btn_search_terms.focus_set()
-        self.btn_search_terms.pack(side=LEFT, padx=5)
+        self.frm_search_terms.focus_set()
+        self.frm_search_terms.pack(side=LEFT, padx=5)
 
         # 検索フォームでのポップアップメニューを設定
         popup_search_terms = Menu(parent, tearoff=0)
-        self.create_basic_menu(popup_search_terms, self.btn_search_terms)
+        self.create_basic_menu(popup_search_terms, self.frm_search_terms)
 
         # 検索フォーム上での右クリックでポップアップメニューを表示する
-        self.btn_search_terms.bind('<ButtonRelease-3>', lambda event: self.open_popup(event, popup_search_terms))
+        self.frm_search_terms.bind('<ButtonRelease-3>', lambda event: self.open_popup(event, popup_search_terms))
 
         # 検索ボタン
         search_button = ttk.Button(frame_search_terms, text='Search', width=10, command=self.__refresh_tree_view)
         search_button.pack(side=LEFT)
 
         # ツリービューの構築
-        self.__create_tree_view(parent)
+        self.__create_main_tree_view(parent)
 
         # ボタンのフレーム
         frame_button = Frame(parent, relief=FLAT)
@@ -843,7 +902,7 @@ class Application(Command):
         quit_button = ttk.Button(frame_button, text='Quit', width=20, command=partial(self.quit, self.master))
         quit_button.pack(side=LEFT, padx=60)
 
-    def __create_tree_view(self, parent: Frame):
+    def __create_main_tree_view(self, parent: Frame):
         '''ツリービューの構築を行うメソッド。
 
         :param tkinter.Frame parent: 画面の親フレーム。
@@ -876,7 +935,7 @@ class Application(Command):
 
         # ポップアップメニューの設定
         popup_treeview = Menu(parent, tearoff=0)
-        self.create_treeview_menu(popup_treeview, self.treeview)
+        self.create_main_treeview_menu(popup_treeview, self.treeview)
 
         # ダブルクリックでページを開くように設定
         self.treeview.bind('<Double-1>', lambda x: self.open_by_double_click(self.treeview))
@@ -905,7 +964,7 @@ class Application(Command):
         search_word = ''
         if not is_sort:
             # ソートを行わない場合に検索ワードを取得
-            search_word = self.btn_search_terms.get()
+            search_word = self.frm_search_terms.get()
 
         # 検索時とヘッダーのbookmarks押下によるソート時で処理が異なる
         if search_word or (self.search_word_for_sort and is_sort):
@@ -998,19 +1057,19 @@ class Application(Command):
         frame_log_file.pack(pady=20)
 
         # 日付入力フォームの生成
-        self.input_date = ttk.Entry(frame_log_file, font=('Consolas', 10), justify=CENTER, width=20)
-        self.input_date.insert(END, datetime.today().strftime('%Y/%m/%d'))
+        self.frm_input_date = ttk.Entry(frame_log_file, font=('Consolas', 10), justify=CENTER, width=20)
+        self.frm_input_date.insert(END, datetime.today().strftime('%Y/%m/%d'))
 
         # 出力用テキストエリアの生成
         self.__create_custom_text_area(parent)
 
         # リターン時にファイルの読み込み処理を行う
-        self.input_date.bind('<Return>', lambda x: self.read_log(self.input_date, self.output_text_log))
-        self.input_date.focus_set()
-        self.input_date.pack(side=LEFT, padx=5)
+        self.frm_input_date.bind('<Return>', lambda x: self.read_log(self.frm_input_date, self.output_text_log))
+        self.frm_input_date.focus_set()
+        self.frm_input_date.pack(side=LEFT, padx=5)
 
         # 読み込みボタン
-        search_button = ttk.Button(frame_log_file, text='Read', width=10, command=partial(self.read_log, self.input_date, self.output_text_log))
+        search_button = ttk.Button(frame_log_file, text='Read', width=10, command=partial(self.read_log, self.frm_input_date, self.output_text_log))
         search_button.pack(side=LEFT)
 
         # ボタンのフレーム
@@ -1083,17 +1142,197 @@ class Application(Command):
         # パラメータ設定画面を生成
         params_window = Toplevel(master=self.master)
 
-        params_frame = LabelFrame(params_window, bd=2, labelanchor=N, relief=RIDGE, text='General')
-        params_frame.pack(padx=5, pady=5, fill=X)
+        # 検索ワード追加フォーム用のフレーム
+        frame_add_search_word = LabelFrame(params_window, labelanchor=N, relief=FLAT, text='Add search word')
+        frame_add_search_word.pack(pady=20)
 
-        button1 = ttk.Entry(params_frame, justify=CENTER, width=40)
-        button1.pack()
+        # 入力フォームの設定
+        self.frm_add_search_word = ttk.Entry(frame_add_search_word, justify=CENTER, width=40)
+        # リターンキー押下で追加処理を開始するように設定
+        self.frm_add_search_word.bind('<Return>', lambda x: self.__add_search_words())
+        # 画面開設時のフォーカスを入力欄に設定する
+        self.frm_add_search_word.focus_set()
+        self.frm_add_search_word.pack(side=LEFT, padx=5)
+
+        # 追加ボタン
+        add_button = ttk.Button(frame_add_search_word, text='Add', width=10, command=self.__add_search_words)
+        add_button.pack(side=LEFT)
+
+        # ツリービュー部分のフレーム
+        params_frame = LabelFrame(params_window, bd=2, labelanchor=N, relief=FLAT)
+        params_frame.pack(padx=5, pady=5, fill=BOTH)
+
+        # 設定画面におけるツリービューを生成
+        self.__create_param_tree_view(params_frame)
+
+        try:
+            # データベースへの接続
+            conn, cursor = connect_to_database()
+            # ツリービューのリフレッシュ処理
+            self.__refresh_param_tree_view(conn, cursor)
+        except sqlite3.Error as e:
+            self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.CLASS_NAME, self.log.location())
+            self.log.error(e)
+        finally:
+            conn.close()
+            self.log.normal(LogLevel.INFO.value, 'LINF0005', self.CLASS_NAME, self.log.location())
 
         # ウィンドウの設定
-        self.set_window_basic_config(master=params_window, title='Settings', width=400, height=200)
+        self.set_window_basic_config(master=params_window, title='Search word :config:', expand=False, width=600, height=300)
         params_window.focus_set()
         params_window.transient(self.master)
         params_window.grab_set()
+
+    def __create_param_tree_view(self, parent: Frame):
+        '''パラメータ設定画面におけるツリービューの構築を行うメソッド。
+
+        :param tkinter.Frame parent: 画面の親フレーム。
+        '''
+
+        # ツリービューのフレーム
+        frame_tree_view = Frame(parent, relief=RIDGE)
+        frame_tree_view.pack(fill=BOTH, expand=True)
+
+        # ツリービューのオブジェクトを生成
+        self.param_treeview = ttk.Treeview(frame_tree_view)
+
+        # スクロールバーの生成
+        self.attach_scrollbar(frame_tree_view, self.param_treeview)
+
+        # カラムの設定
+        self.param_treeview['columns'] = (1, 2)
+        self.param_treeview.column(1, width=50)
+        self.param_treeview.column(2, width=100)
+
+        # ヘッダの設定
+        self.param_treeview['show'] = 'headings'
+        self.param_treeview.heading(1, text='No.')
+        self.param_treeview.heading(2, text='Search word')
+        self.param_treeview.configure(style='my.Treeview', displaycolumns=(1, 2))
+
+        # ポップアップメニューの設定
+        popup_treeview = Menu(parent, tearoff=0)
+        self.create_main_treeview_menu(popup_treeview, self.param_treeview)
+
+        # ダブルクリックでフォーカス部分を削除する処理を設定
+        self.param_treeview.bind('<Double-1>', lambda x: self.__delete_search_words(self.param_treeview))
+
+        # ツリービューのレイアウト設定
+        style = ttk.Style(parent)
+        style.configure('my.Treeview', rowheight=30)
+        style.configure('Treeview', font=('Consolas', 10))
+        style.configure('Treeview.Heading', font=('Consolas', 10, 'bold'))
+
+        self.param_treeview.pack(fill=BOTH, expand=True)
+
+    def __add_search_words(self):
+        '''クローリング時における検索ワードを追加するメソッド。'''
+
+        # 追加対象の値を取得
+        add_word = self.frm_add_search_word.get()
+        # 空ではない場合
+        if add_word:
+            try:
+                # データベースへの接続
+                conn, cursor = connect_to_database()
+
+                # データベースから加工用の値をリストで取得し、追加する検索ワードをアペンドする
+                raw_search_words = split(''.join(list(self.mst_parameter_dao.select_params_by_primary_key(cursor, 'SEARCH_WORDS_4_HATENA'))), ',')
+                raw_search_words.append(add_word)
+
+                # リストを更新用にCSV形式へ変換する
+                processed_search_words = ','.join(raw_search_words)
+
+                # 検索ワードの更新
+                self.mst_parameter_dao.update_params_by_primary_key(cursor, processed_search_words, 'SEARCH_WORDS_4_HATENA')
+                conn.commit()
+
+                # ツリービューのリフレッシュ処理
+                self.__refresh_param_tree_view(conn, cursor)
+            except sqlite3.Error as e:
+                self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.CLASS_NAME, self.log.location())
+                self.log.error(e)
+            finally:
+                conn.close()
+                self.log.normal(LogLevel.INFO.value, 'LINF0005', self.CLASS_NAME, self.log.location())
+        else:
+            # フォームが空の場合はエラーメッセージを出力する
+            self.message.showerror('MERR0008')
+
+        # フォームの初期化
+        self.frm_add_search_word.delete(0, END)
+
+    def __delete_search_words(self, treeview):
+        '''選択された検索ワードを削除するメソッド。
+
+        :param tkinter.ttk.Treeview treeview: 情報取得元ツリービュー。
+        '''
+
+        # フォーカス部分の要素を辞書として取得
+        item_dict = treeview.item(treeview.focus())
+
+        if item_dict['values'] and item_dict['tags']:
+
+            # 削除対象の検索ワードと位置を取得
+            del_search_word = item_dict['values'][1]
+            idx_search_word = int(item_dict['tags'][0])
+
+            try:
+                # データベースへの接続
+                conn, cursor = connect_to_database()
+                # DBから検索ワードの取得
+                raw_search_words = split(''.join(list(self.mst_parameter_dao.select_params_by_primary_key(cursor, 'SEARCH_WORDS_4_HATENA'))), ',')
+
+                for i, search_word in enumerate(raw_search_words):
+                    # 削除対象のワードと出現位置が一致する場合
+                    if search_word == search_word and i == idx_search_word:
+                        # 対象箇所を空文字で初期化
+                        raw_search_words[i] = ''
+                        # リストを更新用にCSV形式へ変換する
+                        processed_search_words = ','.join(raw_search_words)
+
+                        # 検索ワードの更新
+                        self.mst_parameter_dao.update_params_by_primary_key(cursor, processed_search_words, 'SEARCH_WORDS_4_HATENA')
+                        conn.commit()
+
+                        # ツリービューのリフレッシュ処理
+                        self.__refresh_param_tree_view(conn, cursor)
+
+                        # 削除対象は一つのみのため、繰り返し処理を終了させる
+                        break
+            except sqlite3.Error as e:
+                self.log.normal(LogLevel.ERROR.value, 'LERR0001', self.CLASS_NAME, self.log.location())
+                self.log.error(e)
+            finally:
+                conn.close()
+                self.log.normal(LogLevel.INFO.value, 'LINF0005', self.CLASS_NAME, self.log.location())
+        else:
+            # フォームが空の場合はエラーメッセージを出力する
+            self.message.showerror('MERR0008')
+
+    def __refresh_param_tree_view(self, conn: sqlite3.Connection, cursor: sqlite3.Cursor):
+        '''パラメータ設定画面のツリービューをリフレッシュするメソッド。
+
+        :param sqlite3.Connection conn: DBとのコネクション。
+        :param sqlite3.Cursor cursor: カーソルオブジェクト。
+        '''
+
+        # パラメータ設定画面におけるツリービューの初期化
+        self.param_treeview.delete(*self.param_treeview.get_children())
+
+        # DBから検索ワードの取得
+        search_words = split(''.join(list(self.mst_parameter_dao.select_params_by_primary_key(cursor, 'SEARCH_WORDS_4_HATENA'))), ',')
+
+        # TreeViewに登録済みの検索ワードを反映させる
+        for i, search_word in enumerate(search_words):
+            value = (str(i+1), search_word)
+            self.param_treeview.insert('', END, tags=i, values=value)
+
+            if i & 1:
+                # 偶数行の背景色を変更
+                self.param_treeview.tag_configure(i, background='#CCFFFF')
+
+        self.param_treeview.pack(fill=BOTH, expand=True)
 
 if __name__ == '__main__':
     app = Application()
