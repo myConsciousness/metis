@@ -45,7 +45,7 @@ class TkWinBase:
         :param int height: 初期表示時の画面の高さ。
         '''
 
-        #master.update_idletasks()
+        master.update_idletasks()
 
         # 画面を表示する幅を求める
         frm_width = master.winfo_rootx() - master.winfo_x()
