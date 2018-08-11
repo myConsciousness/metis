@@ -591,7 +591,7 @@ class UpdateBookmarksHatena(CommunicateBase):
         super().__init__(args[0])
 
         # クラス名
-        self.CLASS_NAME = 'UpdateBookmarks'
+        self.CLASS_NAME = 'UpdateBookmarksHatena'
 
     def execute(self):
         '''ブックマーク数の更新処理を実行するメソッド。'''
