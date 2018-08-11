@@ -153,7 +153,7 @@ Tkinter is included with the standard Microsoft Windows and Mac OS X install of 
 around a complete Tcl interpreter embedded in the Python interpreter.
 Tkinter calls are translated into Tcl commands which are fed to this embedded interpreter,
 thus making it possible to mix Python and Tcl in a single application.</p>
-<p>Python 2.7 and Python 3.1 incorporate the “themed Tk” (“ttk”) functionality of Tk 8.5.
+<p>Python 2.7 and Python 3.1 incorporate the ‘themed Tk’ (‘ttk’) functionality of Tk 8.5.
 This allows Tk widgets to be easily themed to look like the native desktop environment in which the application is running,
 thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 <p>Tkinter is free software released under a Python license.</p>
@@ -176,6 +176,12 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 <em class="property">class </em><code class="descclassname">metis.</code><code class="descname">Application</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#metis.Command" title="metis.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">metis.Command</span></code></a></p>
 <p>GUIの出力処理を定義するクラス。</p>
+<dl class="method">
+<dt id="metis.Application._Application__add_search_words">
+<code class="descname">_Application__add_search_words</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__add_search_words" title="Permalink to this definition">¶</a></dt>
+<dd><p>クローリング時における検索ワードを追加するメソッド。</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="metis.Application._Application__create_custom_text_area">
 <code class="descname">_Application__create_custom_text_area</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_custom_text_area" title="Permalink to this definition">¶</a></dt>
@@ -205,9 +211,43 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="metis.Application._Application__create_main_tree_view">
+<code class="descname">_Application__create_main_tree_view</code><span class="sig-paren">(</span><em>parent: tkinter.Frame</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_main_tree_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>ツリービューの構築を行うメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<em>tkinter.Frame</em>) – 画面の親フレーム。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="metis.Application._Application__create_menubar">
 <code class="descname">_Application__create_menubar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_menubar" title="Permalink to this definition">¶</a></dt>
 <dd><p>メニューバーを生成するメソッド。</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metis.Application._Application__create_param_tree_view">
+<code class="descname">_Application__create_param_tree_view</code><span class="sig-paren">(</span><em>parent: tkinter.Frame</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_param_tree_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>パラメータ設定画面におけるツリービューの構築を行うメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<em>tkinter.Frame</em>) – 画面の親フレーム。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metis.Application._Application__create_params_window">
+<code class="descname">_Application__create_params_window</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_params_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>パラメータ設定画面の出力を定義するメソッド。</p>
 </dd></dl>
 
 <dl class="method">
@@ -225,23 +265,23 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.Application._Application__create_tree_view">
-<code class="descname">_Application__create_tree_view</code><span class="sig-paren">(</span><em>parent: tkinter.Frame</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_tree_view" title="Permalink to this definition">¶</a></dt>
-<dd><p>ツリービューの構築を行うメソッド。</p>
+<dt id="metis.Application._Application__create_window">
+<code class="descname">_Application__create_window</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>ウィンドウを構築するメソッド。</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="metis.Application._Application__delete_search_words">
+<code class="descname">_Application__delete_search_words</code><span class="sig-paren">(</span><em>treeview</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__delete_search_words" title="Permalink to this definition">¶</a></dt>
+<dd><p>選択された検索ワードを削除するメソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<em>tkinter.Frame</em>) – 画面の親フレーム。</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>treeview</strong> (<em>tkinter.ttk.Treeview</em>) – 情報取得元ツリービュー。</td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.Application._Application__create_window">
-<code class="descname">_Application__create_window</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__create_window" title="Permalink to this definition">¶</a></dt>
-<dd><p>ウィンドウを構築するメソッド。</p>
 </dd></dl>
 
 <dl class="method">
@@ -253,6 +293,24 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>order</strong> (<em>str</em>) – ソート順を決定する処理オーダ。</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metis.Application._Application__refresh_param_tree_view">
+<code class="descname">_Application__refresh_param_tree_view</code><span class="sig-paren">(</span><em>conn: sqlite3.Connection</em>, <em>cursor: sqlite3.Cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Application._Application__refresh_param_tree_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>パラメータ設定画面のツリービューをリフレッシュするメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>conn</strong> (<em>sqlite3.Connection</em>) – DBとのコネクション。</li>
+<li><strong>cursor</strong> (<em>sqlite3.Cursor</em>) – カーソルオブジェクト。</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -283,7 +341,7 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 <dl class="class">
 <dt id="metis.Command">
 <em class="property">class </em><code class="descclassname">metis.</code><code class="descname">Command</code><a class="headerlink" href="#metis.Command" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#metis.MetisCommandBase" title="metis.MetisCommandBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">metis.MetisCommandBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#metis.CommandBase" title="metis.CommandBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">metis.CommandBase</span></code></a></p>
 <p>アプリケーションのコマンド処理を定義するクラス。</p>
 <dl class="method">
 <dt id="metis.Command.copy_all">
@@ -328,6 +386,24 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="metis.Command.create_main_treeview_menu">
+<code class="descname">create_main_treeview_menu</code><span class="sig-paren">(</span><em>popup</em>, <em>treeview</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.create_main_treeview_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>ツリービュー系統のメニューを作成するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>popup</strong> (<em>tkinter.Menu</em>) – メニューオブジェクト。</li>
+<li><strong>treeview</strong> (<em>tkinter.ttk.Treeview</em>) – 処理付加対象ツリービュー。</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="metis.Command.create_search_form">
 <code class="descname">create_search_form</code><span class="sig-paren">(</span><em>master</em>, <em>textarea</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.create_search_form" title="Permalink to this definition">¶</a></dt>
 <dd><p>子画面として検索フォームを生成するメソッド。</p>
@@ -337,25 +413,7 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>master</strong> (<em>tkinter.Tk</em>) – 画面のフレーム。</li>
-<li><strong>textarea</strong> (<a class="reference internal" href="#metis.MetisCustomText" title="metis.MetisCustomText"><em>MetisCustomText</em></a>) – 検索対象テキストエリア。</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.Command.create_treeview_menu">
-<code class="descname">create_treeview_menu</code><span class="sig-paren">(</span><em>popup</em>, <em>treeview</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.Command.create_treeview_menu" title="Permalink to this definition">¶</a></dt>
-<dd><p>ツリービュー系統のメニューを作成するメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>popup</strong> (<em>tkinter.Menu</em>) – メニューオブジェクト。</li>
-<li><strong>treeview</strong> (<em>tkinter.ttk.Treeview</em>) – 処理付加対象ツリービュー。</li>
+<li><strong>textarea</strong> (<a class="reference internal" href="tkutils.html#tkutils.CustomText" title="tkutils.CustomText"><em>CustomText</em></a>) – 検索対象テキストエリア。</li>
 </ul>
 </td>
 </tr>
@@ -399,7 +457,7 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>textarea</strong> (<a class="reference internal" href="#metis.MetisCustomText" title="metis.MetisCustomText"><em>MetisCustomText</em></a>) – 出力先テキストエリア。</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>textarea</strong> (<a class="reference internal" href="tkutils.html#tkutils.CustomText" title="tkutils.CustomText"><em>CustomText</em></a>) – 出力先テキストエリア。</td>
 </tr>
 </tbody>
 </table>
@@ -443,7 +501,7 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>text_form</strong> (<em>tkinter.ttk.Entry</em>) – 日付取得元テキストフォーム。</li>
-<li><strong>textarea</strong> (<a class="reference internal" href="#metis.MetisCustomText" title="metis.MetisCustomText"><em>MetisCustomText</em></a>) – 出力先テキストエリア。</li>
+<li><strong>textarea</strong> (<a class="reference internal" href="tkutils.html#tkutils.CustomText" title="tkutils.CustomText"><em>CustomText</em></a>) – 出力先テキストエリア。</li>
 </ul>
 </td>
 </tr>
@@ -461,7 +519,7 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>canvas</strong> (<em>tkinter.Canvas</em>) – 行番号描画用キャンバス。</li>
-<li><strong>textarea</strong> (<a class="reference internal" href="#metis.MetisCustomText" title="metis.MetisCustomText"><em>MetisCustomText</em></a>) – 座標取得元テキストエリア。</li>
+<li><strong>textarea</strong> (<a class="reference internal" href="tkutils.html#tkutils.CustomText" title="tkutils.CustomText"><em>CustomText</em></a>) – 座標取得元テキストエリア。</li>
 </ul>
 </td>
 </tr>
@@ -472,61 +530,33 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="metis.MetisBase">
-<em class="property">class </em><code class="descclassname">metis.</code><code class="descname">MetisBase</code><a class="headerlink" href="#metis.MetisBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Metisにおける最基底クラス。</p>
-<dl class="method">
-<dt id="metis.MetisBase._MetisBase__center">
-<code class="descname">_MetisBase__center</code><span class="sig-paren">(</span><em>master</em>, <em>width: int</em>, <em>height: int</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisBase._MetisBase__center" title="Permalink to this definition">¶</a></dt>
-<dd><p>初期表示時に画面を常に中央に表示するように設定するメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>master</strong> (<em>tkinter.Tk</em>) – 画面のフレーム。</li>
-<li><strong>width</strong> (<em>int</em>) – 初期表示時の画面の幅。</li>
-<li><strong>height</strong> (<em>int</em>) – 初期表示時の画面の高さ。</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.MetisBase.set_window_basic_config">
-<code class="descname">set_window_basic_config</code><span class="sig-paren">(</span><em>master</em>, <em>title='Metis'</em>, <em>icon='../common/icon/python_icon.ico'</em>, <em>expand=True</em>, <em>width=1200</em>, <em>height=710</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisBase.set_window_basic_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>ウィンドウにおける基本情報を設定するメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>master</strong> (<em>tkinter.Tk</em>) – 画面のフレーム。</li>
-<li><strong>title</strong> (<em>str</em>) – 画面タイトル。</li>
-<li><strong>icon</strong> (<em>str</em>) – 画面左上に表示するアイコンへのパス。</li>
-<li><strong>expand</strong> (<em>bool</em>) – 画面の拡張 / 縮小可否。</li>
-<li><strong>width</strong> (<em>int</em>) – 初期表示時の画面の幅。</li>
-<li><strong>height</strong> (<em>int</em>) – 初期表示時の画面の高さ。</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="metis.MetisCommandBase">
-<em class="property">class </em><code class="descclassname">metis.</code><code class="descname">MetisCommandBase</code><a class="headerlink" href="#metis.MetisCommandBase" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase">
+<em class="property">class </em><code class="descclassname">metis.</code><code class="descname">CommandBase</code><a class="headerlink" href="#metis.CommandBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#metis.MetisBase" title="metis.MetisBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">metis.MetisBase</span></code></a></p>
-<p>Metisにおける基本コマンド処理を定義する基底クラス。</p>
+<p>基本コマンド処理を定義する基底クラス。</p>
 <dl class="method">
-<dt id="metis.MetisCommandBase.copy">
-<code class="descname">copy</code><span class="sig-paren">(</span><em>menu</em>, <em>label</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.copy" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.attach_scrollbar">
+<code class="descname">attach_scrollbar</code><span class="sig-paren">(</span><em>master</em>, <em>widget</em>, <em>x_axis=True</em>, <em>y_axis=True</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.attach_scrollbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>XY軸のスクロールバーを生成するメソッド。</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>master</strong> (<em>tkinter.Tk</em>) – 画面のフレーム。</li>
+<li><strong>widget</strong> (<em>inferred-type</em>) – 機能付加対象ウィジェット。</li>
+<li><strong>x-axis</strong> (<em>bool</em>) – x軸スクロールバーの付加可否。初期値はTrue。</li>
+<li><strong>y-axis</strong> (<em>bool</em>) – y軸スクロールバーの付加可否。初期値はTrue。</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="metis.CommandBase.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>menu</em>, <em>label</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>コピー機能の実装メソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -539,8 +569,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.create_basic_menu">
-<code class="descname">create_basic_menu</code><span class="sig-paren">(</span><em>popup</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.create_basic_menu" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.create_basic_menu">
+<code class="descname">create_basic_menu</code><span class="sig-paren">(</span><em>popup</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.create_basic_menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>基本メニューを作成するメソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -557,8 +587,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.create_cancel_menu">
-<code class="descname">create_cancel_menu</code><span class="sig-paren">(</span><em>popup</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.create_cancel_menu" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.create_cancel_menu">
+<code class="descname">create_cancel_menu</code><span class="sig-paren">(</span><em>popup</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.create_cancel_menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>取り消し系統のメニューを作成するメソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -575,26 +605,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.create_xy_scrollbar">
-<code class="descname">create_xy_scrollbar</code><span class="sig-paren">(</span><em>master</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.create_xy_scrollbar" title="Permalink to this definition">¶</a></dt>
-<dd><p>XY軸のスクロールバーを生成するメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>master</strong> (<em>tkinter.Tk</em>) – 画面のフレーム。</li>
-<li><strong>widget</strong> (<em>inferred-type</em>) – 機能付加対象ウィジェット。</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.MetisCommandBase.cut">
-<code class="descname">cut</code><span class="sig-paren">(</span><em>menu</em>, <em>label</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.cut" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.cut">
+<code class="descname">cut</code><span class="sig-paren">(</span><em>menu</em>, <em>label</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.cut" title="Permalink to this definition">¶</a></dt>
 <dd><p>カット機能の実装メソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -607,14 +619,14 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.disable_close_button">
-<code class="descname">disable_close_button</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.disable_close_button" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.disable_close_button">
+<code class="descname">disable_close_button</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.disable_close_button" title="Permalink to this definition">¶</a></dt>
 <dd><p>windowのcloseボタンを無効化する</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.open">
-<code class="descname">open</code><span class="sig-paren">(</span><em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.open" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.open">
+<code class="descname">open</code><span class="sig-paren">(</span><em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.open" title="Permalink to this definition">¶</a></dt>
 <dd><p>ファイルダイアログからファイル名を取得するメソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -627,8 +639,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.open_new_tab">
-<code class="descname">open_new_tab</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.open_new_tab" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.open_new_tab">
+<code class="descname">open_new_tab</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.open_new_tab" title="Permalink to this definition">¶</a></dt>
 <dd><p>引数で渡されたURLを新しいタブで開く。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -641,8 +653,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.open_popup">
-<code class="descname">open_popup</code><span class="sig-paren">(</span><em>event</em>, <em>popup</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.open_popup" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.open_popup">
+<code class="descname">open_popup</code><span class="sig-paren">(</span><em>event</em>, <em>popup</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.open_popup" title="Permalink to this definition">¶</a></dt>
 <dd><p>ポップアップメニューを表示するメソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -655,8 +667,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.paste">
-<code class="descname">paste</code><span class="sig-paren">(</span><em>menu</em>, <em>label</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.paste" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.paste">
+<code class="descname">paste</code><span class="sig-paren">(</span><em>menu</em>, <em>label</em>, <em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.paste" title="Permalink to this definition">¶</a></dt>
 <dd><p>貼り付け機能の実装メソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -669,8 +681,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.quit">
-<code class="descname">quit</code><span class="sig-paren">(</span><em>master</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.quit" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.quit">
+<code class="descname">quit</code><span class="sig-paren">(</span><em>master</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.quit" title="Permalink to this definition">¶</a></dt>
 <dd><p>quitボタン押下時の処理を定義。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -683,8 +695,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.redo">
-<code class="descname">redo</code><span class="sig-paren">(</span><em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.redo" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.redo">
+<code class="descname">redo</code><span class="sig-paren">(</span><em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.redo" title="Permalink to this definition">¶</a></dt>
 <dd><p>やり直すメソッドの実装メソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -697,8 +709,8 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="metis.MetisCommandBase.undo">
-<code class="descname">undo</code><span class="sig-paren">(</span><em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCommandBase.undo" title="Permalink to this definition">¶</a></dt>
+<dt id="metis.CommandBase.undo">
+<code class="descname">undo</code><span class="sig-paren">(</span><em>widget</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.CommandBase.undo" title="Permalink to this definition">¶</a></dt>
 <dd><p>取り消す機能の実装メソッド。</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -713,57 +725,10 @@ thereby addressing a long-standing criticism of Tk (and hence of Tkinter).</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="metis.MetisCustomText">
-<em class="property">class </em><code class="descclassname">metis.</code><code class="descname">MetisCustomText</code><span class="sig-paren">(</span><em>master</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisCustomText" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tkinter.Text</span></code></p>
-<p>Tkinterテキストウィジェットの拡張クラス。</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="metis.MetisSearchForm">
-<em class="property">class </em><code class="descclassname">metis.</code><code class="descname">MetisSearchForm</code><span class="sig-paren">(</span><em>master</em>, <em>text_form</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisSearchForm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tkinter.ttk.Frame</span></code></p>
-<p>Metisにおけるテキストの検索フォームを定義するクラス。</p>
-<dl class="method">
-<dt id="metis.MetisSearchForm._MetisSearchForm__continue_search">
-<code class="descname">_MetisSearchForm__continue_search</code><span class="sig-paren">(</span><em>search_word: str</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisSearchForm._MetisSearchForm__continue_search" title="Permalink to this definition">¶</a></dt>
-<dd><p>検索途中の個所から検索を行うメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>search_word</strong> (<em>str</em>) – 検索ワード。</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.MetisSearchForm._MetisSearchForm__create_search_form">
-<code class="descname">_MetisSearchForm__create_search_form</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisSearchForm._MetisSearchForm__create_search_form" title="Permalink to this definition">¶</a></dt>
-<dd><p>検索フォームを生成するメソッド。</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.MetisSearchForm._MetisSearchForm__search">
-<code class="descname">_MetisSearchForm__search</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisSearchForm._MetisSearchForm__search" title="Permalink to this definition">¶</a></dt>
-<dd><p>対象ウィジェットに対して検索処理を行うメソッド。</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="metis.MetisSearchForm._MetisSearchForm__start_search">
-<code class="descname">_MetisSearchForm__start_search</code><span class="sig-paren">(</span><em>search_word: str</em><span class="sig-paren">)</span><a class="headerlink" href="#metis.MetisSearchForm._MetisSearchForm__start_search" title="Permalink to this definition">¶</a></dt>
-<dd><p>先頭から検索処理を行うメソッド。</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>search_word</strong> (<em>str</em>) – 検索ワード。</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<dt id="metis.MetisBase">
+<em class="property">class </em><code class="descclassname">metis.</code><code class="descname">MetisBase</code><a class="headerlink" href="#metis.MetisBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="winbase.html#winbase.TkWinBase" title="winbase.TkWinBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">winbase.TkWinBase</span></code></a></p>
+<p>Metisにおける最基底クラス。</p>
 </dd></dl>
 
 </div>
