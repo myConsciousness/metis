@@ -37,7 +37,7 @@
               "error" : {
                           "_comment" : "Define error messages.",
                           "MERR0001" : "The application was unable to start correctly.",
-                          "MERR0002" : "There is no Internet connection.\r\n\r\nTry:\r\n■Checking the network cables, modem, and router\r\n■Reconnecting to Wi-Fi",
+                          "MERR0002" : "There is no Internet connection.\r\n\r\nTry:\r\n1. Checking the network cables, modem, and router\r\n2. Reconnecting to Wi-Fi",
                           "MERR0003" : "The serial number is not valid for start up this module.",
                           "MERR0004" : "There is no record in the database.",
                           "MERR0005" : "Use Quit button or Esc key to close the window.",

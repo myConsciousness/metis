@@ -29,8 +29,6 @@ import html.parser as htmlparser
 import warnings
 import time
 import sys
-import tkinter
-from tkinter import messagebox
 from datetime import date, timedelta
 import sqlite3
 from tqdm import tqdm

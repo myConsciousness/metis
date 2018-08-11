@@ -8,6 +8,7 @@
 import tkinter
 from tkinter import messagebox
 from common import *
+from dpi_awareness import *
 
 __author__ = 'Kato Shinya'
 __date__ = '2018/04/21'
@@ -25,6 +26,9 @@ class ShowMessages:
         self.root = tkinter.Tk()
         self.root.withdraw()
         self.root.iconbitmap('../common/icon/python_icon.ico')
+
+        # 高DPIに対応させる
+        make_tk_dpi_aware(self.root)
 
         # キー : タイトル
         self.KEY_TITLE = 'title'
