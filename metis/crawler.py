@@ -90,7 +90,6 @@ class CrawlHandler:
             # 不正な起動のためプロセス終了
             sys.exit()
 
-
 class CommunicateBase:
     '''通信処理を定義する基底クラス。'''
 

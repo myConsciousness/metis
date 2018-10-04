@@ -456,7 +456,6 @@ class Command(CommandBase):
         canvas.delete(ALL)
 
         # 0,0座標が何行目かを取得
-        #
         first_row = textarea.index('@0,0')
         current_number = int(split(first_row, '.')[0])
 
